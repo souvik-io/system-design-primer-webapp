@@ -7,6 +7,7 @@ import { ChapterPage } from './pages/ChapterPage'
 import { NotFound } from './pages/NotFound'
 import { FlashcardsPage } from './pages/FlashcardsPage'
 import { BrowsePage, StudyPage } from './pages/StudyPage'
+import { NotesPage } from './pages/NotesPage'
 import './index.css'
 
 const router = createBrowserRouter([
@@ -18,6 +19,7 @@ const router = createBrowserRouter([
       { path: '/flashcards', element: <FlashcardsPage /> },
       { path: '/flashcards/:deckId', element: <StudyPage /> },
       { path: '/flashcards/:deckId/browse', element: <BrowsePage /> },
+      { path: '/notes', element: <NotesPage /> },
       { path: '*', element: <NotFound /> },
     ],
   },

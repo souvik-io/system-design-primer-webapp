@@ -1,1 +1,4 @@
-{ "rewrites": [{ "source": "/((?!content/|repo/|assets/).*)", "destination": "/index.html" }] }
+{
+  "cleanUrls": true,
+  "rewrites": [{ "source": "/((?!content/|repo/|assets/|learn/[^/]+\\.md$).*)", "destination": "/app.html" }]
+}

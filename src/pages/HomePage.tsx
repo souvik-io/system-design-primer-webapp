@@ -2,7 +2,18 @@ import { Fragment, useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import clsx from 'clsx'
 import { ArrowRight, Info } from 'lucide-react'
-import { chapterById, chapters, decks, extraChapterCount, parts, sectionHref, sectionKey, type ChapterMeta, type DeckMeta, type Part } from '../lib/content'
+import {
+  chapterById,
+  chapters,
+  decks,
+  extraChapterCount,
+  parts,
+  sectionHref,
+  sectionKey,
+  type ChapterMeta,
+  type DeckMeta,
+  type Part,
+} from '../lib/content'
 import { useDeckStats } from '../lib/flashcards'
 import { useChapterProgress, useOverallProgress, useProgress } from '../lib/progress'
 import { useAccount } from '../lib/account'
@@ -10,6 +21,7 @@ import { useSettings } from '../lib/settings'
 import { ProgressRing } from '../components/ProgressRing'
 import { SystemMap } from '../components/SystemMap'
 import { ExtrasSwitch } from '../components/ExtrasToggle'
+import { StudyPlan } from '../components/StudyPlan'
 
 export function HomePage() {
   const overall = useOverallProgress()
@@ -64,6 +76,8 @@ export function HomePage() {
           </span>
         </div>
       </section>
+
+      <StudyPlan />
 
       <section className="mt-12" aria-labelledby="map-heading">
         <div className="rounded-2xl border border-rule bg-surface py-5">
@@ -203,7 +217,8 @@ function ResetProgress() {
       {confirming ? (
         <>
           <span>
-            Clear all {count} completed {count === 1 ? 'section' : 'sections'}{signedIn ? ' on every device' : ''}? This can't be undone.
+            Clear all {count} completed {count === 1 ? 'section' : 'sections'}
+            {signedIn ? ' on every device' : ''}? This can't be undone.
           </span>
           <button
             type="button"

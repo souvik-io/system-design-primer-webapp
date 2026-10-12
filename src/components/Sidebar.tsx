@@ -1,14 +1,16 @@
 import { Link, NavLink, useParams } from 'react-router'
 import clsx from 'clsx'
-import { Check, Info, Layers } from 'lucide-react'
+import { Bookmark, Check, Info, Layers } from 'lucide-react'
 import { decks, sectionHref, sectionKey, useVisibleContent, type ChapterMeta } from '../lib/content'
 import { useChapterProgress, useProgress } from '../lib/progress'
 import { useDueCount } from '../lib/flashcards'
+import { useNotes, useNotesCount } from '../lib/notes'
 import { ProgressRing } from './ProgressRing'
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { chapterId } = useParams()
   const due = useDueCount(decks)
+  const notesCount = useNotesCount()
   const { parts } = useVisibleContent()
 
   return (
@@ -44,6 +46,20 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           </span>
         )}
       </NavLink>
+      <NavLink
+        to="/notes"
+        onClick={onNavigate}
+        className={({ isActive }) =>
+          clsx(
+            '-mt-3 mb-4 flex items-center gap-2 rounded-md px-3 py-1.5 font-medium',
+            isActive ? 'bg-accent-soft text-accent' : 'text-ink hover:bg-rule/50',
+          )
+        }
+      >
+        <Bookmark size={15} />
+        Notes and bookmarks
+        {notesCount > 0 && <span className="ml-auto text-[0.75rem] text-muted tabular-nums">{notesCount}</span>}
+      </NavLink>
 
       {parts.map((part) => (
         <div key={part.id} className="mb-5">
@@ -62,6 +78,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 function SidebarChapter({ chapter, active, onNavigate }: { chapter: ChapterMeta; active: boolean; onNavigate?: () => void }) {
   const { ratio, done, total } = useChapterProgress(chapter)
   const completed = useProgress((s) => s.completed)
+  const bookmarks = useNotes((s) => s.bookmarks)
 
   return (
     <li>
@@ -102,7 +119,10 @@ function SidebarChapter({ chapter, active, onNavigate }: { chapter: ChapterMeta;
                   >
                     {isDone && <Check size={8} strokeWidth={4} />}
                   </span>
-                  <span className={clsx(isDone && 'text-ink-2')}>{s.title}</span>
+                  <span className={clsx('flex-1', isDone && 'text-ink-2')}>{s.title}</span>
+                  {bookmarks[sectionKey(chapter.id, s.id)]?.on && (
+                    <Bookmark size={11} fill="currentColor" className="mt-[3px] shrink-0 text-accent" aria-label="Bookmarked" />
+                  )}
                 </Link>
               </li>
             )

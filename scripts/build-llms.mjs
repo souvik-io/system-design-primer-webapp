@@ -1,0 +1,238 @@
+// Runs after `vite build` and makes the course readable without JavaScript, for search engines,
+// AI crawlers and LLM tools:
+//
+//   dist/learn/<id>.md     each chapter as Markdown
+//   dist/llms.txt          an index of the chapters in the llms.txt format (https://llmstxt.org)
+//   dist/llms-full.txt     the whole course in one Markdown file
+//   dist/learn/<id>.html   each chapter prerendered into the app's HTML, so the text is in the page
+//   dist/index.html        the course overview prerendered the same way
+//   dist/app.html          the empty app shell, served for every other route (see vercel.json)
+//   dist/robots.txt, dist/sitemap.xml
+//
+// Set SITE_URL (in .env.local, .env or the environment) to the address the site is served from, e.g.
+// https://sdp.example.com. Without it, links are root-relative and there's no sitemap,
+// since sitemaps need full URLs.
+
+import fs from 'node:fs'
+import path from 'node:path'
+import { unified } from 'unified'
+import rehypeParse from 'rehype-parse'
+import rehypeRemark from 'rehype-remark'
+import remarkGfm from 'remark-gfm'
+import remarkStringify from 'remark-stringify'
+import { visit, SKIP } from 'unist-util-visit'
+
+const ROOT = path.resolve(import.meta.dirname, '..')
+const DIST = path.join(ROOT, 'dist')
+const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/generated/manifest.json'), 'utf8'))
+
+for (const file of ['.env.local', '.env']) {
+  try {
+    process.loadEnvFile(path.join(ROOT, file)) // doesn't override variables already set
+  } catch {
+    /* no such file */
+  }
+}
+const SITE = (process.env.SITE_URL ?? '').replace(/\/+$/, '')
+if (SITE && !/^https?:\/\//.test(SITE)) throw new Error(`SITE_URL should start with https://, got "${SITE}".`)
+const abs = (p) => (SITE && p.startsWith('/') ? SITE + p : p)
+
+if (!fs.existsSync(path.join(DIST, 'index.html'))) throw new Error('Run `vite build` first: dist/index.html is missing.')
+const shell = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8')
+if (!shell.includes('<div id="root"></div>')) throw new Error('dist/index.html has already been prerendered. Run `npm run build` again.')
+
+const PRIMER = 'The System Design Primer'
+const PRIMER_URL = 'https://github.com/donnemartin/system-design-primer'
+
+// ---------------------------------------------------------------------------
+// HTML -> Markdown
+
+/** Tidies the app's HTML for Markdown: drops interactive diagram slots and turns drawn diagrams into text. */
+function forMarkdown() {
+  return (tree) => {
+    visit(tree, 'element', (node, index, parent) => {
+      if (!parent) return
+      const p = node.properties
+      if (p.dataWidget) {
+        parent.children.splice(index, 1)
+        return [SKIP, index]
+      }
+      if (node.tagName === 'figure' && p.className?.includes('diagram')) {
+        const caption = node.children.find((c) => c.tagName === 'figcaption')
+        const title = caption ? caption.children.map((c) => c.value ?? '').join('') : ''
+        parent.children[index] = {
+          type: 'element',
+          tagName: 'p',
+          properties: {},
+          children: [
+            { type: 'element', tagName: 'em', properties: {}, children: [{ type: 'text', value: `Diagram${title ? `: ${title}` : ''}` }] },
+            { type: 'text', value: p.dataText ? ` ${p.dataText}` : '' },
+          ],
+        }
+        return SKIP
+      }
+      if (node.tagName === 'a' && typeof p.href === 'string') p.href = abs(p.href)
+      if (node.tagName === 'img' && typeof p.src === 'string') p.src = abs(p.src)
+    })
+  }
+}
+
+const toMarkdown = unified()
+  .use(rehypeParse, { fragment: true })
+  .use(forMarkdown)
+  .use(rehypeRemark)
+  .use(remarkGfm)
+  .use(remarkStringify, { bullet: '-', emphasis: '_', rule: '-', fences: true })
+
+const md = (html) => String(toMarkdown.processSync(html)).trim()
+
+// ---------------------------------------------------------------------------
+// Chapters
+
+const chapters = manifest.parts.flatMap((part) => part.chapters.map((c) => ({ ...c, part })))
+const load = (id) => JSON.parse(fs.readFileSync(path.join(DIST, 'content', `${id}.json`), 'utf8'))
+
+function sourceNote(c) {
+  return c.extra
+    ? `Written for this site, not part of ${PRIMER}. The sources it draws on are listed under Further reading.`
+    : `From [${PRIMER}](${PRIMER_URL}) by Donne Martin, licensed under CC BY 4.0, arranged into chapters for this site.`
+}
+
+function chapterMarkdown(c, body) {
+  const parts = [`# ${c.title}`, `> ${sourceNote(c)} Part of "${c.part.title}". Web page: ${abs(`/learn/${c.id}`)}`]
+  if (c.alsoAsked) parts.push(`Also asked as: ${c.alsoAsked}`)
+  for (const s of body.sections) parts.push(md(s.html))
+  if (body.sourceFiles.length) {
+    parts.push('## Full source code')
+    for (const f of body.sourceFiles) parts.push(`### ${f.name}`, md(f.html))
+  }
+  return parts.join('\n\n') + '\n'
+}
+
+const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
+/** The app shell with this page's title and description, and its content in place of the empty root. */
+function page({ urlPath, title, description, body, markdown, preload }) {
+  const head = [
+    `<title>${esc(title)}</title>`,
+    `<meta name="description" content="${esc(description)}" />`,
+    `<meta property="og:title" content="${esc(title)}" />`,
+    `<meta property="og:description" content="${esc(description)}" />`,
+    `<meta property="og:type" content="${urlPath === '/' ? 'website' : 'article'}" />`,
+    SITE && `<link rel="canonical" href="${SITE}${urlPath}" />`,
+    SITE && `<meta property="og:url" content="${SITE}${urlPath}" />`,
+    markdown && `<link rel="alternate" type="text/markdown" href="${markdown}" />`,
+    preload && `<link rel="preload" href="${preload}" as="fetch" crossorigin />`,
+  ]
+    .filter(Boolean)
+    .join('\n    ')
+  return shell
+    .replace(/<title>.*?<\/title>/, head)
+    .replace(/\s*<meta name="description"[^>]*>/, '')
+    .replace('<div id="root"></div>', `<div id="root"><div class="prerender">${body}</div></div>`)
+}
+
+const nav = `<p class="prerender-nav"><a href="/">System Design Primer</a> · <a href="/llms.txt">llms.txt</a></p>`
+
+fs.mkdirSync(path.join(DIST, 'learn'), { recursive: true })
+const full = []
+
+for (const [i, c] of chapters.entries()) {
+  const body = load(c.id)
+  const markdown = chapterMarkdown(c, body)
+  fs.writeFileSync(path.join(DIST, 'learn', `${c.id}.md`), markdown)
+  full.push(markdown)
+
+  const prev = chapters[i - 1]
+  const next = chapters[i + 1]
+  const article = [
+    nav,
+    `<p><a href="/#${c.part.id}">${esc(c.part.title)}</a></p>`,
+    `<h1>${esc(c.title)}</h1>`,
+    c.extra ? `<p><em>${esc(sourceNote(c))}</em></p>` : '',
+    ...body.sections.map((s) => `<section class="article">${s.html}</section>`),
+    ...body.sourceFiles.map((f) => `<section class="article"><h3>${esc(f.name)}</h3>${f.html}</section>`),
+    `<p>${prev ? `Previous: <a href="/learn/${prev.id}">${esc(prev.title)}</a>` : ''}${prev && next ? ' · ' : ''}${
+      next ? `Next: <a href="/learn/${next.id}">${esc(next.title)}</a>` : ''
+    }</p>`,
+  ].join('\n')
+  fs.writeFileSync(
+    path.join(DIST, 'learn', `${c.id}.html`),
+    page({
+      urlPath: `/learn/${c.id}`,
+      title: `${c.title} | System Design Primer`,
+      description: c.summary || `${c.title}, from ${PRIMER}.`,
+      body: article,
+      markdown: `/learn/${c.id}.md`,
+      preload: `/content/${c.id}.json`,
+    }),
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Index pages
+
+const primerCount = chapters.filter((c) => !c.extra).length
+const extraCount = chapters.length - primerCount
+const intro =
+  `Donne Martin's ${PRIMER} (CC BY 4.0), the guide to designing large-scale systems, reorganized into ${primerCount} chapters: ` +
+  `core trade-offs, building blocks from DNS to databases, and worked system design and object-oriented design interview questions. ` +
+  `Also ${extraCount} extra chapters written for this site on topics the primer doesn't cover, such as rate limiting, consistent hashing and consensus.`
+
+const llms = [`# ${PRIMER}, as a course`, `> ${intro}`]
+llms.push(
+  `Each chapter is available as Markdown at \`/learn/<chapter-id>.md\`, and the whole course is in one file at [llms-full.txt](${abs('/llms-full.txt')}). ` +
+    `Chapters in the "Beyond the primer" parts are written for this site, not by the primer's author.`,
+)
+for (const part of manifest.parts) {
+  const optional = part.untracked
+  llms.push(
+    `## ${optional ? 'Optional' : part.title}`,
+    part.chapters.map((c) => `- [${c.title}](${abs(`/learn/${c.id}.md`)})${c.summary ? `: ${c.summary}` : ''}`).join('\n'),
+  )
+}
+fs.writeFileSync(path.join(DIST, 'llms.txt'), llms.join('\n\n') + '\n')
+fs.writeFileSync(path.join(DIST, 'llms-full.txt'), [`# ${PRIMER}, as a course`, `> ${intro}`, ...full].join('\n\n---\n\n'))
+
+const home = [
+  nav,
+  `<h1>The System Design Primer</h1>`,
+  `<p>${esc(intro)}</p>`,
+  ...manifest.parts.map(
+    (part) =>
+      `<section id="${part.id}"><h2>${esc(part.title)}</h2><p>${esc(part.description)}</p><ul>${part.chapters
+        .map((c) => `<li><a href="/learn/${c.id}">${esc(c.title)}</a>${c.summary ? `: ${esc(c.summary)}` : ''}</li>`)
+        .join('')}</ul></section>`,
+  ),
+].join('\n')
+
+// Every route without its own page gets the empty shell, so it doesn't flash the overview.
+fs.writeFileSync(path.join(DIST, 'app.html'), shell)
+fs.writeFileSync(
+  path.join(DIST, 'index.html'),
+  page({
+    urlPath: '/',
+    title: 'System Design Primer',
+    description: 'The System Design Primer as an interactive course with progress tracking.',
+    body: home,
+    markdown: '/llms.txt',
+  }),
+)
+
+const urls = ['/', '/flashcards', ...chapters.map((c) => `/learn/${c.id}`)]
+fs.writeFileSync(path.join(DIST, 'robots.txt'), `User-agent: *\nAllow: /\n${SITE ? `\nSitemap: ${SITE}/sitemap.xml\n` : ''}`)
+if (SITE) {
+  const today = new Date().toISOString().slice(0, 10)
+  fs.writeFileSync(
+    path.join(DIST, 'sitemap.xml'),
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
+      .map((u) => `  <url><loc>${SITE}${u}</loc><lastmod>${today}</lastmod></url>`)
+      .join('\n')}\n</urlset>\n`,
+  )
+} else fs.rmSync(path.join(DIST, 'sitemap.xml'), { force: true })
+
+const kb = (f) => Math.round(fs.statSync(path.join(DIST, f)).size / 1024)
+console.log(
+  `Wrote ${chapters.length} Markdown chapters and prerendered pages, llms.txt (${kb('llms.txt')} KB), llms-full.txt (${kb('llms-full.txt')} KB), robots.txt` +
+    (SITE ? `, sitemap.xml for ${SITE}.` : '. Set SITE_URL for full URLs and a sitemap.'),
+)

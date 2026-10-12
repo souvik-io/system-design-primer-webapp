@@ -127,5 +127,33 @@ test('merging a copy with itself changes nothing', () => {
 test('stored documents are filled in, and newer formats are refused', () => {
   assert.deepEqual(parseDoc({ v: 1, progress: { completed: { x: 1 } } }).progress, { ...emptyDoc().progress, completed: { x: 1 } })
   assert.ok(sameDoc(parseDoc(null), emptyDoc()))
-  assert.throws(() => parseDoc({ v: 2 }), /newer version/)
+  assert.deepEqual(parseDoc({ v: 1, progress: {} }).notes, emptyDoc().notes)
+  assert.throws(() => parseDoc({ v: 3 }), /newer version/)
+})
+
+test('the latest edit to each note and bookmark wins, including deletions', () => {
+  const m = merge(
+    doc((d) => {
+      d.notes.notes['a/x'] = { text: 'old', at: 1 }
+      d.notes.notes['a/y'] = { text: '', at: 9 }
+      d.notes.bookmarks['a/x'] = { on: true, at: 4 }
+    }),
+    doc((d) => {
+      d.notes.notes['a/x'] = { text: 'new', at: 2 }
+      d.notes.notes['a/y'] = { text: 'kept elsewhere', at: 3 }
+      d.notes.notes['b/z'] = { text: 'only here', at: 1 }
+      d.notes.bookmarks['a/x'] = { on: false, at: 6 }
+    }),
+  )
+  assert.equal(m.notes.notes['a/x'].text, 'new')
+  assert.equal(m.notes.notes['a/y'].text, '')
+  assert.equal(m.notes.notes['b/z'].text, 'only here')
+  assert.equal(m.notes.bookmarks['a/x'].on, false)
+})
+
+test('the most recent study plan choice wins, and stopping a plan counts as a choice', () => {
+  const started = doc((d) => (d.plan = { plan: { id: 'short', start: '2026-10-01', target: '2026-10-14' }, planAt: 5 }))
+  const stopped = doc((d) => (d.plan = { plan: null, planAt: 8 }))
+  assert.equal(merge(started, stopped).plan.plan, null)
+  assert.equal(merge(started, emptyDoc()).plan.plan?.id, 'short')
 })

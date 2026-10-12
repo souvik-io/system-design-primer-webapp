@@ -67,6 +67,10 @@ The fix for both problems is to give each physical server many positions on the 
 - **Failure spreads.** A failed server's 100 small ranges go to many different successors, so no single neighbor takes the whole load.
 - **Unequal hardware is easy.** Give a machine with twice the memory twice the virtual nodes. Memcached's libketama client does this, placing 160 points per server, scaled by each server's weight.
 
+```widget
+hash-ring
+```
+
 Here is the whole idea in Python, including the replica walk explained in the next section:
 
 ```python

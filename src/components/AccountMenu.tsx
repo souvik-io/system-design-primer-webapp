@@ -118,7 +118,8 @@ function SignedOut() {
     <form onSubmit={submit} className="text-sm">
       <h2 className="text-base font-semibold text-ink">Sync your progress</h2>
       <p className="mt-2 text-ink-2">
-        Sign in to keep your reading progress and flashcard reviews on every device. What you've done in this browser is added to your account.
+        Sign in to keep your reading progress, flashcard reviews, notes and study plan on every device. What you've done in this browser is added to
+        your account.
       </p>
       {linkError && !error && <p className="mt-3 text-red-600 dark:text-red-400">{linkError}</p>}
       <label htmlFor="account-email" className="mt-4 block font-medium text-ink">

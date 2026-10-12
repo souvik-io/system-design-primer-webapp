@@ -164,6 +164,20 @@ const SKIPPED_README_TARGETS = {
 // Sections too small to track on their own; they're folded into the preceding section.
 const FOLD_INTO_PREVIOUS = /^(source\(s\)|disadvantage\(s\)|further reading)/i
 
+// Interactive diagrams (src/widgets/Widgets.tsx). The build leaves an empty placeholder where each
+// one goes and the app renders into it. Primer chapters get theirs here, before a given heading;
+// extra chapters place them with a ```widget block.
+const WIDGET_NAMES = new Set(['hash-ring', 'cache-strategies', 'replication', 'rate-limiter'])
+const PRIMER_WIDGETS = [
+  { chapter: 'cache', before: 'disadvantages-cache', widget: 'cache-strategies' },
+  { chapter: 'database', before: 'master-master-replication', widget: 'replication' },
+]
+
+function widgetNode(name, where) {
+  if (!WIDGET_NAMES.has(name)) throw new Error(`${where}: no interactive diagram called "${name}". Known: ${[...WIDGET_NAMES].join(', ')}.`)
+  return { type: 'html', value: `<div class="widget-slot" data-widget="${name}"></div>` }
+}
+
 // Chapters long enough that "####" headings get their own trackable section too.
 const SPLIT_DEEPER = new Set(['database'])
 
@@ -489,12 +503,21 @@ function extraChapter(id) {
       h.depth = Math.min(6, h.depth + 1)
     })
     visit(n, 'code', (c, index, parent) => {
-      if (c.lang !== 'diagram' || !parent) return
-      parent.children[index] = { type: 'html', value: renderDiagram(c.value, file) }
+      if (!parent) return
+      if (c.lang === 'diagram') parent.children[index] = { type: 'html', value: renderDiagram(c.value, file) }
+      if (c.lang === 'widget') parent.children[index] = widgetNode(c.value.trim(), file)
     })
   }
-  // A diagram can be a top-level block, which the visit above can't replace in place.
-  const body = nodes.map((n) => (n.type === 'code' && n.lang === 'diagram' ? { type: 'html', value: renderDiagram(n.value, file) } : n))
+  // A block can be at the top level, which the visit above can't replace in place.
+  const body = nodes.map((n) =>
+    n.type !== 'code'
+      ? n
+      : n.lang === 'diagram'
+        ? { type: 'html', value: renderDiagram(n.value, file) }
+        : n.lang === 'widget'
+          ? widgetNode(n.value.trim(), file)
+          : n,
+  )
   return { id, title, nodes: body, sectionDepth: 3, ctx: { file, chapterId: id, localAnchors } }
 }
 
@@ -531,6 +554,11 @@ for (const part of PARTS) {
     ? part.readme.map((id) => {
         const ch = readme.get(id)
         if (!ch) throw new Error(`README section "${id}" not found — did the upstream headings change?`)
+        for (const w of PRIMER_WIDGETS.filter((w) => w.chapter === id)) {
+          const at = ch.nodes.findIndex((n) => n.type === 'heading' && n.data.id === w.before)
+          if (at === -1) throw new Error(`Interactive diagram "${w.widget}" goes before heading "${w.before}" in ${id}, which doesn't exist.`)
+          ch.nodes.splice(at, 0, widgetNode(w.widget, `README ${id}`))
+        }
         return { ...ch, sectionDepth: 3, maxSectionDepth: SPLIT_DEEPER.has(id) ? 4 : 3, ctx: { file: 'README.md', chapterId: id } }
       })
     : part.about

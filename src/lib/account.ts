@@ -2,11 +2,13 @@ import { create } from 'zustand'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { useProgress } from './progress'
 import { useFlashcards } from './flashcards'
-import { emptyDoc, mergeDocs, parseDoc, sameDoc, type SyncDoc } from './syncDoc'
+import { useNotes } from './notes'
+import { usePlan } from './plans'
+import { emptyDoc, mergeDocs, parseDoc, sameDoc, SYNC_VERSION, type SyncDoc } from './syncDoc'
 
 // Optional accounts. VITE_PROGRESS_STORAGE picks where progress lives:
 // - "browser" (the default): localStorage only, no sign-in.
-// - "supabase": signing in by email link syncs reading progress and flashcard history through
+// - "supabase": signing in by email link syncs reading progress, flashcard history, notes, bookmarks and the study plan through
 //   one row per user in the `progress` table (see supabase/). Needs the two Supabase variables too.
 
 const storage = import.meta.env.VITE_PROGRESS_STORAGE || 'browser'
@@ -104,7 +106,15 @@ export async function signOut() {
 function snapshot(): SyncDoc {
   const { completed, removed, resetAt, lastVisited } = useProgress.getState()
   const { cards, removedCards, introduced, newPerDay, newPerDayAt } = useFlashcards.getState()
-  return { v: 1, progress: { completed, removed, resetAt, lastVisited }, flashcards: { cards, removedCards, introduced, newPerDay, newPerDayAt } }
+  const { notes, bookmarks } = useNotes.getState()
+  const { plan, planAt } = usePlan.getState()
+  return {
+    v: SYNC_VERSION,
+    progress: { completed, removed, resetAt, lastVisited },
+    flashcards: { cards, removedCards, introduced, newPerDay, newPerDayAt },
+    notes: { notes, bookmarks },
+    plan: { plan, planAt },
+  }
 }
 
 let applying = false
@@ -114,6 +124,8 @@ function applyDoc(doc: SyncDoc) {
   try {
     useProgress.setState(doc.progress)
     useFlashcards.setState(doc.flashcards)
+    useNotes.setState(doc.notes)
+    usePlan.setState(doc.plan)
   } finally {
     applying = false
   }
@@ -204,6 +216,8 @@ function scheduleSync(delay: number) {
 
 useProgress.subscribe((s, prev) => scheduleSync(s.completed !== prev.completed || s.resetAt !== prev.resetAt ? 1500 : 15_000))
 useFlashcards.subscribe(() => scheduleSync(1500))
+useNotes.subscribe(() => scheduleSync(1500))
+usePlan.subscribe(() => scheduleSync(1500))
 
 // Save before the tab is hidden or closed, pick up other devices' changes when it comes back,
 // and retry after reconnecting.

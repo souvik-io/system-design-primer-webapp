@@ -96,6 +96,16 @@ function label(node, g) {
   return `<text class="dg-label${node.kind === 'note' ? ' dg-muted' : ''}" text-anchor="middle">${tspans}</text>`
 }
 
+/** The diagram as one line of text, for the Markdown copies of each chapter that crawlers and LLMs read. */
+function describe(nodes, edges) {
+  const name = (id) => nodes.get(id).lines.join(' ')
+  const arrow = (e) => (e.both ? '<->' : '->')
+  const lines = edges.map((e) => `${name(e.from)} ${arrow(e)} ${name(e.to)}${e.label ? ` (${e.label})` : ''}`)
+  const linked = new Set(edges.flatMap((e) => [e.from, e.to]))
+  const alone = [...nodes.keys()].filter((id) => !linked.has(id)).map(name)
+  return [...lines, ...alone].join('; ')
+}
+
 /** Returns the diagram as HTML: an inline SVG in a <figure>, with the title as its caption. */
 export function renderDiagram(source, where) {
   const { title, nodes, edges } = parseDiagram(source, where)
@@ -147,5 +157,5 @@ export function renderDiagram(source, where) {
     body +
     labels.join('') +
     `</svg>`
-  return `<figure class="diagram"><div class="diagram-scroll">${svg}</div>${title ? `<figcaption>${esc(title)}</figcaption>` : ''}</figure>`
+  return `<figure class="diagram" data-text="${esc(describe(nodes, edges))}"><div class="diagram-scroll">${svg}</div>${title ? `<figcaption>${esc(title)}</figcaption>` : ''}</figure>`
 }

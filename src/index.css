@@ -15,6 +15,15 @@
   --done: #0c8a6a;
   --done-soft: #dcf2eb;
   --code-bg: #eef1f5;
+  --bad: #c0352b;
+  --bad-soft: #fbe7e5;
+  --warn: #9a5b00;
+  --w1: #2853c8;
+  --w2: #0c8a6a;
+  --w3: #b5650d;
+  --w4: #b5367c;
+  --w5: #6d4fd0;
+  --w6: #52606f;
   color-scheme: light;
 }
 
@@ -31,6 +40,15 @@
   --done: #3dd3a5;
   --done-soft: #143229;
   --code-bg: #1d232d;
+  --bad: #ff8b80;
+  --bad-soft: #3a1f1f;
+  --warn: #f0b04d;
+  --w1: #8aa9ff;
+  --w2: #3dd3a5;
+  --w3: #f0a650;
+  --w4: #f283bb;
+  --w5: #b9a4ff;
+  --w6: #a7b2bf;
   color-scheme: dark;
 }
 
@@ -47,6 +65,9 @@
   --color-done: var(--done);
   --color-done-soft: var(--done-soft);
   --color-code: var(--code-bg);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-warn: var(--warn);
   --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
   --font-serif: 'Source Serif 4', ui-serif, Georgia, serif;
   --font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
@@ -340,6 +361,15 @@ body {
     font-size: 11px;
   }
 
+  /* Interactive diagrams (src/widgets) mount into these placeholders */
+  .article .widget-slot {
+    margin-top: 1.8em;
+    margin-bottom: 1.8em;
+  }
+  .article .widget-slot:empty {
+    display: none;
+  }
+
   /* "Check yourself" questions in the extra chapters */
   .article details {
     border: 1px solid var(--rule);
@@ -370,6 +400,38 @@ body {
 }
 
 /* ------------------------------------------------------------------ */
+/* Static copy of a page, written into the HTML at build time for crawlers
+   (scripts/build-llms.mjs). The app replaces it as soon as it starts.     */
+
+.prerender {
+  max-width: 70ch;
+  margin: 0 auto;
+  padding: 2.5rem 1rem 4rem;
+}
+.prerender h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0.5rem 0 1.5rem;
+}
+.prerender h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 2rem;
+}
+.prerender > p,
+.prerender li {
+  color: var(--ink-2);
+  margin-top: 0.5rem;
+}
+.prerender a {
+  color: var(--accent);
+}
+.prerender .article {
+  padding-top: 1.5rem;
+}
+
+/* ------------------------------------------------------------------ */
 /* System map: edges draw in once on first load                       */
 
 .map-edge {
@@ -382,7 +444,22 @@ body {
     stroke-dashoffset: 0;
   }
 }
+/* Keys that just moved to another server in the hash ring diagram */
+.ring-moved {
+  animation: ring-pulse 1.1s ease-out 2;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes ring-pulse {
+  50% {
+    transform: scale(1.9);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .ring-moved {
+    animation: none;
+  }
   .map-edge {
     animation: none;
     stroke-dashoffset: 0;

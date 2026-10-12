@@ -1,19 +1,26 @@
 import type { ProgressData } from './progress'
 import type { CardState, FlashcardData } from './flashcards'
+import type { NotesData } from './notes'
+import type { PlanData } from './plans'
 
 // Everything that syncs to an account, as one JSON document. Two copies (this browser and the
 // account) are merged item by item, and the most recent change to each item wins. Removals are
 // kept as timestamps too, so un-marking a section or resetting a deck isn't undone by an older copy.
 
-export type SyncDoc = { v: 1; progress: ProgressData; flashcards: FlashcardData }
+// Version 2 added notes, bookmarks and the study plan. Older code refuses version 2 documents
+// instead of saving over them without those parts.
 
-export const SYNC_VERSION = 1
+export type SyncDoc = { v: 2; progress: ProgressData; flashcards: FlashcardData; notes: NotesData; plan: PlanData }
+
+export const SYNC_VERSION = 2
 
 export function emptyDoc(): SyncDoc {
   return {
     v: SYNC_VERSION,
     progress: { completed: {}, removed: {}, resetAt: 0, lastVisited: null },
     flashcards: { cards: {}, removedCards: {}, introduced: { day: '', byDeck: {} }, newPerDay: 10, newPerDayAt: 0 },
+    notes: { notes: {}, bookmarks: {} },
+    plan: { plan: null, planAt: 0 },
   }
 }
 
@@ -27,11 +34,34 @@ export function parseDoc(data: unknown): SyncDoc {
     v: SYNC_VERSION,
     progress: { ...empty.progress, ...d.progress },
     flashcards: { ...empty.flashcards, ...d.flashcards },
+    notes: { ...empty.notes, ...d.notes },
+    plan: { ...empty.plan, ...d.plan },
   }
 }
 
 export function mergeDocs(a: SyncDoc, b: SyncDoc): SyncDoc {
-  return { v: SYNC_VERSION, progress: mergeProgress(a.progress, b.progress), flashcards: mergeFlashcards(a.flashcards, b.flashcards) }
+  return {
+    v: SYNC_VERSION,
+    progress: mergeProgress(a.progress, b.progress),
+    flashcards: mergeFlashcards(a.flashcards, b.flashcards),
+    notes: { notes: latestEach(a.notes.notes, b.notes.notes), bookmarks: latestEach(a.notes.bookmarks, b.notes.bookmarks) },
+    plan: pick(a.plan, b.plan, a.plan.planAt, b.plan.planAt),
+  }
+}
+
+/** Per key, the entry changed most recently. Ties go to the larger JSON so both orders agree. */
+function latestEach<T extends { at: number }>(a: Record<string, T>, b: Record<string, T>) {
+  const out: Record<string, T> = {}
+  for (const key of keysOf(a, b)) {
+    const [x, y] = [a[key], b[key]]
+    out[key] = x && y ? pick(x, y, x.at, y.at) : (x ?? y)
+  }
+  return out
+}
+
+function pick<T>(a: T, b: T, atA: number, atB: number): T {
+  if (atA !== atB) return atA > atB ? a : b
+  return stableJson(a) >= stableJson(b) ? a : b
 }
 
 function mergeProgress(a: ProgressData, b: ProgressData): ProgressData {

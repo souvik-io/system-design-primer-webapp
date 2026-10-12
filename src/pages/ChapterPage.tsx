@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
 import clsx from 'clsx'
-import { ArrowLeft, ArrowRight, Check, Circle, Clock, ExternalLink, PenLine } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Bookmark, Check, Clock, ExternalLink, PenLine } from 'lucide-react'
 import { chapterById, loadChapter, sectionHref, sectionKey, useVisibleContent, type Chapter, type ChapterMeta, type SourceFile } from '../lib/content'
-import { useChapterProgress, useIsSectionDone, useProgress } from '../lib/progress'
+import { useChapterProgress, useProgress } from '../lib/progress'
+import { useNotes } from '../lib/notes'
 import { useSettings } from '../lib/settings'
 import { useArticleClicks } from '../components/useArticleClicks'
 import { ExtrasSwitch } from '../components/ExtrasToggle'
+import { SectionTools } from '../components/SectionTools'
+import { Widgets } from '../widgets/Widgets'
 import { NotFound } from './NotFound'
 
 export function ChapterPage() {
@@ -86,8 +89,21 @@ function ChapterView({ meta }: { meta: ChapterMeta & { part: { id: string; title
     Promise.all([document.fonts.ready, ...above.map(settled)]).then(() => {
       if (!cancelled && Math.abs(window.scrollY - y) < 2) el.scrollIntoView()
     })
+
+    // Interactive diagrams render a moment later too. Follow the target as the page grows,
+    // for a few seconds or until the reader scrolls.
+    let anchored = window.scrollY
+    const follow = new ResizeObserver(() => {
+      if (cancelled || Math.abs(window.scrollY - anchored) > 2) return follow.disconnect()
+      el.scrollIntoView()
+      anchored = window.scrollY
+    })
+    if (articleRef.current) follow.observe(articleRef.current)
+    const stop = setTimeout(() => follow.disconnect(), 3000)
     return () => {
       cancelled = true
+      follow.disconnect()
+      clearTimeout(stop)
     }
   }, [chapter, location.key, location.hash])
 
@@ -180,10 +196,11 @@ function ChapterView({ meta }: { meta: ChapterMeta & { part: { id: string; title
             {chapter.sections.map((sec) => (
               <section key={sec.id} data-section={sec.id} className="border-b border-rule pb-10 not-first:pt-10">
                 <div className="article" dangerouslySetInnerHTML={{ __html: sec.html }} />
-                {tracked && <SectionDoneButton chapterId={meta.id} sectionId={sec.id} title={sec.title} />}
+                <SectionTools chapterId={meta.id} sectionId={sec.id} title={sec.title} tracked={tracked} />
               </section>
             ))}
             {chapter.sourceFiles.length > 0 && <SourceFiles files={chapter.sourceFiles} />}
+            <Widgets root={articleRef} chapter={chapter} />
           </div>
         )}
 
@@ -216,27 +233,6 @@ function ChapterView({ meta }: { meta: ChapterMeta & { part: { id: string; title
 
       {zoom}
     </div>
-  )
-}
-
-function SectionDoneButton({ chapterId, sectionId, title }: { chapterId: string; sectionId: string; title: string }) {
-  const done = useIsSectionDone(chapterId, sectionId)
-  const setSectionDone = useProgress((s) => s.setSectionDone)
-  return (
-    <button
-      type="button"
-      onClick={() => setSectionDone(chapterId, sectionId, !done)}
-      aria-pressed={done}
-      aria-label={`${title}: ${done ? 'done' : 'mark as done'}`}
-      title={done ? 'Mark as not done' : undefined}
-      className={clsx(
-        'mt-8 flex items-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-medium transition-colors',
-        done ? 'border-done/40 bg-done-soft text-done' : 'border-rule bg-surface text-ink-2 hover:border-done/50 hover:text-ink',
-      )}
-    >
-      {done ? <Check size={16} strokeWidth={3} /> : <Circle size={16} />}
-      {done ? 'Section done' : 'Mark section as done'}
-    </button>
   )
 }
 
@@ -277,10 +273,12 @@ function SourceFiles({ files }: { files: SourceFile[] }) {
 
 function Outline({ meta, active, hasSource }: { meta: ChapterMeta; active: string | null; hasSource: boolean }) {
   const completed = useProgress((s) => s.completed)
+  const bookmarks = useNotes((s) => s.bookmarks)
   return (
     <ul className="space-y-0.5 border-l border-rule text-[0.8125rem]">
       {meta.sections.map((s) => {
         const done = Boolean(completed[sectionKey(meta.id, s.id)])
+        const marked = Boolean(bookmarks[sectionKey(meta.id, s.id)]?.on)
         return (
           <li key={s.id}>
             <Link
@@ -291,6 +289,7 @@ function Outline({ meta, active, hasSource }: { meta: ChapterMeta; active: strin
               )}
             >
               <span className="flex-1">{s.title}</span>
+              {marked && <Bookmark size={12} fill="currentColor" className="mt-0.5 shrink-0 text-accent" aria-label="Bookmarked" />}
               {done && <Check size={13} strokeWidth={3} className="mt-0.5 shrink-0 text-done" aria-label="Done" />}
             </Link>
           </li>

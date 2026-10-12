@@ -62,3 +62,15 @@ q --> w
 - Columns and rows start at 0, and halves like `1.5` are allowed. Up to 5 columns fit the page.
 - Write `\n` in a label for a line break. Keep lines under about 18 characters.
 - Edges: `a -> b`, `a <-> b`, `a --> b` (dashed, for async work), each with an optional `: label`. Edges are straight lines, so lay nodes out so lines don't cross other boxes.
+
+## Interactive diagrams
+
+A fenced code block with the language `widget` and a diagram's name places one of the site's interactive diagrams there:
+
+````markdown
+```widget
+hash-ring
+```
+````
+
+The diagrams are React components in `src/widgets/` (`hash-ring`, `cache-strategies`, `replication`, `rate-limiter`). A new one needs a component there, an entry in `src/widgets/Widgets.tsx`, and its name added to `WIDGET_NAMES` in `scripts/build-content.mjs`. Primer chapters can't be edited, so their diagrams are placed by `PRIMER_WIDGETS` in the same script.

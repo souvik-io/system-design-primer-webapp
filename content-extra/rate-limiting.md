@@ -109,6 +109,10 @@ The wait time it returns is exactly what you'd put in a `Retry-After` header. Th
 
 There are two versions of the name. As a meter, it's the token bucket viewed from the other side: a bucket that fills with each request and drains at a fixed rate, rejecting when full. As a queue, requests wait in a fixed-size FIFO and are released at a constant rate, and new requests are dropped when the queue is full. The queue form smooths traffic into a steady stream, which protects a backend that can't handle bursts, at the price of added latency. NGINX's `limit_req` uses this method. Its `burst` setting sizes the queue, and `nodelay` passes queued requests through immediately, which makes it behave much like a token bucket.
 
+```widget
+rate-limiter
+```
+
 ## Distributed counters in Redis
 
 With one gateway instance, the counters can live in memory. With twenty, they can't: each instance would see a twentieth of a client's traffic and enforce a limit twenty times too loose. The usual fix is a shared, fast store, most often Redis.
