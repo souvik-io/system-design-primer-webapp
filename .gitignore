@@ -1,0 +1,7 @@
+node_modules
+dist
+source-repo
+public/content
+public/repo
+src/generated
+.DS_Store

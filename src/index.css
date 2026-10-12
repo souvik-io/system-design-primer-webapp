@@ -1,0 +1,270 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --paper: #f5f6f8;
+  --surface: #ffffff;
+  --ink: #18202b;
+  --ink-2: #333e4c;
+  --muted: #66717f;
+  --rule: #dce1e7;
+  --accent: #2853c8;
+  --accent-soft: #e7ecfa;
+  --on-accent: #ffffff;
+  --done: #0c8a6a;
+  --done-soft: #dcf2eb;
+  --code-bg: #eef1f5;
+  color-scheme: light;
+}
+
+.dark {
+  --paper: #12161d;
+  --surface: #181d26;
+  --ink: #e6eaf0;
+  --ink-2: #c3cad4;
+  --muted: #8d98a7;
+  --rule: #2a313c;
+  --accent: #8aa9ff;
+  --accent-soft: #1d2843;
+  --on-accent: #0d1424;
+  --done: #3dd3a5;
+  --done-soft: #143229;
+  --code-bg: #1d232d;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-rule: var(--rule);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+  --color-done: var(--done);
+  --color-done-soft: var(--done-soft);
+  --color-code: var(--code-bg);
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Source Serif 4', ui-serif, Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+}
+
+html {
+  scroll-padding-top: 5rem;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Article content rendered from the primer's markdown                */
+
+@layer components {
+  .article {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: var(--ink-2);
+    max-width: 70ch;
+  }
+
+  .article > * + * {
+    margin-top: 1.1em;
+  }
+
+  .article h3,
+  .article h4,
+  .article h5 {
+    font-family: var(--font-sans);
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+  .article h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 2.2em;
+  }
+  .article > h3:first-child {
+    margin-top: 0;
+  }
+  .article h4 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 2em;
+  }
+  .article h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 1.6em;
+  }
+
+  .article a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+  .article a:hover {
+    text-decoration-color: var(--accent);
+  }
+
+  .article strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .article a strong {
+    color: inherit;
+  }
+
+  .article ul,
+  .article ol {
+    padding-left: 1.4em;
+  }
+  .article ul {
+    list-style: disc;
+  }
+  .article ol {
+    list-style: decimal;
+  }
+  .article li + li,
+  .article li > ul,
+  .article li > ol {
+    margin-top: 0.35em;
+  }
+  .article li::marker {
+    color: var(--muted);
+  }
+
+  .article blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 0.25em 0 0.25em 1em;
+    color: var(--ink);
+    font-style: italic;
+  }
+
+  .article :not(pre) > code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--code-bg);
+    padding: 0.12em 0.35em;
+    border-radius: 4px;
+    color: var(--ink);
+  }
+
+  .article pre {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    padding: 1rem 1.15rem;
+    border-radius: 8px;
+    border: 1px solid var(--rule);
+    overflow-x: auto;
+    background: var(--code-bg) !important;
+  }
+  .dark .article .shiki span {
+    color: var(--shiki-dark) !important;
+  }
+
+  /* Diagrams are drawn on white, so they sit on a white plate in both themes. */
+  .article .figure {
+    text-align: center;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+  .article .figure br {
+    display: none;
+  }
+  .article .figure i {
+    display: block;
+    margin-top: 0.5rem;
+    font-style: normal;
+  }
+  .article .figure a {
+    color: inherit;
+  }
+  .article img {
+    display: inline-block;
+    max-width: 100%;
+    max-height: 34rem;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 10px;
+    cursor: zoom-in;
+  }
+
+  .article .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+  }
+  .article table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  .article th,
+  .article td {
+    padding: 0.55rem 0.8rem;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--rule);
+  }
+  .article th {
+    font-weight: 600;
+    color: var(--ink);
+    background: var(--code-bg);
+  }
+  .article tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .article hr {
+    border: 0;
+    border-top: 1px solid var(--rule);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* System map: edges draw in once on first load                       */
+
+.map-edge {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: draw-edge 900ms cubic-bezier(0.3, 0.6, 0.2, 1) forwards;
+}
+@keyframes draw-edge {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-edge {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
