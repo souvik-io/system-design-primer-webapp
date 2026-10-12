@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "license": "MIT",
   "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
     "content": "node --disable-warning=ExperimentalWarning scripts/build-content.mjs",
     "verify-content": "node --disable-warning=ExperimentalWarning scripts/verify-content.mjs",
