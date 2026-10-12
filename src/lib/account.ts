@@ -4,13 +4,23 @@ import { useProgress } from './progress'
 import { useFlashcards } from './flashcards'
 import { emptyDoc, mergeDocs, parseDoc, sameDoc, type SyncDoc } from './syncDoc'
 
-// Optional accounts. When Supabase is configured, signing in by email link syncs reading progress
-// and flashcard history through one row per user in the `progress` table (see supabase/).
-// Without the env variables the site works exactly as before, with everything in localStorage.
+// Optional accounts. VITE_PROGRESS_STORAGE picks where progress lives:
+// - "browser" (the default): localStorage only, no sign-in.
+// - "supabase": signing in by email link syncs reading progress and flashcard history through
+//   one row per user in the `progress` table (see supabase/). Needs the two Supabase variables too.
 
+const storage = import.meta.env.VITE_PROGRESS_STORAGE || 'browser'
 const url = import.meta.env.VITE_SUPABASE_URL
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-export const syncAvailable = Boolean(url && key)
+
+if (storage !== 'browser' && storage !== 'supabase')
+  console.warn(`VITE_PROGRESS_STORAGE is "${storage}". Use "browser" or "supabase". Keeping progress in the browser.`)
+else if (storage === 'supabase' && !(url && key))
+  console.warn(
+    'VITE_PROGRESS_STORAGE is "supabase" but VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY is missing. Keeping progress in the browser.',
+  )
+
+export const syncAvailable = storage === 'supabase' && Boolean(url && key)
 
 export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'offline' | 'error'
 

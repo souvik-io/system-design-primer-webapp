@@ -46,14 +46,21 @@ Flashcards use an SM-2 style schedule like Anki's: Again (1 minute), Hard, Good 
 
 ## Accounts and sync (optional)
 
-When Supabase is configured, a **Sign in** button appears in the top bar. People sign in with an emailed link (no password), and their progress and flashcard history sync across devices. Without the configuration the button is hidden and everything stays in the browser, as before.
+Progress is kept in the browser by default. One environment variable switches it:
+
+| `VITE_PROGRESS_STORAGE` | What happens                                                                                                            |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `browser` (or unset)    | Progress stays in `localStorage`. No sign-in button. Any Supabase keys are ignored.                                     |
+| `supabase`              | A **Sign in** button appears in the top bar. People sign in with an emailed link (no password) and sync across devices. |
+
+If it's set to `supabase` but either Supabase value is missing, the site stays in browser mode and logs a warning in the console.
 
 Setup:
 
 1. Create a free project at [supabase.com](https://supabase.com).
 2. In the SQL editor, run [`supabase/migrations/20261012000000_progress.sql`](supabase/migrations/20261012000000_progress.sql). It creates the `progress` table with row-level security, so each user can read and write only their own row.
 3. Under **Authentication → URL Configuration**, set **Site URL** to where the site is hosted, and add `http://localhost:5173/**` and `https://<your-domain>/**` to **Redirect URLs**. The sign-in link returns people to the page they were on.
-4. Copy `.env.example` to `.env.local` and fill in the project URL and publishable key from **Project Settings → API**. Set the same two variables in your host (Vercel: Project → Settings → Environment Variables) and rebuild.
+4. Copy `.env.example` to `.env.local`, set `VITE_PROGRESS_STORAGE=supabase`, and fill in the project URL and publishable key from **Project Settings → API**. Set the same three variables in your host (Vercel: Project → Settings → Environment Variables) and rebuild. Vite reads them at build time, so changing them always needs a rebuild or a dev server restart.
 
 Supabase's built-in email sender allows only a few sign-in emails per hour. That's fine for personal use. For more users, set up custom SMTP under **Authentication → Emails**.
 
