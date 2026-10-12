@@ -38,6 +38,14 @@ To pull upstream changes, run `git -C source-repo pull`, then `npm run content` 
 
 `npm run verify-content` compares every paragraph, heading, list item, table cell, code block and image in the primer with the generated site, and checks that every internal link and image resolves. It lists what is left out on purpose (the README's tables of contents, language links and notebook attribution lines) and exits with an error if anything else is missing.
 
+## Extra chapters
+
+`content-extra/` holds chapters written for this site on topics the primer doesn't cover, such as rate limiting, consistent hashing and a chat system design. They're original writing. Each one lists the books, papers and docs it draws on under "Further reading".
+
+They're off by default. Readers turn them on with **Show extra chapters** on the home page, and the choice is saved in that browser (`sdp-settings`). When they're on, they appear in the course list, the sidebar and search, and count toward progress. When they're off, a link to one shows a page with the same switch.
+
+`scripts/build-content.mjs` builds them like the primer chapters. `##` headings become trackable sections, and fenced `diagram` blocks are drawn as SVG that follows the theme ([`scripts/diagram.mjs`](scripts/diagram.mjs)). See [`content-extra/README.md`](content-extra/README.md) for the format. `npm run verify-content` checks their internal links too.
+
 ## Progress and flashcards
 
 Reading progress (`sdp-progress`) and flashcard history (`sdp-flashcards`) are stored in `localStorage`. Without an account they stay in that browser. Signing in (optional, see below) syncs them across devices.

@@ -87,6 +87,7 @@ body {
     margin-top: 1.1em;
   }
 
+  .article h2,
   .article h3,
   .article h4,
   .article h5 {
@@ -95,11 +96,17 @@ body {
     letter-spacing: -0.01em;
     line-height: 1.3;
   }
+  .article h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-top: 2em;
+  }
   .article h3 {
     font-size: 1.5rem;
     font-weight: 600;
     margin-top: 2.2em;
   }
+  .article > h2:first-child,
   .article > h3:first-child {
     margin-top: 0;
   }
@@ -246,6 +253,119 @@ body {
   .article hr {
     border: 0;
     border-top: 1px solid var(--rule);
+  }
+
+  /* Diagrams drawn at build time from `diagram` blocks (scripts/diagram.mjs) */
+  .article .diagram {
+    margin-top: 1.6em;
+    margin-bottom: 1.6em;
+  }
+  .article .diagram-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--surface);
+    padding: 12px;
+  }
+  .article .diagram svg {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
+    min-width: 34rem;
+    font-family: var(--font-sans);
+  }
+  .article .diagram figcaption {
+    margin-top: 0.5rem;
+    text-align: center;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .dg-node {
+    stroke-width: 1.25;
+  }
+  .dg-box {
+    fill: var(--surface);
+    stroke: var(--ink-2);
+  }
+  .dg-store {
+    fill: var(--accent-soft);
+    stroke: var(--accent);
+  }
+  .dg-queue {
+    fill: var(--done-soft);
+    stroke: var(--done);
+  }
+  .dg-client {
+    fill: var(--paper);
+    stroke: var(--muted);
+  }
+  .dg-note {
+    fill: none;
+    stroke: var(--muted);
+    stroke-dasharray: 4 3;
+  }
+  .dg-line {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1;
+    opacity: 0.45;
+    color: var(--ink-2);
+  }
+  .dg-label {
+    fill: var(--ink);
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .dg-muted {
+    fill: var(--muted);
+    font-weight: 400;
+  }
+  .dg-edge {
+    stroke: var(--muted);
+    stroke-width: 1.4;
+  }
+  .dg-dashed {
+    stroke-dasharray: 5 4;
+  }
+  .dg-arrowhead {
+    fill: var(--muted);
+  }
+  .dg-edge-bg {
+    fill: var(--surface);
+  }
+  .dg-edge-label {
+    fill: var(--ink-2);
+    font-size: 11px;
+  }
+
+  /* "Check yourself" questions in the extra chapters */
+  .article details {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--surface);
+    padding: 0.7rem 1rem;
+  }
+  .article details + details {
+    margin-top: 0.6rem;
+  }
+  .article summary {
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .article summary::marker {
+    color: var(--muted);
+  }
+  .article details[open] summary {
+    margin-bottom: 0.6rem;
+  }
+  .article details > * + * {
+    margin-top: 0.8em;
   }
 }
 

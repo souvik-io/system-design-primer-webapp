@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router'
 import MiniSearch from 'minisearch'
 import clsx from 'clsx'
 import { Check, CornerDownLeft, Search } from 'lucide-react'
-import { sectionHref, sectionKey } from '../lib/content'
+import { chapterById, sectionHref, sectionKey } from '../lib/content'
 import { useProgress } from '../lib/progress'
+import { useSettings } from '../lib/settings'
 
 type Doc = { id: string; chapterId: string; sectionId: string; chapterTitle: string; title: string; text: string }
 type Result = Doc & { terms: string[] }
 
 let indexPromise: Promise<MiniSearch<Doc>> | null = null
+let chapterIdsOfDocs: string[] = []
 
 function loadIndex() {
   indexPromise ??= fetch('/content/search.json')
@@ -21,6 +23,7 @@ function loadIndex() {
         searchOptions: { boost: { title: 4, chapterTitle: 2 }, prefix: true, fuzzy: 0.15, combineWith: 'AND' },
       })
       ms.addAll(docs)
+      chapterIdsOfDocs = docs.map((d) => d.chapterId)
       return ms
     })
     .catch((err) => {
@@ -70,6 +73,7 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
   const listRef = useRef<HTMLUListElement>(null)
   const navigate = useNavigate()
   const completed = useProgress((s) => s.completed)
+  const showExtras = useSettings((s) => s.showExtras)
 
   useEffect(() => {
     if (!open) return
@@ -79,13 +83,20 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
     loadIndex().then(setIndex, () => setError(true))
   }, [open])
 
-  const results: Result[] = useMemo(() => {
-    if (!index || !query.trim()) return []
-    return index
-      .search(query)
-      .slice(0, 12)
-      .map((r) => ({ ...(r as unknown as Doc), terms: r.terms }))
-  }, [index, query])
+  const { results, hiddenMatches } = useMemo(() => {
+    if (!index || !query.trim()) return { results: [] as Result[], hiddenMatches: 0 }
+    const all = index.search(query)
+    const shown = all.filter((r) => showExtras || !chapterById.get(r.chapterId)?.extra)
+    return {
+      results: shown.slice(0, 12).map((r) => ({ ...(r as unknown as Doc), terms: r.terms })),
+      hiddenMatches: all.length - shown.length,
+    }
+  }, [index, query, showExtras])
+
+  const sectionCount = useMemo(() => {
+    if (!index) return ''
+    return chapterIdsOfDocs.filter((id) => showExtras || !chapterById.get(id)?.extra).length
+  }, [index, showExtras])
 
   useEffect(() => setActive(0), [query])
 
@@ -138,10 +149,14 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
             <p className="px-4 py-8 text-center text-sm text-muted">The search index didn't load. Check your connection and open search again.</p>
           ) : !query.trim() ? (
             <p className="px-4 py-8 text-center text-sm text-muted">
-              Search all {index ? index.documentCount : ''} sections of the primer by title or content.
+              Search all {sectionCount} sections{showExtras ? '' : ' of the primer'} by title or content.
             </p>
           ) : results.length === 0 ? (
-            <p className="px-4 py-8 text-center text-sm text-muted">Nothing matches "{query}". Try a shorter or more general term.</p>
+            <p className="px-4 py-8 text-center text-sm text-muted">
+              {hiddenMatches > 0
+                ? `Nothing in the primer matches "${query}", but ${hiddenMatches} ${hiddenMatches === 1 ? 'section' : 'sections'} in the extra chapters ${hiddenMatches === 1 ? 'does' : 'do'}. Turn on extra chapters from the course overview to see them.`
+                : `Nothing matches "${query}". Try a shorter or more general term.`}
+            </p>
           ) : (
             <ul id="search-results" ref={listRef} role="listbox" className="p-2">
               {results.map((r, i) => (

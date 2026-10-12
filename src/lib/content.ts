@@ -1,3 +1,4 @@
+import { useSettings } from './settings'
 import manifestJson from '../generated/manifest.json'
 
 export type SectionMeta = { id: string; title: string }
@@ -11,6 +12,8 @@ export type ChapterMeta = {
   alsoAsked?: string
   /** Reference material that doesn't count toward progress */
   untracked?: boolean
+  /** Written for this site, not part of the primer. Hidden unless the reader turns extra chapters on. */
+  extra?: boolean
 }
 export type Part = {
   id: string
@@ -18,6 +21,7 @@ export type Part = {
   description: string
   chapters: ChapterMeta[]
   untracked?: boolean
+  extra?: boolean
   /** Questions listed in the primer that don't have a solution yet */
   unsolved?: string[]
 }
@@ -31,7 +35,7 @@ export type DeckMeta = { id: string; title: string; description: string; cardIds
 export type Card = { id: string; front: string; back: string; href?: string }
 export type Deck = { id: string; title: string; cards: Card[] }
 
-export const parts: Part[] = manifestJson.parts
+export const parts: Part[] = (manifestJson.parts as Part[]).filter((p) => p.chapters.length > 0)
 export const decks: DeckMeta[] = manifestJson.decks
 export const deckById = new Map(decks.map((d) => [d.id, d]))
 
@@ -39,9 +43,22 @@ export const chapters: (ChapterMeta & { part: Part })[] = parts.flatMap((part) =
 
 export const chapterById = new Map(chapters.map((c) => [c.id, c]))
 
-export const trackedChapters = chapters.filter((c) => !c.untracked)
+export const extraParts = parts.filter((p) => p.extra)
+export const extraChapterCount = extraParts.reduce((n, p) => n + p.chapters.length, 0)
 
-export const totalSections = trackedChapters.reduce((n, c) => n + c.sections.length, 0)
+const visible = (showExtras: boolean) => {
+  const shownParts = showExtras ? parts : parts.filter((p) => !p.extra)
+  const shownChapters = showExtras ? chapters : chapters.filter((c) => !c.extra)
+  const tracked = shownChapters.filter((c) => !c.untracked)
+  return { parts: shownParts, chapters: shownChapters, tracked, totalSections: tracked.reduce((n, c) => n + c.sections.length, 0) }
+}
+const withExtras = visible(true)
+const withoutExtras = visible(false)
+
+/** The parts and chapters the reader has chosen to see: the primer, plus the extra chapters if they're turned on. */
+export function useVisibleContent() {
+  return useSettings((s) => s.showExtras) ? withExtras : withoutExtras
+}
 
 export function sectionKey(chapterId: string, sectionId: string) {
   return `${chapterId}/${sectionId}`

@@ -1,17 +1,20 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import clsx from 'clsx'
 import { ArrowRight, Info } from 'lucide-react'
-import { chapterById, chapters, decks, parts, sectionHref, type ChapterMeta, type DeckMeta } from '../lib/content'
+import { chapterById, chapters, decks, extraChapterCount, parts, sectionHref, sectionKey, type ChapterMeta, type DeckMeta, type Part } from '../lib/content'
 import { useDeckStats } from '../lib/flashcards'
 import { useChapterProgress, useOverallProgress, useProgress } from '../lib/progress'
 import { useAccount } from '../lib/account'
+import { useSettings } from '../lib/settings'
 import { ProgressRing } from '../components/ProgressRing'
 import { SystemMap } from '../components/SystemMap'
+import { ExtrasSwitch } from '../components/ExtrasToggle'
 
 export function HomePage() {
   const overall = useOverallProgress()
   const lastVisited = useProgress((s) => s.lastVisited)
+  const showExtras = useSettings((s) => s.showExtras)
   const location = useLocation()
 
   useEffect(() => {
@@ -21,7 +24,9 @@ export function HomePage() {
     else window.scrollTo(0, 0)
   }, [location.key, location.hash])
 
-  const resume = lastVisited && chapterById.get(lastVisited.chapterId)
+  const visited = lastVisited && chapterById.get(lastVisited.chapterId)
+  const resume = visited && (showExtras || !visited.extra) ? visited : null
+  const firstExtraPart = parts.find((p) => p.extra)?.id
   const resumeSection = resume?.sections.find((s) => s.id === lastVisited?.sectionId)
 
   return (
@@ -90,23 +95,52 @@ export function HomePage() {
 
       <div className="mt-16 space-y-14">
         {parts.map((part) => (
-          <section key={part.id} id={part.id} className="scroll-mt-20">
-            <div className="max-w-2xl">
-              <h2 className="text-xl font-semibold tracking-tight text-ink">{part.title}</h2>
-              <p className="mt-1 text-[0.95rem] text-muted">{part.description}</p>
-            </div>
-            <ol className="mt-4 divide-y divide-rule overflow-hidden rounded-xl border border-rule bg-surface">
-              {part.chapters.map((ch) => (
-                <ChapterRow key={ch.id} chapter={ch} />
-              ))}
-            </ol>
-            {part.unsolved && <p className="mt-3 text-sm text-muted">Also in the primer, without a solution yet: {part.unsolved.join(', ')}.</p>}
-          </section>
+          <Fragment key={part.id}>
+            {part.id === firstExtraPart && <ExtrasIntro />}
+            {(!part.extra || showExtras) && <PartSection part={part} />}
+          </Fragment>
         ))}
       </div>
 
       <ResetProgress />
     </div>
+  )
+}
+
+function PartSection({ part }: { part: Part }) {
+  return (
+    <section id={part.id} className="scroll-mt-20">
+      <div className="max-w-2xl">
+        <h2 className="text-xl font-semibold tracking-tight text-ink">{part.title}</h2>
+        <p className="mt-1 text-[0.95rem] text-muted">{part.description}</p>
+      </div>
+      <ol className="mt-4 divide-y divide-rule overflow-hidden rounded-xl border border-rule bg-surface">
+        {part.chapters.map((ch) => (
+          <ChapterRow key={ch.id} chapter={ch} />
+        ))}
+      </ol>
+      {part.unsolved && <p className="mt-3 text-sm text-muted">Also in the primer, without a solution yet: {part.unsolved.join(', ')}.</p>}
+    </section>
+  )
+}
+
+/** Introduces the extra chapters and holds the switch that shows them. */
+function ExtrasIntro() {
+  const showExtras = useSettings((s) => s.showExtras)
+  return (
+    <section id="extras" aria-labelledby="extras-heading" className="scroll-mt-20 rounded-xl border border-dashed border-rule px-5 py-5 sm:px-6">
+      <h2 id="extras-heading" className="text-xl font-semibold tracking-tight text-ink">
+        Beyond the primer
+      </h2>
+      <p className="mt-1 max-w-2xl text-[0.95rem] text-muted">
+        {extraChapterCount} extra chapters on topics the primer doesn't cover, like rate limiting, consistent hashing and designing a chat system.
+        They're written for this site, not by the primer's author, and each one lists its sources.
+      </p>
+      <ExtrasSwitch className="mt-4" />
+      {showExtras && (
+        <p className="mt-2 text-sm text-muted">They're listed below and in the sidebar, show up in search, and count toward your progress.</p>
+      )}
+    </section>
   )
 }
 
@@ -157,17 +191,19 @@ function DeckLink({ deck }: { deck: DeckMeta }) {
 
 function ResetProgress() {
   const [confirming, setConfirming] = useState(false)
-  const overall = useOverallProgress()
+  const completed = useProgress((s) => s.completed)
+  // Every completed section, including any in extra chapters that are hidden right now.
+  const count = chapters.filter((c) => !c.untracked).reduce((n, c) => n + c.sections.filter((s) => completed[sectionKey(c.id, s.id)]).length, 0)
   const reset = useProgress((s) => s.reset)
   const signedIn = useAccount((s) => Boolean(s.email))
-  if (overall.done === 0 && !confirming) return null
+  if (count === 0 && !confirming) return null
 
   return (
     <div className="mt-16 flex items-center gap-3 text-sm text-muted">
       {confirming ? (
         <>
           <span>
-            Clear all {overall.done} completed sections{signedIn ? ' on every device' : ''}? This can't be undone.
+            Clear all {count} completed {count === 1 ? 'section' : 'sections'}{signedIn ? ' on every device' : ''}? This can't be undone.
           </span>
           <button
             type="button"

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
 import { Menu, Moon, Search, Sun, X } from 'lucide-react'
 import { useTheme } from '../lib/theme'
+import { useSettings } from '../lib/settings'
 import { useOverallProgress } from '../lib/progress'
 import { ProgressRing } from './ProgressRing'
 import { Sidebar } from './Sidebar'
@@ -13,6 +14,7 @@ export function Layout() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const { isDark, toggle } = useTheme()
   const overall = useOverallProgress()
+  const showExtras = useSettings((s) => s.showExtras)
   const location = useLocation()
 
   useEffect(() => {
@@ -109,7 +111,7 @@ export function Layout() {
             >
               CC BY 4.0
             </a>
-            . Reorganized into chapters and sections for this site.
+            . Reorganized into chapters and sections for this site.{showExtras && ' Chapters marked “Beyond the primer” are written for this site.'}
           </footer>
         </main>
       </div>

@@ -1,17 +1,44 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
 import clsx from 'clsx'
-import { ArrowLeft, ArrowRight, Check, Circle, Clock, ExternalLink } from 'lucide-react'
-import { chapterById, chapters, loadChapter, sectionHref, sectionKey, type Chapter, type ChapterMeta, type SourceFile } from '../lib/content'
+import { ArrowLeft, ArrowRight, Check, Circle, Clock, ExternalLink, PenLine } from 'lucide-react'
+import { chapterById, loadChapter, sectionHref, sectionKey, useVisibleContent, type Chapter, type ChapterMeta, type SourceFile } from '../lib/content'
 import { useChapterProgress, useIsSectionDone, useProgress } from '../lib/progress'
+import { useSettings } from '../lib/settings'
 import { useArticleClicks } from '../components/useArticleClicks'
+import { ExtrasSwitch } from '../components/ExtrasToggle'
 import { NotFound } from './NotFound'
 
 export function ChapterPage() {
   const { chapterId = '' } = useParams()
   const meta = chapterById.get(chapterId)
+  const showExtras = useSettings((s) => s.showExtras)
   if (!meta) return <NotFound />
+  if (meta.extra && !showExtras) return <HiddenExtra meta={meta} />
   return <ChapterView key={meta.id} meta={meta} />
+}
+
+/** Someone followed a link to an extra chapter while extra chapters are turned off. */
+function HiddenExtra({ meta }: { meta: ChapterMeta }) {
+  useEffect(() => {
+    document.title = `${meta.title} | System Design Primer`
+  }, [meta])
+  return (
+    <div className="mx-auto max-w-[70ch] px-4 pt-12 pb-16 sm:px-8">
+      <h1 className="text-[2rem] leading-tight font-semibold tracking-tight text-ink">{meta.title}</h1>
+      <p className="mt-4 font-serif text-lg leading-relaxed text-ink-2">
+        This is one of the extra chapters written for this site, beyond the primer. Extra chapters are turned off. Turn them on to read it.
+      </p>
+      <ExtrasSwitch className="mt-6" />
+      <p className="mt-6 text-sm text-muted">
+        You can change this any time from the{' '}
+        <Link to="/#extras" className="text-accent hover:underline">
+          course overview
+        </Link>
+        .
+      </p>
+    </div>
+  )
 }
 
 function ChapterView({ meta }: { meta: ChapterMeta & { part: { id: string; title: string } } }) {
@@ -25,6 +52,7 @@ function ChapterView({ meta }: { meta: ChapterMeta & { part: { id: string; title
   const visit = useProgress((s) => s.visit)
   const setChapterDone = useProgress((s) => s.setChapterDone)
   const progress = useChapterProgress(meta)
+  const { chapters } = useVisibleContent()
 
   useEffect(() => {
     document.title = `${meta.title} | System Design Primer`
@@ -100,6 +128,14 @@ function ChapterView({ meta }: { meta: ChapterMeta & { part: { id: string; title
             {meta.title}
           </h1>
           {meta.alsoAsked && <p className="mt-2 text-muted">Also asked as: {meta.alsoAsked}</p>}
+          {meta.extra && (
+            <p className="mt-4 flex gap-2.5 rounded-lg border border-dashed border-rule px-3.5 py-2.5 text-sm text-ink-2">
+              <PenLine size={16} className="mt-0.5 shrink-0 text-muted" aria-hidden />
+              <span>
+                Written for this site, not part of The System Design Primer. The sources it draws on are listed under Further reading at the end.
+              </span>
+            </p>
+          )}
 
           {tracked && (
             <>

@@ -5,6 +5,7 @@
 //   source-repo/solutions/object_oriented_design/*/*.ipynb -> one chapter each
 //
 //   source-repo/README.md "About" sections (Anki, credits, license...) -> one untracked "About" chapter
+//   content-extra/*.md               -> extra chapters written for this site, hidden unless the reader turns them on
 //   source-repo/resources/flash_cards/*.apkg -> flashcard decks (see flashcards.mjs)
 //
 // Output:
@@ -29,9 +30,11 @@ import { visit, SKIP } from 'unist-util-visit'
 import { toString as mdToString } from 'mdast-util-to-string'
 import { toString as hastToString } from 'hast-util-to-string'
 import { buildDecks, decodeCamo, DECKS } from './flashcards.mjs'
+import { renderDiagram } from './diagram.mjs'
 
 const ROOT = path.resolve(import.meta.dirname, '..')
 const SRC = path.join(ROOT, 'source-repo')
+const EXTRA = path.join(ROOT, 'content-extra')
 const OUT_CONTENT = path.join(ROOT, 'public/content')
 const OUT_REPO = path.join(ROOT, 'public/repo')
 const OUT_MANIFEST = path.join(ROOT, 'src/generated/manifest.json')
@@ -108,6 +111,37 @@ const PARTS = [
       file: `solutions/object_oriented_design/${d}/${f}.ipynb`,
     })),
   },
+  // Not from the primer: written for this site from other sources (content-extra/).
+  {
+    id: 'extra-concepts',
+    title: 'Beyond the primer: concepts',
+    description: 'Topics the primer leaves out, from estimation to consensus. Written for this site.',
+    extra: [
+      'estimation',
+      'consistent-hashing',
+      'rate-limiting',
+      'unique-ids',
+      'event-streaming',
+      'reliability-patterns',
+      'distributed-transactions',
+      'consensus',
+      'realtime',
+      'observability',
+    ],
+  },
+  {
+    id: 'extra-designs',
+    title: 'Beyond the primer: design questions',
+    description: 'More worked interview questions, written for this site.',
+    extra: [
+      'design-key-value-store',
+      'design-notification-system',
+      'design-chat-system',
+      'design-autocomplete',
+      'design-video-streaming',
+      'design-file-sync',
+    ],
+  },
   {
     id: 'about',
     title: 'About the primer',
@@ -128,7 +162,7 @@ const SKIPPED_README_TARGETS = {
 }
 
 // Sections too small to track on their own; they're folded into the preceding section.
-const FOLD_INTO_PREVIOUS = /^(source\(s\)|disadvantage\(s\))/i
+const FOLD_INTO_PREVIOUS = /^(source\(s\)|disadvantage\(s\)|further reading)/i
 
 // Chapters long enough that "####" headings get their own trackable section too.
 const SPLIT_DEEPER = new Set(['database'])
@@ -439,6 +473,31 @@ function fileChapter({ id, file }) {
   return { id, title, nodes, file, sectionDepth: 2, ctx: { file, chapterId: id, localAnchors } }
 }
 
+/** An extra chapter: "##" headings become sections, shifted down a level to match the README chapters. */
+function extraChapter(id) {
+  const file = `content-extra/${id}.md`
+  const tree = parser.parse(fs.readFileSync(path.join(ROOT, file), 'utf8'))
+  slugHeadings(tree)
+  const titleIdx = tree.children.findIndex((n) => n.type === 'heading' && n.depth === 1)
+  if (titleIdx === -1) throw new Error(`${file} needs a "# Title" heading.`)
+  const title = mdToString(tree.children[titleIdx])
+  const nodes = tree.children.filter((_, i) => i !== titleIdx)
+  const localAnchors = new Set()
+  for (const n of nodes) {
+    visit(n, 'heading', (h) => {
+      localAnchors.add(h.data.id)
+      h.depth = Math.min(6, h.depth + 1)
+    })
+    visit(n, 'code', (c, index, parent) => {
+      if (c.lang !== 'diagram' || !parent) return
+      parent.children[index] = { type: 'html', value: renderDiagram(c.value, file) }
+    })
+  }
+  // A diagram can be a top-level block, which the visit above can't replace in place.
+  const body = nodes.map((n) => (n.type === 'code' && n.lang === 'diagram' ? { type: 'html', value: renderDiagram(n.value, file) } : n))
+  return { id, title, nodes: body, sectionDepth: 3, ctx: { file, chapterId: id, localAnchors } }
+}
+
 // ---------------------------------------------------------------------------
 // Build
 
@@ -448,6 +507,16 @@ fs.mkdirSync(OUT_CONTENT, { recursive: true })
 fs.mkdirSync(path.dirname(OUT_MANIFEST), { recursive: true })
 
 const readme = readmeChapters()
+
+function extraExists(id) {
+  if (fs.existsSync(path.join(EXTRA, `${id}.md`))) return true
+  console.warn(`  Skipping extra chapter "${id}": content-extra/${id}.md doesn't exist yet.`)
+  return false
+}
+const primerIds = new Set([...readme.keys(), ABOUT_ID, ...chapterByRepoFile.values()])
+for (const id of PARTS.flatMap((p) => p.extra ?? [])) {
+  if (primerIds.has(id)) throw new Error(`Extra chapter id "${id}" is already used by a primer chapter. Rename the file.`)
+}
 const manifest = { generatedAt: new Date().toISOString(), parts: [], decks: [] }
 const searchDocs = []
 
@@ -466,7 +535,9 @@ for (const part of PARTS) {
       })
     : part.about
       ? [aboutChapter(readme, part.about)]
-      : part.files.map(fileChapter)
+      : part.extra
+        ? part.extra.filter(extraExists).map(extraChapter)
+        : part.files.map(fileChapter)
   const rows = questionTables[part.id] ?? []
 
   const chapters = []
@@ -498,6 +569,7 @@ for (const part of PARTS) {
       title: src.title,
       ...(asked && asked.question !== src.title ? { alsoAsked: asked.question } : {}),
       ...(part.untracked ? { untracked: true } : {}),
+      ...(part.extra ? { extra: true } : {}),
       summary: useCaseSummary(src.nodes) || firstSentenceSummary(src.nodes),
       minutes: Math.max(1, Math.round(words / 220)),
       sections: sections.map((s) => ({ id: s.id, title: s.title })),
@@ -509,6 +581,7 @@ for (const part of PARTS) {
     title: part.title,
     description: part.description,
     ...(part.untracked ? { untracked: true } : {}),
+    ...(part.extra ? { extra: true } : {}),
     ...(unsolved.length ? { unsolved } : {}),
     chapters,
   })

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { sectionKey, totalSections, trackedChapters, type ChapterMeta } from './content'
+import { sectionKey, useVisibleContent, type ChapterMeta } from './content'
 
 type LastVisited = { chapterId: string; sectionId: string; at: number }
 
@@ -67,10 +67,12 @@ export function useChapterProgress(chapter: ChapterMeta) {
   return { done, total: chapter.sections.length, ratio: done / chapter.sections.length }
 }
 
+/** Progress across the chapters on show: the primer, plus the extra chapters when they're turned on. */
 export function useOverallProgress() {
   const completed = useProgress((s) => s.completed)
+  const { tracked, totalSections } = useVisibleContent()
   let done = 0
-  for (const c of trackedChapters) for (const sec of c.sections) if (completed[sectionKey(c.id, sec.id)]) done++
+  for (const c of tracked) for (const sec of c.sections) if (completed[sectionKey(c.id, sec.id)]) done++
   return { done, total: totalSections, ratio: done / totalSections }
 }
 
