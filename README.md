@@ -120,4 +120,6 @@ This is a static site. `vercel.json` turns on clean URLs, so `/learn/cache` serv
 
 ## License
 
-The content is © Donne Martin, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), and is credited in the site footer.
+- **The site's code** is released under the [MIT License](LICENSE), © 2026 Souvik Samanta.
+- **The primer's content** is © Donne Martin, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), and is credited in the site footer. It isn't stored in this repository; the build fetches it from the [original repo](https://github.com/donnemartin/system-design-primer).
+- **The extra chapters** in `content-extra/` are © 2026 Souvik Samanta, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
