@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { decks, type DeckMeta } from '../lib/content'
 import { formatWait, useDeckStats, useFlashcards } from '../lib/flashcards'
+import { useAccount } from '../lib/account'
 
 const NEW_PER_DAY_OPTIONS = [5, 10, 20, 50]
 
 export function FlashcardsPage() {
   const newPerDay = useFlashcards((s) => s.newPerDay)
   const setNewPerDay = useFlashcards((s) => s.setNewPerDay)
+  const signedIn = useAccount((s) => Boolean(s.email))
 
   useEffect(() => {
     document.title = 'Flashcards | System Design Primer'
@@ -43,7 +45,9 @@ export function FlashcardsPage() {
           ))}
         </select>
       </div>
-      <p className="mt-2 text-sm text-muted">Your review history is saved in this browser.</p>
+      <p className="mt-2 text-sm text-muted">
+        {signedIn ? 'Your review history syncs to your account.' : 'Your review history is saved in this browser.'}
+      </p>
     </div>
   )
 }

@@ -9,6 +9,7 @@ npm install
 npm run dev              # http://localhost:5173
 npm run build            # static site in dist/
 npm run verify-content   # check nothing from the primer went missing
+npm test                 # unit tests (progress sync merging)
 ```
 
 The first run clones the primer into `source-repo/` and generates the content. Building needs Node 22.13 or newer (the flashcard decks are read with `node:sqlite`).
@@ -17,13 +18,13 @@ The first run clones the primer into `source-repo/` and generates the content. B
 
 `scripts/build-content.mjs` reads the primer at build time and writes:
 
-| Output                            | What it is                                                     |
-| --------------------------------- | -------------------------------------------------------------- |
-| `src/generated/manifest.json`     | Course outline: parts, chapters, sections, reading time, decks |
-| `public/content/<chapter>.json`   | Pre-rendered HTML per chapter (syntax highlighting done here)  |
-| `public/content/flashcards/*.json` | The three Anki decks, cleaned up                              |
-| `public/content/search.json`      | Plain-text index used by search                                |
-| `public/repo/...`                 | Diagrams referenced by the content                             |
+| Output                             | What it is                                                     |
+| ---------------------------------- | -------------------------------------------------------------- |
+| `src/generated/manifest.json`      | Course outline: parts, chapters, sections, reading time, decks |
+| `public/content/<chapter>.json`    | Pre-rendered HTML per chapter (syntax highlighting done here)  |
+| `public/content/flashcards/*.json` | The three Anki decks, cleaned up                               |
+| `public/content/search.json`       | Plain-text index used by search                                |
+| `public/repo/...`                  | Diagrams referenced by the content                             |
 
 - README `##` topics become chapters, and `###` headings become trackable sections. Database also splits at `####`. "Disadvantage(s)" and "Source(s)" are folded into the section before them.
 - Solution READMEs and the OOD notebooks each become a chapter. Each solution also shows its full `.py` files under "Full source code".
@@ -39,9 +40,30 @@ To pull upstream changes, run `git -C source-repo pull`, then `npm run content` 
 
 ## Progress and flashcards
 
-Reading progress (`sdp-progress`) and flashcard history (`sdp-flashcards`) are stored in `localStorage`, so they stay in one browser. There is no account or sync.
+Reading progress (`sdp-progress`) and flashcard history (`sdp-flashcards`) are stored in `localStorage`. Without an account they stay in that browser. Signing in (optional, see below) syncs them across devices.
 
 Flashcards use an SM-2 style schedule like Anki's: Again (1 minute), Hard, Good and Easy, with intervals growing by each card's ease. New cards are limited per deck per day, 10 by default.
+
+## Accounts and sync (optional)
+
+When Supabase is configured, a **Sign in** button appears in the top bar. People sign in with an emailed link (no password), and their progress and flashcard history sync across devices. Without the configuration the button is hidden and everything stays in the browser, as before.
+
+Setup:
+
+1. Create a free project at [supabase.com](https://supabase.com).
+2. In the SQL editor, run [`supabase/migrations/20261012000000_progress.sql`](supabase/migrations/20261012000000_progress.sql). It creates the `progress` table with row-level security, so each user can read and write only their own row.
+3. Under **Authentication → URL Configuration**, set **Site URL** to where the site is hosted, and add `http://localhost:5173/**` and `https://<your-domain>/**` to **Redirect URLs**. The sign-in link returns people to the page they were on.
+4. Copy `.env.example` to `.env.local` and fill in the project URL and publishable key from **Project Settings → API**. Set the same two variables in your host (Vercel: Project → Settings → Environment Variables) and rebuild.
+
+Supabase's built-in email sender allows only a few sign-in emails per hour. That's fine for personal use. For more users, set up custom SMTP under **Authentication → Emails**.
+
+How sync works:
+
+- Each user has one row holding a JSON document of their progress and flashcard history ([`src/lib/syncDoc.ts`](src/lib/syncDoc.ts)). The browser's copy and the account's copy are merged item by item, and the newest change wins. Un-marking a section, clearing progress and resetting a deck are recorded with timestamps too, so they aren't undone by an older copy on another device.
+- Changes are saved about 1.5 seconds after they happen. Scrolling to a new section, which only updates "continue where you left off", is saved after 15 seconds. The page also saves when the tab is hidden, pulls other devices' changes when the tab comes back, and retries after reconnecting.
+- Writes are conditional on the row's `version`. If another device saved in between, the browser reads again, re-merges and retries, so neither device's changes are lost.
+- Signing in adds what's already in the browser to the account. Signing out saves first, then clears the browser's copy. If that save fails, the person stays signed in.
+- supabase-js is loaded only for people who are signed in or open the account menu.
 
 ## Deploying
 

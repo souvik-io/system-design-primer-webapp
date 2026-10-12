@@ -5,6 +5,7 @@ import { ArrowRight, Info } from 'lucide-react'
 import { chapterById, chapters, decks, parts, sectionHref, type ChapterMeta, type DeckMeta } from '../lib/content'
 import { useDeckStats } from '../lib/flashcards'
 import { useChapterProgress, useOverallProgress, useProgress } from '../lib/progress'
+import { useAccount } from '../lib/account'
 import { ProgressRing } from '../components/ProgressRing'
 import { SystemMap } from '../components/SystemMap'
 
@@ -158,13 +159,16 @@ function ResetProgress() {
   const [confirming, setConfirming] = useState(false)
   const overall = useOverallProgress()
   const reset = useProgress((s) => s.reset)
+  const signedIn = useAccount((s) => Boolean(s.email))
   if (overall.done === 0 && !confirming) return null
 
   return (
     <div className="mt-16 flex items-center gap-3 text-sm text-muted">
       {confirming ? (
         <>
-          <span>Clear all {overall.done} completed sections? This can't be undone.</span>
+          <span>
+            Clear all {overall.done} completed sections{signedIn ? ' on every device' : ''}? This can't be undone.
+          </span>
           <button
             type="button"
             className="rounded-md border border-rule px-2.5 py-1 font-medium text-ink hover:border-red-500 hover:text-red-600"

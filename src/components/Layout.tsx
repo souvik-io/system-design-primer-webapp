@@ -6,6 +6,7 @@ import { useOverallProgress } from '../lib/progress'
 import { ProgressRing } from './ProgressRing'
 import { Sidebar } from './Sidebar'
 import { SearchDialog } from './SearchDialog'
+import { AccountMenu } from './AccountMenu'
 
 export function Layout() {
   const [searchOpen, setSearchOpen] = useState(false)
@@ -68,6 +69,8 @@ export function Layout() {
             <ProgressRing ratio={overall.ratio} size={20} />
             <span className="tabular-nums">{Math.round(overall.ratio * 100)}% done</span>
           </Link>
+
+          <AccountMenu />
 
           <button
             type="button"

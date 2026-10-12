@@ -4,10 +4,17 @@ import { sectionKey, totalSections, trackedChapters, type ChapterMeta } from './
 
 type LastVisited = { chapterId: string; sectionId: string; at: number }
 
-type ProgressState = {
+export type ProgressData = {
   /** sectionKey -> time it was marked done */
   completed: Record<string, number>
+  /** sectionKey -> time it was marked not done, so the change wins over older copies when syncing */
+  removed: Record<string, number>
+  /** When all progress was last cleared */
+  resetAt: number
   lastVisited: LastVisited | null
+}
+
+type ProgressState = ProgressData & {
   setSectionDone: (chapterId: string, sectionId: string, done: boolean) => void
   setChapterDone: (chapter: ChapterMeta, done: boolean) => void
   visit: (chapterId: string, sectionId: string) => void
@@ -18,30 +25,41 @@ export const useProgress = create<ProgressState>()(
   persist(
     (set) => ({
       completed: {},
+      removed: {},
+      resetAt: 0,
       lastVisited: null,
-      setSectionDone: (chapterId, sectionId, done) =>
-        set((s) => {
-          const completed = { ...s.completed }
-          if (done) completed[sectionKey(chapterId, sectionId)] = Date.now()
-          else delete completed[sectionKey(chapterId, sectionId)]
-          return { completed }
-        }),
+      setSectionDone: (chapterId, sectionId, done) => set((s) => mark(s, [sectionKey(chapterId, sectionId)], done)),
       setChapterDone: (chapter, done) =>
-        set((s) => {
-          const completed = { ...s.completed }
-          for (const sec of chapter.sections) {
-            const key = sectionKey(chapter.id, sec.id)
-            if (done) completed[key] ??= Date.now()
-            else delete completed[key]
-          }
-          return { completed }
-        }),
+        set((s) =>
+          mark(
+            s,
+            chapter.sections.map((sec) => sectionKey(chapter.id, sec.id)),
+            done,
+          ),
+        ),
       visit: (chapterId, sectionId) => set({ lastVisited: { chapterId, sectionId, at: Date.now() } }),
-      reset: () => set({ completed: {}, lastVisited: null }),
+      reset: () => set({ completed: {}, removed: {}, resetAt: Date.now(), lastVisited: null }),
     }),
     { name: 'sdp-progress', version: 1 },
   ),
 )
+
+function mark(s: ProgressData, keys: string[], done: boolean) {
+  const now = Date.now()
+  const completed = { ...s.completed }
+  const removed = { ...s.removed }
+  for (const key of keys) {
+    if (done === Boolean(completed[key])) continue
+    if (done) {
+      completed[key] = now
+      delete removed[key]
+    } else {
+      delete completed[key]
+      removed[key] = now
+    }
+  }
+  return { completed, removed }
+}
 
 export function useChapterProgress(chapter: ChapterMeta) {
   const completed = useProgress((s) => s.completed)

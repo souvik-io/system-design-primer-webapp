@@ -17,6 +17,8 @@ export type CardState = {
   /** Successful reviews in a row */
   reps: number
   lapses: number
+  /** When the card was last rated, used to pick the newest copy when syncing */
+  at?: number
 }
 
 const MINUTE = 60_000
@@ -62,11 +64,17 @@ export function formatWait(ms: number) {
 
 const today = () => new Date().toLocaleDateString('en-CA') // YYYY-MM-DD in local time
 
-type FlashcardState = {
+export type FlashcardData = {
   cards: Record<string, CardState>
+  /** cardId -> time the card's history was reset */
+  removedCards: Record<string, number>
   /** New cards started per deck, for the current day only */
   introduced: { day: string; byDeck: Record<string, number> }
   newPerDay: number
+  newPerDayAt: number
+}
+
+type FlashcardState = FlashcardData & {
   rate: (deckId: string, cardId: string, rating: Rating) => CardState
   setNewPerDay: (n: number) => void
   resetDeck: (deck: DeckMeta) => void
@@ -76,26 +84,37 @@ export const useFlashcards = create<FlashcardState>()(
   persist(
     (set, get) => ({
       cards: {},
+      removedCards: {},
       introduced: { day: today(), byDeck: {} },
       newPerDay: 10,
+      newPerDayAt: 0,
       rate: (deckId, cardId, rating) => {
         const prev = get().cards[cardId]
-        const next = schedule(prev, rating, Date.now())
+        const now = Date.now()
+        const next = { ...schedule(prev, rating, now), at: now }
         set((s) => {
           const introduced = s.introduced.day === today() ? s.introduced : { day: today(), byDeck: {} }
+          const removedCards = { ...s.removedCards }
+          delete removedCards[cardId]
           return {
             cards: { ...s.cards, [cardId]: next },
+            removedCards,
             introduced: prev ? introduced : { ...introduced, byDeck: { ...introduced.byDeck, [deckId]: (introduced.byDeck[deckId] ?? 0) + 1 } },
           }
         })
         return next
       },
-      setNewPerDay: (n) => set({ newPerDay: n }),
+      setNewPerDay: (n) => set({ newPerDay: n, newPerDayAt: Date.now() }),
       resetDeck: (deck) =>
         set((s) => {
+          const now = Date.now()
           const cards = { ...s.cards }
-          for (const id of deck.cardIds) delete cards[id]
-          return { cards, introduced: { ...s.introduced, byDeck: { ...s.introduced.byDeck, [deck.id]: 0 } } }
+          const removedCards = { ...s.removedCards }
+          for (const id of deck.cardIds) {
+            delete cards[id]
+            removedCards[id] = now
+          }
+          return { cards, removedCards, introduced: { ...s.introduced, byDeck: { ...s.introduced.byDeck, [deck.id]: 0 } } }
         }),
     }),
     { name: 'sdp-flashcards', version: 1 },

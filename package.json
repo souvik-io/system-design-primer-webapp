@@ -11,9 +11,11 @@
     "prebuild": "node --disable-warning=ExperimentalWarning scripts/build-content.mjs",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "test": "node --disable-warning=ExperimentalWarning --test \"tests/*.test.ts\"",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"scripts/*.mjs\""
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
     "clsx": "^2.1.1",
     "lucide-react": "^1.55.0",
     "minisearch": "^7.2.0",
