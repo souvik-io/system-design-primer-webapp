@@ -2,6 +2,8 @@
 
 A React app that presents [The System Design Primer](https://github.com/donnemartin/system-design-primer) as a course: chapters split into sections, progress tracking, study plans with a daily goal, notes and bookmarks, interactive diagrams, spaced-repetition flashcards, search, and dark mode.
 
+**Live site: [system.tangentbyte.com](https://system.tangentbyte.com)**
+
 ## Run it
 
 ```bash
@@ -116,7 +118,7 @@ The app replaces the prerendered article as soon as it starts. Set `SITE_URL` (f
 
 ## Deploying
 
-This is a static site. `vercel.json` turns on clean URLs, so `/learn/cache` serves the prerendered `learn/cache.html`, and rewrites every other route to `app.html`. Other hosts need the same two rules. `npm run preview` behaves the same way. The app assumes it's served from the domain root.
+This is a static site. `vercel.json` turns on clean URLs, so `/learn/cache` serves the prerendered `learn/cache.html`, and rewrites every other route to the app shell, `app.html` (served at `/app` because of clean URLs). Other hosts need the same two rules. The live site runs on Vercel with `SITE_URL=https://system.tangentbyte.com`, and every push to `main` redeploys it. `npm run preview` behaves the same way. The app assumes it's served from the domain root.
 
 ## License
 
