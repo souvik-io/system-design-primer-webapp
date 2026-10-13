@@ -47,6 +47,15 @@ To pull upstream changes, run `git -C source-repo pull`, then `npm run content` 
 
 They're off by default. Readers turn them on with **Show extra chapters** on the home page, and the choice is saved in that browser (`sdp-settings`). When they're on, they appear in the course list, the sidebar and search, and count toward progress. When they're off, a link to one shows a page with the same switch.
 
+Four of them are always shown, because they're companions to primer chapters that are short and lean on old external links. Each sits right after the chapters it covers, and those chapters link to it:
+
+- **Scalability 101**, after "System design topics: start here": what Harvard's scalability lecture and the *Scalability for Dummies* series cover.
+- **Performance and latency 101**, after "Performance vs scalability" and "Latency vs throughput".
+- **CAP and consistency 101**, after "Availability vs consistency" and "Consistency patterns".
+- **Availability 101**, after "Availability patterns".
+
+They're fact-checked against the original sources and primary accounts (papers, post-mortems, official docs), with real examples. Readers can use the originals, the companions, or both.
+
 `scripts/build-content.mjs` builds them like the primer chapters. `##` headings become trackable sections, and fenced `diagram` blocks are drawn as SVG that follows the theme ([`scripts/diagram.mjs`](scripts/diagram.mjs)). See [`content-extra/README.md`](content-extra/README.md) for the format. `npm run verify-content` checks their internal links too.
 
 ## Interactive diagrams

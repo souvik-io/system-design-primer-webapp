@@ -14,6 +14,8 @@ export type ChapterMeta = {
   untracked?: boolean
   /** Written for this site, not part of the primer. Hidden unless the reader turns extra chapters on. */
   extra?: boolean
+  /** Written for this site, but always shown, next to the primer chapter it accompanies */
+  companion?: boolean
 }
 export type Part = {
   id: string

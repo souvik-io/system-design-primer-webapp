@@ -4,6 +4,8 @@ Chapters written for this site to cover topics The System Design Primer doesn't.
 
 These are original writing, not copied or closely paraphrased from any book or site. Each chapter lists what it drew on under "Further reading". The curriculum order lives in the `EXTRA_PARTS` array in `scripts/build-content.mjs`.
 
+A chapter can also be a **companion** to a primer chapter: always shown, placed in a primer part, and marked "Written for this site". `scalability-101` is one, a beginner's walkthrough of the lecture and article that "System design topics: start here" points to. Add it to a part's `readme` list as `{ companion: '<chapter-id>' }`, and add a note to the primer chapter that links to it with `PRIMER_NOTES` in the same script.
+
 ## Writing a chapter
 
 One markdown file per chapter: `content-extra/<chapter-id>.md`.

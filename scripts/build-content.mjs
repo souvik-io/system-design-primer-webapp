@@ -55,13 +55,29 @@ const PARTS = [
     id: 'start',
     title: 'Start here',
     description: 'Why system design matters, how much to study, and how to run an interview answer.',
-    readme: ['motivation', 'study-guide', 'how-to-approach-a-system-design-interview-question', 'system-design-topics-start-here'],
+    readme: [
+      'motivation',
+      'study-guide',
+      'how-to-approach-a-system-design-interview-question',
+      'system-design-topics-start-here',
+      // Written for this site (content-extra/), but always shown: it retells the lecture and article the chapter above points to.
+      { companion: 'scalability-101' },
+    ],
   },
   {
     id: 'trade-offs',
     title: 'Core trade-offs',
     description: 'The tensions every design balances: speed, scale, availability and consistency.',
-    readme: ['performance-vs-scalability', 'latency-vs-throughput', 'availability-vs-consistency', 'consistency-patterns', 'availability-patterns'],
+    readme: [
+      'performance-vs-scalability',
+      'latency-vs-throughput',
+      { companion: 'performance-and-latency-101' },
+      'availability-vs-consistency',
+      'consistency-patterns',
+      { companion: 'cap-and-consistency-101' },
+      'availability-patterns',
+      { companion: 'availability-101' },
+    ],
   },
   {
     id: 'building-blocks',
@@ -177,6 +193,55 @@ function widgetNode(name, where) {
   if (!WIDGET_NAMES.has(name)) throw new Error(`${where}: no interactive diagram called "${name}". Known: ${[...WIDGET_NAMES].join(', ')}.`)
   return { type: 'html', value: `<div class="widget-slot" data-widget="${name}"></div>` }
 }
+
+// Notes added to primer chapters pointing at the companion chapter written for this site. Each goes before
+// the heading `before`, or at the top of the chapter (after its first heading, if it opens with one).
+const PRIMER_NOTES = [
+  {
+    chapter: 'system-design-topics-start-here',
+    companion: 'scalability-101',
+    before: 'step-1-review-the-scalability-video-lecture',
+    markdown:
+      '> **Prefer to read?** [Scalability 101](/learn/scalability-101) is a chapter written for this site that covers both sources below, the lecture and the article, in one read. ' +
+      'It follows a made-up app from one server to millions of users, with real examples from Stack Overflow, Pokémon GO, Facebook, Instagram and Ticketmaster. ' +
+      'Read it in place of the originals, or alongside them.',
+  },
+  {
+    chapter: 'performance-vs-scalability',
+    companion: 'performance-and-latency-101',
+    markdown:
+      '> **Want more depth?** [Performance and latency 101](/learn/performance-and-latency-101) is a chapter written for this site that covers this chapter and the next. ' +
+      "It explains why adding servers stops helping (Amdahl's law), what went wrong at HealthCare.gov's launch, and how to tell the two kinds of problem apart.",
+  },
+  {
+    chapter: 'latency-vs-throughput',
+    companion: 'performance-and-latency-101',
+    markdown:
+      '> **Want more depth?** [Performance and latency 101](/learn/performance-and-latency-101) is a chapter written for this site that goes past these definitions: ' +
+      "batching, why latency climbs as servers get busy, Little's Law, tail latency from Google's research, and what slower pages cost in Google's own experiments.",
+  },
+  {
+    chapter: 'availability-vs-consistency',
+    companion: 'cap-and-consistency-101',
+    markdown:
+      '> **Want more depth?** [CAP and consistency 101](/learn/cap-and-consistency-101) is a chapter written for this site that covers this chapter and the next. ' +
+      'It explains what CAP\'s three letters mean precisely, why "pick two of three" misleads, and how Amazon, Google and GitHub made the trade-off in real systems.',
+  },
+  {
+    chapter: 'consistency-patterns',
+    companion: 'cap-and-consistency-101',
+    markdown:
+      '> **Want more depth?** [CAP and consistency 101](/learn/cap-and-consistency-101) is a chapter written for this site that covers these patterns in more depth, ' +
+      'along with the guarantees a single user can rely on (such as read-your-writes), quorums, and a guide to the talk this chapter is based on.',
+  },
+  {
+    chapter: 'availability-patterns',
+    companion: 'availability-101',
+    markdown:
+      '> **Want more depth?** [Availability 101](/learn/availability-101) is a chapter written for this site that covers these patterns with sources: ' +
+      'how availability is measured (SLOs and error budgets), split brain and fencing, and why redundant copies still fail together, from the post-mortems of Facebook, AWS and GitHub.',
+  },
+]
 
 // Chapters long enough that "####" headings get their own trackable section too.
 const SPLIT_DEEPER = new Set(['database'])
@@ -403,7 +468,7 @@ function readmeChapters() {
   }
 
   // Map every README heading to where it lives in the app.
-  const wanted = new Set(PARTS.flatMap((p) => p.readme ?? []))
+  const wanted = new Set(PARTS.flatMap((p) => p.readme ?? []).filter((id) => typeof id === 'string'))
   const about = new Set(PARTS.flatMap((p) => p.about ?? []))
   for (const ch of chapters.values()) {
     const inAbout = about.has(ch.id)
@@ -537,7 +602,8 @@ function extraExists(id) {
   return false
 }
 const primerIds = new Set([...readme.keys(), ABOUT_ID, ...chapterByRepoFile.values()])
-for (const id of PARTS.flatMap((p) => p.extra ?? [])) {
+const companionIds = PARTS.flatMap((p) => p.readme ?? []).flatMap((e) => (typeof e === 'string' ? [] : [e.companion]))
+for (const id of [...PARTS.flatMap((p) => p.extra ?? []), ...companionIds]) {
   if (primerIds.has(id)) throw new Error(`Extra chapter id "${id}" is already used by a primer chapter. Rename the file.`)
 }
 const manifest = { generatedAt: new Date().toISOString(), parts: [], decks: [] }
@@ -551,16 +617,26 @@ const questionTables = {
 
 for (const part of PARTS) {
   const sources = part.readme
-    ? part.readme.map((id) => {
-        const ch = readme.get(id)
-        if (!ch) throw new Error(`README section "${id}" not found — did the upstream headings change?`)
-        for (const w of PRIMER_WIDGETS.filter((w) => w.chapter === id)) {
-          const at = ch.nodes.findIndex((n) => n.type === 'heading' && n.data.id === w.before)
-          if (at === -1) throw new Error(`Interactive diagram "${w.widget}" goes before heading "${w.before}" in ${id}, which doesn't exist.`)
-          ch.nodes.splice(at, 0, widgetNode(w.widget, `README ${id}`))
-        }
-        return { ...ch, sectionDepth: 3, maxSectionDepth: SPLIT_DEEPER.has(id) ? 4 : 3, ctx: { file: 'README.md', chapterId: id } }
-      })
+    ? part.readme
+        .map((id) => {
+          if (typeof id !== 'string') return extraExists(id.companion) ? { ...extraChapter(id.companion), companion: true } : null
+          const ch = readme.get(id)
+          if (!ch) throw new Error(`README section "${id}" not found — did the upstream headings change?`)
+          for (const w of PRIMER_WIDGETS.filter((w) => w.chapter === id)) {
+            const at = ch.nodes.findIndex((n) => n.type === 'heading' && n.data.id === w.before)
+            if (at === -1) throw new Error(`Interactive diagram "${w.widget}" goes before heading "${w.before}" in ${id}, which doesn't exist.`)
+            ch.nodes.splice(at, 0, widgetNode(w.widget, `README ${id}`))
+          }
+          for (const n of PRIMER_NOTES.filter((n) => n.chapter === id && fs.existsSync(path.join(EXTRA, `${n.companion}.md`)))) {
+            const at = n.before
+              ? ch.nodes.findIndex((node) => node.type === 'heading' && node.data.id === n.before)
+              : Number(ch.nodes[0]?.type === 'heading')
+            if (at === -1) throw new Error(`A note goes before heading "${n.before}" in ${id}, which doesn't exist.`)
+            ch.nodes.splice(at, 0, ...parser.parse(n.markdown).children)
+          }
+          return { ...ch, sectionDepth: 3, maxSectionDepth: SPLIT_DEEPER.has(id) ? 4 : 3, ctx: { file: 'README.md', chapterId: id } }
+        })
+        .filter(Boolean)
     : part.about
       ? [aboutChapter(readme, part.about)]
       : part.extra
@@ -598,6 +674,7 @@ for (const part of PARTS) {
       ...(asked && asked.question !== src.title ? { alsoAsked: asked.question } : {}),
       ...(part.untracked ? { untracked: true } : {}),
       ...(part.extra ? { extra: true } : {}),
+      ...(src.companion ? { companion: true } : {}),
       summary: useCaseSummary(src.nodes) || firstSentenceSummary(src.nodes),
       minutes: Math.max(1, Math.round(words / 220)),
       sections: sections.map((s) => ({ id: s.id, title: s.title })),

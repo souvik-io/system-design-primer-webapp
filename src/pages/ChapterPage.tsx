@@ -144,7 +144,7 @@ function ChapterView({ meta }: { meta: ChapterMeta & { part: { id: string; title
             {meta.title}
           </h1>
           {meta.alsoAsked && <p className="mt-2 text-muted">Also asked as: {meta.alsoAsked}</p>}
-          {meta.extra && (
+          {(meta.extra || meta.companion) && (
             <p className="mt-4 flex gap-2.5 rounded-lg border border-dashed border-rule px-3.5 py-2.5 text-sm text-ink-2">
               <PenLine size={16} className="mt-0.5 shrink-0 text-muted" aria-hidden />
               <span>

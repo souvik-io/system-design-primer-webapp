@@ -92,8 +92,10 @@ const md = (html) => String(toMarkdown.processSync(html)).trim()
 const chapters = manifest.parts.flatMap((part) => part.chapters.map((c) => ({ ...c, part })))
 const load = (id) => JSON.parse(fs.readFileSync(path.join(DIST, 'content', `${id}.json`), 'utf8'))
 
+const written = (c) => c.extra || c.companion
+
 function sourceNote(c) {
-  return c.extra
+  return written(c)
     ? `Written for this site, not part of ${PRIMER}. The sources it draws on are listed under Further reading.`
     : `From [${PRIMER}](${PRIMER_URL}) by Donne Martin, licensed under CC BY 4.0, arranged into chapters for this site.`
 }
@@ -149,7 +151,7 @@ for (const [i, c] of chapters.entries()) {
     nav,
     `<p><a href="/#${c.part.id}">${esc(c.part.title)}</a></p>`,
     `<h1>${esc(c.title)}</h1>`,
-    c.extra ? `<p><em>${esc(sourceNote(c))}</em></p>` : '',
+    written(c) ? `<p><em>${esc(sourceNote(c))}</em></p>` : '',
     ...body.sections.map((s) => `<section class="article">${s.html}</section>`),
     ...body.sourceFiles.map((f) => `<section class="article"><h3>${esc(f.name)}</h3>${f.html}</section>`),
     `<p>${prev ? `Previous: <a href="/learn/${prev.id}">${esc(prev.title)}</a>` : ''}${prev && next ? ' · ' : ''}${
@@ -172,17 +174,17 @@ for (const [i, c] of chapters.entries()) {
 // ---------------------------------------------------------------------------
 // Index pages
 
-const primerCount = chapters.filter((c) => !c.extra).length
+const primerCount = chapters.filter((c) => !written(c)).length
 const extraCount = chapters.length - primerCount
 const intro =
   `Donne Martin's ${PRIMER} (CC BY 4.0), the guide to designing large-scale systems, reorganized into ${primerCount} chapters: ` +
   `core trade-offs, building blocks from DNS to databases, and worked system design and object-oriented design interview questions. ` +
-  `Also ${extraCount} extra chapters written for this site on topics the primer doesn't cover, such as rate limiting, consistent hashing and consensus.`
+  `Also ${extraCount} chapters written for this site: companions that explain the primer's opening topics and trade-offs in more depth (Scalability 101, Performance and latency 101, CAP and consistency 101, Availability 101), and topics the primer doesn't cover, such as rate limiting, consistent hashing and consensus.`
 
 const llms = [`# ${PRIMER}, as a course`, `> ${intro}`]
 llms.push(
   `Each chapter is available as Markdown at \`/learn/<chapter-id>.md\`, and the whole course is in one file at [llms-full.txt](${abs('/llms-full.txt')}). ` +
-    `Chapters in the "Beyond the primer" parts are written for this site, not by the primer's author.`,
+    `The chapters ending in "101" and those in the "Beyond the primer" parts are written for this site, not by the primer's author.`,
 )
 for (const part of manifest.parts) {
   const optional = part.untracked
