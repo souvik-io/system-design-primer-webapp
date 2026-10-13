@@ -87,14 +87,19 @@ const PARTS = [
     readme: [
       'domain-name-system',
       'content-delivery-network',
+      { companion: 'dns-and-cdn-101' },
       'load-balancer',
       'reverse-proxy-web-server',
       'application-layer',
+      { companion: 'reverse-proxy-and-api-gateway-101' },
       'database',
+      { companion: 'database-101' },
       'cache',
+      { companion: 'cache-101' },
       'asynchronism',
       'communication',
       'security',
+      { companion: 'security-101' },
     ],
   },
   {
@@ -144,6 +149,7 @@ const PARTS = [
       'consensus',
       'realtime',
       'observability',
+      'batch-processing',
     ],
   },
   {
@@ -151,6 +157,13 @@ const PARTS = [
     title: 'Beyond the primer: design questions',
     description: 'More worked interview questions, written for this site.',
     extra: [
+      'design-url-shortener',
+      'design-social-news-feed',
+      'design-gaming-leaderboard',
+      'design-payment-system',
+      'design-collaborative-document',
+      'design-search-engine',
+      'design-recommendation-system',
       'design-key-value-store',
       'design-notification-system',
       'design-chat-system',
@@ -241,6 +254,55 @@ const PRIMER_NOTES = [
     markdown:
       '> **Want more depth?** [Availability 101](/learn/availability-101) is a chapter written for this site that covers these patterns with sources: ' +
       'how availability is measured (SLOs and error budgets), split brain and fencing, and why redundant copies still fail together, from the post-mortems of Facebook, AWS and GitHub.',
+  },
+  {
+    chapter: 'domain-name-system',
+    companion: 'dns-and-cdn-101',
+    markdown:
+      '> **Want more depth?** [DNS and CDN 101](/learn/dns-and-cdn-101) is a chapter written for this site that covers this topic and the next: ' +
+      'the complete 4-step recursive DNS resolution flow, record types (A, CNAME, ALIAS), Anycast BGP routing, and why DNS failover is often too slow for production.',
+  },
+  {
+    chapter: 'content-delivery-network',
+    companion: 'dns-and-cdn-101',
+    markdown:
+      '> **Want more depth?** [DNS and CDN 101](/learn/dns-and-cdn-101) is a chapter written for this site that covers modern edge architecture: ' +
+      'tiered caching with Origin Shielding, Cache-Control directives (s-maxage, stale-while-revalidate), surrogate-key instant purges, and edge compute.',
+  },
+  {
+    chapter: 'reverse-proxy-web-server',
+    companion: 'reverse-proxy-and-api-gateway-101',
+    markdown:
+      '> **Want more depth?** [Reverse proxy, API gateway, and microservices 101](/learn/reverse-proxy-and-api-gateway-101) is a chapter written for this site that covers this topic and the next: ' +
+      'how non-blocking event loops (epoll/kqueue) solved the C10K problem, the Backend-for-Frontend (BFF) pattern, and protocol translation (HTTP to gRPC).',
+  },
+  {
+    chapter: 'application-layer',
+    companion: 'reverse-proxy-and-api-gateway-101',
+    markdown:
+      '> **Want more depth?** [Reverse proxy, API gateway, and microservices 101](/learn/reverse-proxy-and-api-gateway-101) is a chapter written for this site that covers modern service architectures: ' +
+      'client-side vs server-side service discovery, sidecar proxies (Envoy), and how the Service Mesh eliminated language-specific networking libraries.',
+  },
+  {
+    chapter: 'security',
+    companion: 'security-101',
+    markdown:
+      '> **Want more depth?** [Security 101](/learn/security-101) is a chapter written for this site that covers this topic with modern standards: ' +
+      'authentication (OAuth 2.0, OpenID Connect, JWT vs sessions), mTLS, authorization (RBAC vs ABAC), envelope encryption with KMS, API gateway security, and defense in depth.',
+  },
+  {
+    chapter: 'database',
+    companion: 'database-101',
+    markdown:
+      '> **Want more depth?** [Database 101](/learn/database-101) is a chapter written for this site that covers the storage engine beneath the SQL: ' +
+      'B-Trees vs LSM-Trees (WAL, MemTable, SSTables, Bloom filters, compaction), clustered vs covering indexes, sharding anti-patterns, and Google Spanner TrueTime.',
+  },
+  {
+    chapter: 'cache',
+    companion: 'cache-101',
+    markdown:
+      '> **Want more depth?** [Cache 101](/learn/cache-101) is a chapter written for this site that covers production caching realities: ' +
+      'cache stampede (thundering herd & XFetch), cache avalanche (jitter), cache penetration (Bloom filters), Redis Cluster 16,384 hash slots, and CDC invalidation via Debezium and Kafka.',
   },
 ]
 
@@ -434,7 +496,8 @@ function rehypeRewrite() {
       const p = node.properties
       if (node.tagName === 'a' && typeof p.href === 'string') {
         p.href = rewriteHref(p.href, ctx)
-        if (/^https?:/.test(p.href)) {
+        // External links, and the standalone interactive diagrams in public/diagrams/, open in a new tab
+        if (/^https?:/.test(p.href) || p.href.startsWith('/diagrams/')) {
           p.target = '_blank'
           p.rel = ['noopener', 'noreferrer']
         }

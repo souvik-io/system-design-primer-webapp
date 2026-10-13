@@ -283,6 +283,7 @@ body {
   }
   .article .diagram-scroll {
     overflow-x: auto;
+    cursor: zoom-in;
     border: 1px solid var(--rule);
     border-radius: 8px;
     background: var(--surface);
@@ -294,6 +295,21 @@ body {
     max-width: 100%;
     height: auto;
     min-width: 34rem;
+    font-family: var(--font-sans);
+  }
+  /* A diagram opened full size (src/components/useArticleClicks.tsx) */
+  .diagram-zoom {
+    max-height: 90vh;
+    overflow: auto;
+    border-radius: 8px;
+    background: var(--surface);
+    padding: 16px;
+    cursor: zoom-out;
+  }
+  .diagram-zoom svg {
+    display: block;
+    width: 100%;
+    height: auto;
     font-family: var(--font-sans);
   }
   .article .diagram figcaption {

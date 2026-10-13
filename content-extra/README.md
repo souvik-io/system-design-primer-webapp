@@ -64,6 +64,10 @@ q --> w
 - Columns and rows start at 0, and halves like `1.5` are allowed. Up to 5 columns fit the page.
 - Write `\n` in a label for a line break. Keep lines under about 18 characters.
 - Edges: `a -> b`, `a <-> b`, `a --> b` (dashed, for async work), each with an optional `: label`. Edges are straight lines, so lay nodes out so lines don't cross other boxes.
+- Draw at most one edge between two nodes: a second one is drawn on top of the first. A step-by-step exchange (request, reply, retry) belongs in a numbered list, not in edges.
+- Keep edge labels short (under about 26 characters) and leave the boxes far enough apart that the line shows on both sides of its label.
+- Write formulas and arithmetic as plain text (`10M ÷ 86,400 s ≈ 116 a second`), not LaTeX: the site has no math renderer.
+- `npm run lint-diagrams` flags diagrams that will draw badly: too wide, overlapping boxes, doubled edges, lines through boxes, and labels that cover lines or each other. Readers can click any diagram to open it full size.
 
 ## Interactive diagrams
 

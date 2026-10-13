@@ -86,7 +86,7 @@ title: The storage rejects a write carrying an older fencing token
 [lock] Lock service @ 1,0
 [c1] Worker A\ndelayed, token 117 @ 0,1
 [c2] Worker B\ntoken 118 @ 2,1
-[s:store] Storage\nhighest seen: 118 @ 1,2
+[s:store] Storage\nhighest seen: 118 @ 1,2.3
 lock -> c1 : grant 117
 lock -> c2 : grant 118
 c2 -> s : write, 118 OK

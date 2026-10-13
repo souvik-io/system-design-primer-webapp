@@ -3,7 +3,7 @@
 // (see .diagram in src/index.css), so diagrams follow the light and dark theme.
 
 const COL = 160 // grid column width
-const ROW = 96 // grid row height
+const ROW = 120 // grid row height
 const BOX_W = 136
 const LINE = 16 // label line height
 const PAD = 12

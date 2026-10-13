@@ -87,12 +87,12 @@ In [active-passive](/learn/availability-patterns#active-passive) fail-over, the 
 title: Active-passive. Only the active node serves traffic.
 [c:client] Checkouts @ 0,0.5
 [vip] Shared IP\nor DNS name @ 1,0.5
-[a] Active\nTillpay API @ 2.5,0
-[p] Standby\nTillpay API @ 2.5,1
+[a] Active\nTillpay API @ 2.7,0
+[p] Standby\nTillpay API @ 2.7,1.2
 [db:store] Database @ 4,0.5
 c -> vip
 vip -> a
-vip --> p : after failover
+vip --> p : on failover
 a <-> p : heartbeats
 a -> db
 ```
