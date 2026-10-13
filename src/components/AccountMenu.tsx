@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import clsx from 'clsx'
 import { Cloud, CloudAlert, CloudCheck, CloudOff, CloudUpload, LoaderCircle } from 'lucide-react'
-import { loadAccounts, sendSignInLink, signOut, syncAvailable, syncNow, useAccount, type SyncStatus } from '../lib/account'
+import { loadAccounts, signInWithPassword, signOut, syncAvailable, syncNow, useAccount, type SyncStatus } from '../lib/account'
 
 export function AccountMenu() {
   const [open, setOpen] = useState(false)
@@ -82,7 +82,8 @@ const STATUS_TEXT: Record<SyncStatus, string> = {
 function SignedOut() {
   const linkError = useAccount((s) => s.error)
   const [email, setEmail] = useState('')
-  const [sentTo, setSentTo] = useState<string | null>(null)
+  const [password, setPassword] = useState('')
+  const [create, setCreate] = useState(false)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -91,27 +92,12 @@ function SignedOut() {
     setSending(true)
     setError(null)
     try {
-      await sendSignInLink(email.trim())
-      setSentTo(email.trim())
+      await signInWithPassword(email.trim(), password, create)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "The link wasn't sent. Try again.")
+      setError(err instanceof Error ? err.message : "That didn't work. Try again.")
     } finally {
       setSending(false)
     }
-  }
-
-  if (sentTo) {
-    return (
-      <div className="text-sm">
-        <h2 className="text-base font-semibold text-ink">Check your email</h2>
-        <p className="mt-2 text-ink-2">
-          We sent a sign-in link to <span className="font-medium text-ink">{sentTo}</span>. Open it on this device to finish signing in.
-        </p>
-        <button type="button" className="mt-4 text-accent hover:underline" onClick={() => setSentTo(null)}>
-          Use a different email
-        </button>
-      </div>
-    )
   }
 
   return (
@@ -135,6 +121,19 @@ function SignedOut() {
         placeholder="you@example.com"
         className="mt-1.5 w-full rounded-lg border border-rule bg-paper px-3 py-2 text-ink placeholder:text-muted focus:border-accent focus:outline-none"
       />
+      <label htmlFor="account-password" className="mt-3 block font-medium text-ink">
+        Password
+      </label>
+      <input
+        id="account-password"
+        type="password"
+        required
+        minLength={6}
+        autoComplete={create ? 'new-password' : 'current-password'}
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="mt-1.5 w-full rounded-lg border border-rule bg-paper px-3 py-2 text-ink placeholder:text-muted focus:border-accent focus:outline-none"
+      />
       {error && <p className="mt-2 text-red-600 dark:text-red-400">{error}</p>}
       <button
         type="submit"
@@ -142,9 +141,18 @@ function SignedOut() {
         className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 font-medium text-on-accent hover:opacity-90 disabled:opacity-60"
       >
         {sending && <LoaderCircle size={16} className="animate-spin" />}
-        Email me a sign-in link
+        {create ? 'Create account' : 'Sign in'}
       </button>
-      <p className="mt-3 text-muted">No password needed.</p>
+      <button
+        type="button"
+        className="mt-3 text-accent hover:underline"
+        onClick={() => {
+          setCreate((c) => !c)
+          setError(null)
+        }}
+      >
+        {create ? 'Have an account? Sign in' : 'New here? Create an account'}
+      </button>
     </form>
   )
 }

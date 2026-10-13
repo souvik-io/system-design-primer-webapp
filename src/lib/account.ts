@@ -83,10 +83,12 @@ export function loadAccounts() {
   if (syncAvailable) void start()
 }
 
-export async function sendSignInLink(email: string) {
+/** Signs in with email and password, or creates the account first. Expects "Confirm email" to be off in Supabase. */
+export async function signInWithPassword(email: string, password: string, create: boolean) {
   const sb = await start()
-  const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname } })
+  const { data, error } = create ? await sb.auth.signUp({ email, password }) : await sb.auth.signInWithPassword({ email, password })
   if (error) throw error
+  if (!data.session) throw new Error('The account was created but needs email confirmation. Turn off "Confirm email" in Supabase.')
   useAccount.setState({ error: null })
 }
 
