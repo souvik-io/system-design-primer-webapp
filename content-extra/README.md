@@ -76,3 +76,22 @@ hash-ring
 ````
 
 The diagrams are React components in `src/widgets/` (`hash-ring`, `cache-strategies`, `replication`, `rate-limiter`). A new one needs a component there, an entry in `src/widgets/Widgets.tsx`, and its name added to `WIDGET_NAMES` in `scripts/build-content.mjs`. Primer chapters can't be edited, so their diagrams are placed by `PRIMER_WIDGETS` in the same script.
+
+## Flashcard decks
+
+`content-extra/flashcards/<deck-id>.md` holds a deck written for this site. Its title and description live in `SITE_DECKS` in `scripts/build-content.mjs`, and `extra: true` there shows the deck only when extra chapters are turned on.
+
+```markdown
+<!-- chapter: cache -->
+
+## Why does a cache help a read-heavy app more than a write-heavy one?
+
+<!-- /learn/cache#database-caching -->
+
+The answer, in a short paragraph, a few bullets or a small table.
+```
+
+- Each `## ` heading is a card's front. The comment right after it links to the chapter or section that teaches the answer, and the card shows it as a link. Other comments are ignored.
+- Take every fact on a card from the chapter it links to, so the deck never says more than the course does.
+- A card's id is its question's slug, so rewording a question resets that card's review history.
+- `npm run verify-content` checks the links on every card.

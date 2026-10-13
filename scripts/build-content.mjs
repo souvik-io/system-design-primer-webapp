@@ -7,6 +7,7 @@
 //   source-repo/README.md "About" sections (Anki, credits, license...) -> one untracked "About" chapter
 //   content-extra/*.md               -> extra chapters written for this site, hidden unless the reader turns them on
 //   source-repo/resources/flash_cards/*.apkg -> flashcard decks (see flashcards.mjs)
+//   content-extra/flashcards/*.md    -> more decks written for this site (SITE_DECKS)
 //
 // Output:
 //   src/generated/manifest.json   curriculum outline (imported by the app)
@@ -240,6 +241,38 @@ const PRIMER_NOTES = [
     markdown:
       '> **Want more depth?** [Availability 101](/learn/availability-101) is a chapter written for this site that covers these patterns with sources: ' +
       'how availability is measured (SLOs and error budgets), split brain and fencing, and why redundant copies still fail together, from the post-mortems of Facebook, AWS and GitHub.',
+  },
+]
+
+// Decks written for this site, after the primer's three: content-extra/flashcards/<id>.md. An `extra` deck
+// covers the extra chapters, so it's shown only when they are.
+const SITE_DECKS = [
+  {
+    id: 'foundations',
+    title: 'Start here and core trade-offs',
+    description: 'Interview steps, scaling, performance and latency, CAP and consistency, and availability, including the 101 chapters.',
+  },
+  {
+    id: 'building-blocks',
+    title: 'Building blocks and numbers',
+    description: 'DNS to security, the databases and caches in depth, plus the powers of two and latency numbers.',
+  },
+  {
+    id: 'design-decisions',
+    title: 'Design questions, decision by decision',
+    description: 'The key choices, numbers and trade-offs inside each worked system and object-oriented design.',
+  },
+  {
+    id: 'beyond-concepts',
+    title: 'Beyond the primer: concepts',
+    description: 'Estimation, consistent hashing, rate limiting, IDs, streaming, reliability, transactions, consensus, real time and observability.',
+    extra: true,
+  },
+  {
+    id: 'beyond-designs',
+    title: 'Beyond the primer: design questions',
+    description: 'The decisions inside the key-value store, notification, chat, autocomplete, video streaming and file sync designs.',
+    extra: true,
   },
 ]
 
@@ -586,6 +619,39 @@ function extraChapter(id) {
   return { id, title, nodes: body, sectionDepth: 3, ctx: { file, chapterId: id, localAnchors } }
 }
 
+/**
+ * A deck written for this site: each "## " heading is a card's front, followed by an
+ * <!-- /learn/... --> comment linking to where it's taught, then the answer.
+ */
+async function siteDeckCards(deckId, file) {
+  const tree = parser.parse(fs.readFileSync(path.join(ROOT, file), 'utf8'))
+  const ctx = { file, chapterId: null }
+  const slugger = new GithubSlugger()
+  const cards = []
+  let card = null
+  for (const node of tree.children) {
+    if (node.type === 'heading' && node.depth === 2) {
+      const front = mdToString(node).trim()
+      // The id is the question's slug, so rewording a question starts its schedule afresh.
+      card = { id: `${deckId}/${slugger.slug(front)}`, front, href: undefined, nodes: [] }
+      cards.push(card)
+      continue
+    }
+    const link = node.type === 'html' && node.value.match(/^<!--\s*(\/learn\/\S+)\s*-->$/)
+    if (link && card && !card.href && !card.nodes.length) card.href = link[1]
+    else if (node.type === 'html' && /^<!--[\s\S]*-->$/.test(node.value.trim())) continue
+    else if (card) card.nodes.push(node)
+    else throw new Error(`${file}: content before the first "## " card.`)
+  }
+  const out = []
+  for (const c of cards) {
+    if (!c.nodes.length) throw new Error(`${file}: card "${c.front}" has no answer.`)
+    const { html } = await renderSection({ id: c.id, title: c.front, nodes: c.nodes }, ctx)
+    out.push({ id: c.id, front: c.front, back: html, ...(c.href ? { href: c.href } : {}) })
+  }
+  return out
+}
+
 // ---------------------------------------------------------------------------
 // Build
 
@@ -706,6 +772,18 @@ manifest.decks = await buildDecks({
     return url?.startsWith('/') ? url : undefined
   },
 })
+
+for (const deck of SITE_DECKS) {
+  const file = `content-extra/flashcards/${deck.id}.md`
+  if (!fs.existsSync(path.join(ROOT, file))) {
+    console.warn(`  Skipping deck "${deck.id}": ${file} doesn't exist yet.`)
+    continue
+  }
+  if (manifest.decks.some((d) => d.id === deck.id)) throw new Error(`Deck id "${deck.id}" is already used. Rename it.`)
+  const cards = await siteDeckCards(deck.id, file)
+  fs.writeFileSync(path.join(OUT_CONTENT, 'flashcards', `${deck.id}.json`), JSON.stringify({ id: deck.id, title: deck.title, cards }))
+  manifest.decks.push({ ...deck, site: true, cardIds: cards.map((c) => c.id) })
+}
 
 for (const repoPath of copiedImages) {
   const dest = path.join(OUT_REPO, repoPath)

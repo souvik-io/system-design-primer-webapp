@@ -5,7 +5,6 @@ import { ArrowRight, Info } from 'lucide-react'
 import {
   chapterById,
   chapters,
-  decks,
   extraChapterCount,
   parts,
   sectionHref,
@@ -13,6 +12,7 @@ import {
   type ChapterMeta,
   type DeckMeta,
   type Part,
+  useVisibleDecks,
 } from '../lib/content'
 import { useDeckStats } from '../lib/flashcards'
 import { useChapterProgress, useOverallProgress, useProgress } from '../lib/progress'
@@ -27,6 +27,7 @@ export function HomePage() {
   const overall = useOverallProgress()
   const lastVisited = useProgress((s) => s.lastVisited)
   const showExtras = useSettings((s) => s.showExtras)
+  const decks = useVisibleDecks()
   const location = useLocation()
 
   useEffect(() => {

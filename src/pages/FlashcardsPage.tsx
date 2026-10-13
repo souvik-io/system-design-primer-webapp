@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
-import { decks, type DeckMeta } from '../lib/content'
+import { decks as allDecks, useVisibleDecks, type DeckMeta } from '../lib/content'
+import { ExtrasSwitch } from '../components/ExtrasToggle'
 import { formatWait, useDeckStats, useFlashcards } from '../lib/flashcards'
 import { useAccount } from '../lib/account'
 
@@ -10,6 +11,16 @@ export function FlashcardsPage() {
   const newPerDay = useFlashcards((s) => s.newPerDay)
   const setNewPerDay = useFlashcards((s) => s.setNewPerDay)
   const signedIn = useAccount((s) => Boolean(s.email))
+  const decks = useVisibleDecks()
+  const groups = [
+    { title: 'From the primer', note: "The primer's own Anki decks: one card per topic or question.", decks: decks.filter((d) => !d.site) },
+    {
+      title: 'Written for this site',
+      note: 'One question per card, covering every chapter in more detail, the 101 chapters included. Each card links to where its answer is taught.',
+      decks: decks.filter((d) => d.site),
+    },
+  ].filter((g) => g.decks.length)
+  const hiddenExtras = allDecks.filter((d) => d.extra).length - decks.filter((d) => d.extra).length
 
   useEffect(() => {
     document.title = 'Flashcards | System Design Primer'
@@ -20,15 +31,31 @@ export function FlashcardsPage() {
     <div className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-8 lg:pt-14">
       <h1 className="text-[2rem] leading-tight font-semibold tracking-tight text-ink sm:text-[2.5rem]">Flashcards</h1>
       <p className="mt-3 max-w-2xl font-serif text-lg leading-relaxed text-ink-2">
-        The primer's three Anki decks, with spaced repetition. Answer from memory, reveal the card, then rate how well you knew it. Cards you find
-        hard come back sooner.
+        Spaced repetition over the whole course. Answer from memory, reveal the card, then rate how well you knew it. Cards you find hard come
+        back sooner.
       </p>
 
-      <ul className="mt-10 divide-y divide-rule overflow-hidden rounded-xl border border-rule bg-surface">
-        {decks.map((d) => (
-          <DeckRow key={d.id} deck={d} />
-        ))}
-      </ul>
+      {groups.map((g) => (
+        <section key={g.title} className="mt-10">
+          <h2 className="text-lg font-semibold tracking-tight text-ink">{g.title}</h2>
+          <p className="mt-0.5 text-sm text-muted">{g.note}</p>
+          <ul className="mt-4 divide-y divide-rule overflow-hidden rounded-xl border border-rule bg-surface">
+            {g.decks.map((d) => (
+              <DeckRow key={d.id} deck={d} />
+            ))}
+          </ul>
+        </section>
+      ))}
+
+      {hiddenExtras > 0 && (
+        <div className="mt-6 rounded-xl border border-dashed border-rule px-5 py-4 text-sm text-muted">
+          <p>
+            {hiddenExtras} more {hiddenExtras === 1 ? 'deck covers' : 'decks cover'} the extra chapters beyond the primer. Turn them on to see{' '}
+            {hiddenExtras === 1 ? 'it' : 'them'}.
+          </p>
+          <ExtrasSwitch className="mt-3" />
+        </div>
+      )}
 
       <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-muted">
         <label htmlFor="new-per-day">New cards per deck each day</label>
@@ -62,7 +89,7 @@ function DeckRow({ deck }: { deck: DeckMeta }) {
     <li className="p-5">
       <div className="flex flex-wrap items-start gap-x-6 gap-y-4">
         <div className="min-w-0 flex-1 basis-64">
-          <h2 className="text-lg font-semibold text-ink">{deck.title}</h2>
+          <h3 className="text-lg font-semibold text-ink">{deck.title}</h3>
           <p className="mt-0.5 text-sm text-muted">{deck.description}</p>
           <dl className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm">
             <Stat label="Due" value={stats.due} highlight={stats.due > 0} />

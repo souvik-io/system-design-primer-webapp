@@ -25,7 +25,7 @@ The first run clones the primer into `source-repo/` and generates the content. B
 | ---------------------------------- | -------------------------------------------------------------- |
 | `src/generated/manifest.json`      | Course outline: parts, chapters, sections, reading time, decks |
 | `public/content/<chapter>.json`    | Pre-rendered HTML per chapter (syntax highlighting done here)  |
-| `public/content/flashcards/*.json` | The three Anki decks, cleaned up                               |
+| `public/content/flashcards/*.json` | The three Anki decks, cleaned up, and the site's own decks     |
 | `public/content/search.json`       | Plain-text index used by search                                |
 | `public/repo/...`                  | Diagrams referenced by the content                             |
 
@@ -49,7 +49,7 @@ They're off by default. Readers turn them on with **Show extra chapters** on the
 
 Four of them are always shown, because they're companions to primer chapters that are short and lean on old external links. Each sits right after the chapters it covers, and those chapters link to it:
 
-- **Scalability 101**, after "System design topics: start here": what Harvard's scalability lecture and the *Scalability for Dummies* series cover.
+- **Scalability 101**, after "System design topics: start here": what Harvard's scalability lecture and the _Scalability for Dummies_ series cover.
 - **Performance and latency 101**, after "Performance vs scalability" and "Latency vs throughput".
 - **CAP and consistency 101**, after "Availability vs consistency" and "Consistency patterns".
 - **Availability 101**, after "Availability patterns".
@@ -77,6 +77,8 @@ Everything a reader does is stored in `localStorage`: reading progress (`sdp-pro
 
 - **Study plans** follow the primer's study guide: short, medium or long. Each covers every topic chapter plus some, many or all of the practice questions, and adds extra chapters when they're turned on. The lengths (2, 5 and 10 weeks) and the question choices are this site's suggestions ([`src/lib/plans.ts`](src/lib/plans.ts)). Today's goal is what was left this morning divided by the days left, so it doesn't move while you read.
 - **Notes and bookmarks** are per section, added from the buttons at the end of each one. The Notes and bookmarks page lists them in course order and downloads the notes as Markdown.
+
+There are two sets of flashcard decks. The primer's three Anki decks have one card per topic or question. Five more decks, written for this site in [`content-extra/flashcards/`](content-extra/flashcards/), ask one specific question per card across every chapter, the 101 chapters and worked solutions included. Each answer is drawn from the chapter it links to. The two decks covering the extra chapters are shown only when extra chapters are turned on.
 
 Flashcards use an SM-2 style schedule like Anki's: Again (1 minute), Hard, Good and Easy, with intervals growing by each card's ease. New cards are limited per deck per day, 10 by default.
 

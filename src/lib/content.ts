@@ -33,13 +33,28 @@ export type Section = SectionMeta & { html: string; headings: Heading[] }
 export type SourceFile = { name: string; url: string; html: string }
 export type Chapter = { id: string; title: string; sections: Section[]; sourceFiles: SourceFile[] }
 
-export type DeckMeta = { id: string; title: string; description: string; cardIds: string[] }
+export type DeckMeta = {
+  id: string
+  title: string
+  description: string
+  cardIds: string[]
+  /** Written for this site, not one of the primer's Anki decks */
+  site?: boolean
+  /** Covers the extra chapters, so it's shown only when they are */
+  extra?: boolean
+}
 export type Card = { id: string; front: string; back: string; href?: string }
 export type Deck = { id: string; title: string; cards: Card[] }
 
 export const parts: Part[] = (manifestJson.parts as Part[]).filter((p) => p.chapters.length > 0)
 export const decks: DeckMeta[] = manifestJson.decks
 export const deckById = new Map(decks.map((d) => [d.id, d]))
+const decksWithoutExtras = decks.filter((d) => !d.extra)
+
+/** The decks the reader can see: all of them, less the extra chapters' decks when those are turned off. */
+export function useVisibleDecks() {
+  return useSettings((s) => s.showExtras) ? decks : decksWithoutExtras
+}
 
 export const chapters: (ChapterMeta & { part: Part })[] = parts.flatMap((part) => part.chapters.map((c) => ({ ...c, part })))
 

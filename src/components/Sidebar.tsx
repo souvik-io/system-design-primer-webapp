@@ -1,7 +1,7 @@
 import { Link, NavLink, useParams } from 'react-router'
 import clsx from 'clsx'
 import { Bookmark, Check, Info, Layers } from 'lucide-react'
-import { decks, sectionHref, sectionKey, useVisibleContent, type ChapterMeta } from '../lib/content'
+import { sectionHref, sectionKey, useVisibleContent, useVisibleDecks, type ChapterMeta } from '../lib/content'
 import { useChapterProgress, useProgress } from '../lib/progress'
 import { useDueCount } from '../lib/flashcards'
 import { useNotes, useNotesCount } from '../lib/notes'
@@ -9,7 +9,7 @@ import { ProgressRing } from './ProgressRing'
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { chapterId } = useParams()
-  const due = useDueCount(decks)
+  const due = useDueCount(useVisibleDecks())
   const notesCount = useNotesCount()
   const { parts } = useVisibleContent()
 
