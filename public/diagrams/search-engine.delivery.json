@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "bb916c56-7110-423d-a084-f0cb64a6668f",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/souvik/Desktop/system-design-primer-webapp/.archify/search_engine/candidate.json",
+  "output": "/Users/souvik/Desktop/system-design-primer-webapp/public/diagrams/search-engine.html",
+  "specification": {
+    "sha256": "1505d8c350ad1f3f24472e755d81588015f140ce0d07a1c72721092b69b8fe2c",
+    "bytes": 4683
+  },
+  "artifact": {
+    "sha256": "0db11b1f20a2d0234474d6d8cee94643813720f88fa828f430fbcd5c53ee336a",
+    "bytes": 764831
+  }
+}

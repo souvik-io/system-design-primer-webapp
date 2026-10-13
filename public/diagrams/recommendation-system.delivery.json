@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "ebbc669c-5200-4c35-94ba-43acd81d0e9a",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/souvik/Desktop/system-design-primer-webapp/.archify/recommendation_system/candidate.json",
+  "output": "/Users/souvik/Desktop/system-design-primer-webapp/public/diagrams/recommendation-system.html",
+  "specification": {
+    "sha256": "fe4cc6dab36ec98292a4cdadb702446e0c30a2594ce132f571d409ed32e83619",
+    "bytes": 5777
+  },
+  "artifact": {
+    "sha256": "1d9c4ebce8cfff6b1daf395c21daeabb916182e4535557fd798049f774e04847",
+    "bytes": 771003
+  }
+}

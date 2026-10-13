@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "3dfe05c8-5143-4fe2-9cc5-2b5e5cd9e33b",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/souvik/Desktop/system-design-primer-webapp/.archify/payment/candidate.json",
+  "output": "/Users/souvik/Desktop/system-design-primer-webapp/public/diagrams/payment-system.html",
+  "specification": {
+    "sha256": "4650110171bf341607d7a4e1d6f3615b01f9cdb8595c607e70e1caa9ad8826fb",
+    "bytes": 5375
+  },
+  "artifact": {
+    "sha256": "e88e30e9bfe96a4c6f87002fc933c84ba46ebcda556a8ca6d8fae1ae1b32de0b",
+    "bytes": 765421
+  }
+}

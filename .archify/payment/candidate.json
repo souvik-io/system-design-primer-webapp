@@ -1,0 +1,295 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Financial-Grade Payment Gateway Architecture",
+    "output": "public/diagrams/payment-system.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "client",
+      "type": "external",
+      "label": "Checkout Client",
+      "sublabel": "Browser / App",
+      "pos": [
+        40,
+        260
+      ],
+      "size": [
+        130,
+        60
+      ]
+    },
+    {
+      "id": "api_gw",
+      "type": "cloud",
+      "label": "API Gateway",
+      "sublabel": "TLS / WAF",
+      "pos": [
+        280,
+        260
+      ],
+      "size": [
+        130,
+        60
+      ]
+    },
+    {
+      "id": "pay_svc",
+      "type": "backend",
+      "label": "Payment Service",
+      "sublabel": "Orchestrator",
+      "pos": [
+        530,
+        260
+      ],
+      "size": [
+        140,
+        60
+      ],
+      "tag": "Idempotent"
+    },
+    {
+      "id": "tx_db",
+      "type": "database",
+      "label": "Transaction DB",
+      "sublabel": "ACID / State Machine",
+      "pos": [
+        530,
+        100
+      ],
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "ledger_svc",
+      "type": "backend",
+      "label": "Ledger Service",
+      "sublabel": "Double-Entry",
+      "pos": [
+        530,
+        420
+      ],
+      "size": [
+        140,
+        60
+      ]
+    },
+    {
+      "id": "ledger_db",
+      "type": "database",
+      "label": "Immutable Ledger",
+      "sublabel": "Append-Only Journal",
+      "pos": [
+        800,
+        420
+      ],
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "psp_gw",
+      "type": "backend",
+      "label": "PSP Gateway",
+      "sublabel": "Adapter Client",
+      "pos": [
+        800,
+        260
+      ],
+      "size": [
+        130,
+        60
+      ]
+    },
+    {
+      "id": "ext_psp",
+      "type": "external",
+      "label": "External PSP / Bank",
+      "sublabel": "Stripe / Adyen / Visa",
+      "pos": [
+        1060,
+        260
+      ],
+      "size": [
+        140,
+        60
+      ]
+    },
+    {
+      "id": "webhook",
+      "type": "backend",
+      "label": "Webhook Receiver",
+      "sublabel": "Async Settlement",
+      "pos": [
+        1060,
+        100
+      ],
+      "size": [
+        140,
+        60
+      ]
+    },
+    {
+      "id": "recon",
+      "type": "backend",
+      "label": "Reconciliation Engine",
+      "sublabel": "Daily Spark Batch",
+      "pos": [
+        1060,
+        420
+      ],
+      "size": [
+        140,
+        60
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "PCI-DSS Compliant Secure Enclave",
+      "wraps": [
+        "pay_svc",
+        "tx_db",
+        "ledger_svc",
+        "ledger_db",
+        "psp_gw"
+      ]
+    },
+    {
+      "kind": "security-group",
+      "label": "Public Ingress sg-edge",
+      "wraps": [
+        "api_gw"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "c1",
+      "from": "client",
+      "to": "api_gw",
+      "label": "POST /payments",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c2",
+      "from": "api_gw",
+      "to": "pay_svc",
+      "label": "Idempotency-Key"
+    },
+    {
+      "id": "c3",
+      "from": "pay_svc",
+      "to": "tx_db",
+      "label": "State: INITIATED",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "c4",
+      "from": "pay_svc",
+      "to": "psp_gw",
+      "label": "Charge Token"
+    },
+    {
+      "id": "c5",
+      "from": "psp_gw",
+      "to": "ext_psp",
+      "label": "HTTPS /charge"
+    },
+    {
+      "id": "c6",
+      "from": "pay_svc",
+      "to": "ledger_svc",
+      "label": "Record Journal",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "c7",
+      "from": "ledger_svc",
+      "to": "ledger_db",
+      "label": "Append Debit/Credit"
+    },
+    {
+      "id": "c8",
+      "from": "ext_psp",
+      "to": "webhook",
+      "label": "Settlement Webhook",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "variant": "dashed"
+    },
+    {
+      "id": "c9",
+      "from": "webhook",
+      "to": "pay_svc",
+      "label": "Update Status",
+      "fromSide": "left",
+      "toSide": "top",
+      "via": [
+        [
+          740,
+          130
+        ],
+        [
+          740,
+          200
+        ],
+        [
+          600,
+          200
+        ]
+      ]
+    },
+    {
+      "id": "c10",
+      "from": "ext_psp",
+      "to": "recon",
+      "label": "Daily Settlement Files",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "variant": "dashed"
+    },
+    {
+      "id": "c11",
+      "from": "recon",
+      "to": "ledger_db",
+      "label": "Verify Records",
+      "fromSide": "left",
+      "toSide": "right"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Idempotency",
+      "items": [
+        "Atomic lock on Idempotency-Key in Postgres",
+        "Prevents double charging on network drops"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Double-Entry Ledger",
+      "items": [
+        "Debits must equal Credits: sum(D) == sum(C)",
+        "Append-only immutable financial journal"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Reconciliation",
+      "items": [
+        "Daily 3-way batch reconciliation against bank files",
+        "Catches missing or mismatched transactions"
+      ]
+    }
+  ]
+}

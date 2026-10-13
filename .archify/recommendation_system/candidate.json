@@ -1,0 +1,250 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Personalized Recommendation System Architecture",
+    "output": "public/diagrams/recommendation-system.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "client",
+      "type": "external",
+      "label": "Client App",
+      "sublabel": "Mobile / Web Feed Request",
+      "pos": [40, 190],
+      "size": [130, 60]
+    },
+    {
+      "id": "recs_gw",
+      "type": "backend",
+      "label": "Recs Orchestrator",
+      "sublabel": "Multi-Stage Controller",
+      "pos": [260, 190],
+      "size": [140, 60],
+      "tag": "Stateless"
+    },
+    {
+      "id": "session_store",
+      "type": "database",
+      "label": "Session Cache",
+      "sublabel": "Recent Clicks (Redis)",
+      "pos": [260, 50],
+      "size": [140, 64]
+    },
+    {
+      "id": "ann_search",
+      "type": "backend",
+      "label": "Candidate Retrieval",
+      "sublabel": "Two-Tower ANN Search",
+      "pos": [580, 190],
+      "size": [150, 60],
+      "tag": "1B to 1,000"
+    },
+    {
+      "id": "vec_db",
+      "type": "database",
+      "label": "Vector Database",
+      "sublabel": "HNSW / ScaNN Embeddings",
+      "pos": [580, 50],
+      "size": [150, 64]
+    },
+    {
+      "id": "ranker",
+      "type": "backend",
+      "label": "Heavy Ranker",
+      "sublabel": "Deep Multi-Task (MMoE)",
+      "pos": [900, 190],
+      "size": [150, 60],
+      "tag": "P(Click), P(Watch)"
+    },
+    {
+      "id": "feature_store",
+      "type": "database",
+      "label": "Online Feature Store",
+      "sublabel": "Feast / Redis Low Latency",
+      "pos": [900, 50],
+      "size": [150, 64]
+    },
+    {
+      "id": "reranker",
+      "type": "backend",
+      "label": "Re-Ranking & Diversity",
+      "sublabel": "MMR & Bandits (Top 20)",
+      "pos": [1210, 190],
+      "size": [150, 60],
+      "tag": "Deduplicate"
+    },
+    {
+      "id": "kafka",
+      "type": "messagebus",
+      "label": "Event Stream",
+      "sublabel": "Kafka Interaction Log",
+      "pos": [260, 440],
+      "size": [140, 60]
+    },
+    {
+      "id": "flink",
+      "type": "backend",
+      "label": "Flink Real-Time ETL",
+      "sublabel": "10-min Feature Windows",
+      "pos": [580, 440],
+      "size": [150, 60],
+      "tag": "Stream Stats"
+    },
+    {
+      "id": "training_pipeline",
+      "type": "backend",
+      "label": "Offline Training Fleet",
+      "sublabel": "Daily PyTorch / Spark",
+      "pos": [900, 440],
+      "size": [150, 60]
+    },
+    {
+      "id": "model_registry",
+      "type": "database",
+      "label": "Model Registry",
+      "sublabel": "S3 / ONNX Model Weights",
+      "pos": [1210, 440],
+      "size": [150, 64]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Online Recommendation Serving Enclave",
+      "wraps": [
+        "recs_gw",
+        "session_store",
+        "ann_search",
+        "vec_db",
+        "ranker",
+        "feature_store",
+        "reranker"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Real-Time Feature & Model Training Enclave",
+      "wraps": [
+        "kafka",
+        "flink",
+        "training_pipeline",
+        "model_registry"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "c1",
+      "from": "client",
+      "to": "recs_gw",
+      "label": "GET /feed",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c2",
+      "from": "recs_gw",
+      "to": "session_store",
+      "label": "Fetch Session",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "c3",
+      "from": "recs_gw",
+      "to": "ann_search",
+      "label": "Retrieve Candidates"
+    },
+    {
+      "id": "c4",
+      "from": "ann_search",
+      "to": "vec_db",
+      "label": "Vector HNSW Query",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "c5",
+      "from": "ann_search",
+      "to": "ranker",
+      "label": "Pass Candidates"
+    },
+    {
+      "id": "c6",
+      "from": "ranker",
+      "to": "feature_store",
+      "label": "Hydrate Features",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "c7",
+      "from": "ranker",
+      "to": "reranker",
+      "label": "Pass Top Scored"
+    },
+    {
+      "id": "c8",
+      "from": "reranker",
+      "to": "recs_gw",
+      "label": "Return Feed",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "bottom"
+    },
+    {
+      "id": "c9",
+      "from": "recs_gw",
+      "to": "kafka",
+      "label": "Emit Interactions",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "c10",
+      "from": "kafka",
+      "to": "flink",
+      "label": "Stream Logs"
+    },
+    {
+      "id": "c11",
+      "from": "flink",
+      "to": "training_pipeline",
+      "label": "Aggregated Features"
+    },
+    {
+      "id": "c12",
+      "from": "training_pipeline",
+      "to": "model_registry",
+      "label": "Publish Weights"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Stage 1: Retrieval (<25ms)",
+      "items": [
+        "Two-Tower DNN maps user context and 1B items into 256-d embeddings",
+        "Vector ANN search (HNSW) prunes 1B items to top 1,000 candidates"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Stage 2: Ranking (<40ms)",
+      "items": [
+        "Hydrates hundreds of online/offline features from Redis/Feast store",
+        "Multi-gate Mixture-of-Experts predicts multi-task engagement probabilities"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Stage 3: Re-ranking & Diversity",
+      "items": [
+        "Maximal Marginal Relevance (MMR) balances relevance and category variety",
+        "Multi-armed bandit exploration introduces fresh items to prevent filter bubbles"
+      ]
+    }
+  ]
+}

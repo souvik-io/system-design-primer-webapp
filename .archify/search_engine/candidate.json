@@ -1,0 +1,209 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Web Search Engine Architecture",
+    "output": "public/diagrams/search-engine.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "user",
+      "type": "external",
+      "label": "Search Client",
+      "sublabel": "Browser / Mobile App",
+      "pos": [40, 190],
+      "size": [130, 60]
+    },
+    {
+      "id": "query_gw",
+      "type": "backend",
+      "label": "Query Gateway",
+      "sublabel": "Tokenizer & Dispatcher",
+      "pos": [290, 190],
+      "size": [140, 60],
+      "tag": "Stateless"
+    },
+    {
+      "id": "q_cache",
+      "type": "database",
+      "label": "Query Cache",
+      "sublabel": "Redis In-Memory",
+      "pos": [290, 50],
+      "size": [140, 64]
+    },
+    {
+      "id": "ranker",
+      "type": "backend",
+      "label": "Scoring Engine",
+      "sublabel": "BM25 + ML Ranker",
+      "pos": [570, 190],
+      "size": [150, 60],
+      "tag": "Top-K Merge"
+    },
+    {
+      "id": "index_shards",
+      "type": "database",
+      "label": "Index Shard Fleet",
+      "sublabel": "Document-Partitioned",
+      "pos": [850, 190],
+      "size": [160, 64]
+    },
+    {
+      "id": "doc_store",
+      "type": "database",
+      "label": "Document Store",
+      "sublabel": "Snippets & Meta (SSTable)",
+      "pos": [1130, 190],
+      "size": [160, 64]
+    },
+    {
+      "id": "frontier",
+      "type": "messagebus",
+      "label": "Crawl Frontier",
+      "sublabel": "Politeness & Priority Queues",
+      "pos": [290, 440],
+      "size": [150, 60]
+    },
+    {
+      "id": "crawler",
+      "type": "backend",
+      "label": "Crawler Workers",
+      "sublabel": "HTML Fetch & SimHash",
+      "pos": [570, 440],
+      "size": [150, 60],
+      "tag": "Async Egress"
+    },
+    {
+      "id": "indexer",
+      "type": "backend",
+      "label": "MapReduce Indexer",
+      "sublabel": "Inverted Index Builder",
+      "pos": [850, 440],
+      "size": [160, 60]
+    },
+    {
+      "id": "raw_web",
+      "type": "database",
+      "label": "Web Page Corpus",
+      "sublabel": "Distributed Blob Store",
+      "pos": [1130, 440],
+      "size": [160, 64]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Online Query Serving Cluster",
+      "wraps": [
+        "query_gw",
+        "q_cache",
+        "ranker",
+        "index_shards",
+        "doc_store"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Offline Ingestion & Pipeline Cluster",
+      "wraps": [
+        "frontier",
+        "crawler",
+        "indexer",
+        "raw_web"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "c1",
+      "from": "user",
+      "to": "query_gw",
+      "label": "Search Query",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c2",
+      "from": "query_gw",
+      "to": "q_cache",
+      "label": "Check Hot Cache",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "c3",
+      "from": "query_gw",
+      "to": "ranker",
+      "label": "Dispatch Query"
+    },
+    {
+      "id": "c4",
+      "from": "ranker",
+      "to": "index_shards",
+      "label": "Scatter-Gather Query"
+    },
+    {
+      "id": "c5",
+      "from": "ranker",
+      "to": "doc_store",
+      "label": "Hydrate Top-K Snippets",
+      "fromSide": "top",
+      "toSide": "top"
+    },
+    {
+      "id": "c6",
+      "from": "frontier",
+      "to": "crawler",
+      "label": "Poll Allowed URLs"
+    },
+    {
+      "id": "c7",
+      "from": "crawler",
+      "to": "raw_web",
+      "label": "Store Raw HTML",
+      "fromSide": "bottom",
+      "toSide": "bottom"
+    },
+    {
+      "id": "c8",
+      "from": "crawler",
+      "to": "indexer",
+      "label": "Stream Extracted Text"
+    },
+    {
+      "id": "c9",
+      "from": "indexer",
+      "to": "index_shards",
+      "label": "Push SSTable Segments",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Query Latency (<150ms)",
+      "items": [
+        "Document-partitioned index shards searched in parallel",
+        "Aggregator gathers top 100 results and ranks with BM25 + PageRank"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Index Construction",
+      "items": [
+        "Tokens mapped to Posting Lists with Term Frequency & Positions",
+        "Compressed using Frame-of-Reference (FoR) and Roaring Bitmaps"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Crawler Politeness",
+      "items": [
+        "Host-partitioned FIFO queues strictly enforce robots.txt",
+        "SimHash fingerprinting detects duplicate and near-duplicate pages"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,216 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "URL Shortener High-Throughput Architecture",
+    "output": "public/diagrams/url-shortener.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "client",
+      "type": "external",
+      "label": "Client Browser",
+      "sublabel": "HTTP Redirect",
+      "pos": [
+        40,
+        260
+      ],
+      "size": [
+        130,
+        60
+      ]
+    },
+    {
+      "id": "lb",
+      "type": "cloud",
+      "label": "Anycast Edge LB",
+      "sublabel": "L4/L7 Proxy",
+      "pos": [
+        280,
+        260
+      ],
+      "size": [
+        130,
+        60
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Shortener API Fleet",
+      "sublabel": "Stateless Workers",
+      "pos": [
+        530,
+        260
+      ],
+      "size": [
+        140,
+        60
+      ],
+      "tag": "Range Alloc"
+    },
+    {
+      "id": "cache",
+      "type": "database",
+      "label": "Redis Cluster",
+      "sublabel": "LRU Hot URLs",
+      "pos": [
+        800,
+        100
+      ],
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "Sharded DB",
+      "sublabel": "Hash Partitioned",
+      "pos": [
+        800,
+        260
+      ],
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "kafka",
+      "type": "messagebus",
+      "label": "Kafka Click Stream",
+      "sublabel": "Async Log",
+      "pos": [
+        530,
+        420
+      ],
+      "size": [
+        140,
+        60
+      ]
+    },
+    {
+      "id": "worker",
+      "type": "backend",
+      "label": "Analytics Worker",
+      "sublabel": "Stream Ingest",
+      "pos": [
+        800,
+        420
+      ],
+      "size": [
+        140,
+        60
+      ]
+    },
+    {
+      "id": "olap",
+      "type": "database",
+      "label": "ClickHouse OLAP",
+      "sublabel": "Columnar Aggregates",
+      "pos": [
+        1060,
+        420
+      ],
+      "size": [
+        140,
+        64
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Core Cloud VPC",
+      "wraps": [
+        "api",
+        "cache",
+        "db",
+        "kafka",
+        "worker",
+        "olap"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "c1",
+      "from": "client",
+      "to": "lb",
+      "label": "GET /{short_code}",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c2",
+      "from": "lb",
+      "to": "api",
+      "label": "HTTP Request"
+    },
+    {
+      "id": "c3",
+      "from": "api",
+      "to": "cache",
+      "label": "1. Check Cache",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "c4",
+      "from": "cache",
+      "to": "db",
+      "label": "Cache Miss",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "c5",
+      "from": "api",
+      "to": "kafka",
+      "label": "2. Emit Click (Async)",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "c6",
+      "from": "kafka",
+      "to": "worker",
+      "label": "Consume Events"
+    },
+    {
+      "id": "c7",
+      "from": "worker",
+      "to": "olap",
+      "label": "Batch Append"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Read Path (~2ms)",
+      "items": [
+        "Cache hit in Redis returns HTTP 302 immediately",
+        "Cache miss falls back to sharded database"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Write Path",
+      "items": [
+        "Base62 encoding of unique 64-bit integer ranges",
+        "Zero hash collisions, O(1) link creation"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Analytics Isolation",
+      "items": [
+        "Click events stream asynchronously to Kafka",
+        "Heavy analytical queries hit ClickHouse, never transactional DB"
+      ]
+    }
+  ]
+}
