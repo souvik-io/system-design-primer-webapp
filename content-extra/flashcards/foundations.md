@@ -139,7 +139,7 @@ Aim for **maximal throughput with acceptable latency**.
 No. It's a **performance problem**: nothing is competing for resources, so the time goes into the work each request does. Look for a missing index, one query per result (N+1 queries) or a page loading 4 MB of images. Use a profiler. If search were fast at 4 a.m. but slow at peak, that's a scalability problem: find what requests wait for, then add more of it or need less of it.
 
 ## A job is 95% parallelizable. What speedup do you get on 16 machines, and what's the ceiling?
-<!-- /learn/performance-and-latency-101#amdahls-law -->
+<!-- /learn/performance-and-latency-101#reason-2-some-work-cant-be-split-up-amdahls-law -->
 
 By **Amdahl's law**, speedup = 1 / ((1 − p) + p / N).
 
@@ -149,7 +149,7 @@ By **Amdahl's law**, speedup = 1 / ((1 − p) + p / N).
 The 5% that runs serially sets the ceiling.
 
 ## What does the Universal Scalability Law add to Amdahl's law, and what can happen as you add machines?
-<!-- /learn/performance-and-latency-101#coordination-costs -->
+<!-- /learn/performance-and-latency-101#reason-3-machines-have-to-coordinate -->
 
 It adds **coherency** (β), the cost of keeping data consistent between nodes, on top of **contention** (α), waiting for shared resources. With β above zero, throughput eventually goes "retrograde". With α = 0.05 and β = 0.001, 10 machines give about 6.5 times one machine, 30 give about 9, and 60 give about 8. So share as little as possible between requests and machines.
 
@@ -169,7 +169,7 @@ Latency and throughput are independent. Sending 100 PB over a fully used 10 Gbps
 It makes the producer wait up to that many milliseconds so more records go in one batch. Fewer, larger sends raise throughput, but at low load each record can wait the full delay. Kafka 4.0 raised the default from 0 to 5 ms because larger batches usually give similar or lower latency overall. Under heavy load, batching can make a busy system faster.
 
 ## Your servers average 90% CPU and latency looks fine. Why is removing a few servers to "use the hardware fully" risky?
-<!-- /learn/performance-and-latency-101#queueing-as-utilization-rises -->
+<!-- /learn/performance-and-latency-101#queueing-why-busy-servers-get-slow-suddenly -->
 
 In the M/M/1 model, response time is the service time divided by (1 − utilization). With 10 ms of work: 50 ms at 80% busy, 100 ms at 90%, 200 ms at 95%, 1,000 ms at 99%. Latency stays flat, then climbs steeply near full use. Removing servers pushes you onto the steep part, so ordinary spikes cause big latency jumps.
 
@@ -179,7 +179,7 @@ In the M/M/1 model, response time is the service time divided by (1 − utilizat
 **Little's Law**: in-flight requests = arrival rate × average latency. At 50 ms that's 100, just enough. At 500 ms it's 1,000. The pool runs out, new requests queue, latency rises further and more requests pile up. That's how one slow dependency takes down a healthy service, and why timeouts and concurrency limits matter.
 
 ## Why should you track p99 latency instead of the average?
-<!-- /learn/performance-and-latency-101#averages-hide-the-tail -->
+<!-- /learn/performance-and-latency-101#averages-hide-the-slow-requests -->
 
 An average hides the slow **tail**: 99 requests at 30 ms and one at 3 seconds still average about 60 ms. The tail matters more than it looks because users make many requests. Someone loading 100 pages hits at least one p99-slow page with probability 1 − 0.99¹⁰⁰, about 63%. And a page is only as fast as its slowest backend call.
 
