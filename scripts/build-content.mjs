@@ -57,12 +57,15 @@ const PARTS = [
     title: 'Start here',
     description: 'Why system design matters, how much to study, and how to run an interview answer.',
     readme: [
+      // Written for this site (content-extra/), but always shown. These replace the primer chapters around them.
+      { companion: 'how-to-use-this-handbook' },
       'motivation',
       'study-guide',
+      { companion: 'system-design-interview' },
       'how-to-approach-a-system-design-interview-question',
       'system-design-topics-start-here',
-      // Written for this site (content-extra/), but always shown: it retells the lecture and article the chapter above points to.
       { companion: 'scalability-101' },
+      { companion: 'estimation' },
     ],
   },
   {
@@ -139,7 +142,6 @@ const PARTS = [
     title: 'Beyond the primer: concepts',
     description: 'Topics the primer leaves out, from estimation to consensus. Written for this site.',
     extra: [
-      'estimation',
       'consistent-hashing',
       'rate-limiting',
       'unique-ids',

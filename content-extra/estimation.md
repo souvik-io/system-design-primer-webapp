@@ -2,9 +2,9 @@
 
 Before you draw boxes, you need a rough idea of how big the problem is. Is it 50 requests per second or 500,000? Gigabytes or petabytes? The answer decides whether one database will do, whether you need a CDN, and whether the whole working set fits in memory. Back-of-the-envelope estimation is the habit of getting those numbers in a couple of minutes, with round figures and stated assumptions.
 
-In an interview, this usually happens right after you clarify requirements, in the step the primer calls [outlining use cases, constraints, and assumptions](/learn/how-to-approach-a-system-design-interview-question#step-1-outline-use-cases-constraints-and-assumptions). Nobody expects precision. Interviewers want to see that you can turn a vague product description into numbers, keep the units straight, and then let those numbers drive design choices.
+In an interview, this usually happens right after you clarify requirements, in the first of [the four interview steps](/learn/system-design-interview#step-1-outline-use-cases-constraints-and-assumptions). Nobody expects precision. Interviewers want to see that you can turn a vague product description into numbers, keep the units straight, and then let those numbers drive design choices.
 
-The primer's appendix already has the reference tables: the [powers of two table](/learn/appendix#powers-of-two-table) and [latency numbers every programmer should know](/learn/appendix#latency-numbers-every-programmer-should-know). This chapter is about the method that uses them.
+Two reference tables help: the [powers of two table](/learn/appendix#powers-of-two-table) and [latency numbers every programmer should know](/learn/appendix#latency-numbers-every-programmer-should-know). This chapter is about the method that uses them.
 
 ## Units and shortcuts
 
@@ -187,7 +187,8 @@ Probably not. 3 TB across three replicas is about 1 TB per copy, and 500 writes 
 
 ## Further reading
 
-- [Latency numbers every programmer should know](https://gist.github.com/jboner/2841832): the source of the table in the primer's appendix.
+- [Latency numbers every programmer should know](https://gist.github.com/jboner/2841832): Jonas Bonér's widely shared table of latency figures, credited to Jeff Dean and originally Peter Norvig.
+- [Google Pro Tip: Use Back-of-the-Envelope Calculations to Choose the Best Design](https://highscalability.com/google-pro-tip-use-back-of-the-envelope-calculations-to-choo/): High Scalability's 2011 summary of Jeff Dean's case for estimating before you build.
 - [Interactive latency numbers by year](https://colin-scott.github.io/personal_website/research/interactive_latency.html): shows how those numbers have shifted as hardware improved.
 - [Jeff Dean, "Designs, Lessons and Advice from Building Large Distributed Systems" (LADIS 2009)](https://www.cs.cornell.edu/projects/ladis2009/talks/dean-keynote-ladis2009.pdf): includes the original "numbers everyone should know" slide and short worked estimates.
 - [Simon Eskildsen, napkin-math](https://github.com/sirupsen/napkin-math): benchmarked throughput and latency figures for estimates, with exercises.

@@ -9,21 +9,21 @@ Every topic in The System Design Primer, and where this site covers it. The site
 
 | Topic | Covered in |
 | --- | --- |
-| Motivation |  |
-| Motivation › Learn how to design large-scale systems |  |
-| Motivation › Learn from the open source community |  |
-| Motivation › Prep for the system design interview |  |
-| Study guide |  |
-| How to approach a system design interview question |  |
-| How to approach a system design interview question › Step 1: Outline use cases, constraints, and assumptions |  |
-| How to approach a system design interview question › Step 2: Create a high level design |  |
-| How to approach a system design interview question › Step 3: Design core components |  |
-| How to approach a system design interview question › Step 4: Scale the design |  |
-| How to approach a system design interview question › Back-of-the-envelope calculations |  |
-| System design topics: start here |  |
-| System design topics: start here › Step 1: Review the scalability video lecture |  |
-| System design topics: start here › Step 2: Review the scalability article |  |
-| System design topics: start here › Next steps |  |
+| Motivation | how-to-use-this-handbook |
+| Motivation › Learn how to design large-scale systems | how-to-use-this-handbook |
+| Motivation › Learn from the open source community | how-to-use-this-handbook#an-open-handbook |
+| Motivation › Prep for the system design interview | how-to-use-this-handbook |
+| Study guide | how-to-use-this-handbook#pick-a-study-plan |
+| How to approach a system design interview question | system-design-interview |
+| How to approach a system design interview question › Step 1: Outline use cases, constraints, and assumptions | system-design-interview#step-1-outline-use-cases-constraints-and-assumptions |
+| How to approach a system design interview question › Step 2: Create a high level design | system-design-interview#step-2-create-a-high-level-design |
+| How to approach a system design interview question › Step 3: Design core components | system-design-interview#step-3-design-the-core-components |
+| How to approach a system design interview question › Step 4: Scale the design | system-design-interview#step-4-scale-the-design |
+| How to approach a system design interview question › Back-of-the-envelope calculations | system-design-interview#back-of-the-envelope-calculations |
+| System design topics: start here | scalability-101 |
+| System design topics: start here › Step 1: Review the scalability video lecture | scalability-101 |
+| System design topics: start here › Step 2: Review the scalability article | scalability-101 |
+| System design topics: start here › Next steps | scalability-101#what-comes-next |
 | Performance vs scalability | performance-and-latency-101#performance-and-scalability-are-different-problems |
 | Latency vs throughput | performance-and-latency-101#latency-and-throughput |
 | Availability vs consistency | cap-and-consistency-101#what-c-a-and-p-actually-mean |

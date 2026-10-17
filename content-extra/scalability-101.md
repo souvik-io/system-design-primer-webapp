@@ -1,10 +1,12 @@
 # Scalability 101
 
-The primer starts beginners off with two classics: David Malan's [Scalability lecture](https://www.youtube.com/watch?v=-W9F__D3oY4) from Harvard's CS75 (summer 2012), and Sebastian Kreutzberger's four-part blog series [Scalability for Dummies](https://web.archive.org/web/20221030091841/http://www.lecloud.net/tagged/scalability/chrono) (2011). Both still hold up. The lecture runs close to two hours, though, and the blog names tools and habits from more than a decade ago. This chapter covers the same ground in one sitting: vertical and horizontal scaling, clones, load balancing, caching, replication, partitioning and asynchronism. Along the way it shows real companies that hit each wall, with sources you can check. Read it instead of the originals, before them, or after them as a refresher.
+If you're new to system design, start here. This chapter covers the basic ideas behind every large website, in the order a growing site usually needs them: vertical and horizontal scaling, identical server clones, load balancing, caching, database replication, partitioning and asynchronous work. For each one you'll see what it is, how it's used, what it costs, and a real company that hit the problem it solves, with a source you can check.
+
+The chapter draws on two classic introductions: David Malan's [Scalability lecture](https://www.youtube.com/watch?v=-W9F__D3oY4) from Harvard's CS75 (summer 2012), and Sebastian Kreutzberger's four-part blog series [Scalability for Dummies](https://web.archive.org/web/20221030091841/http://www.lecloud.net/tagged/scalability/chrono) (2011). Both still hold up, but the lecture runs close to two hours, and the blog names tools and habits from more than a decade ago. You don't need either one to follow this chapter.
 
 To keep things concrete, we'll follow one imaginary app as it grows. Call it **Crumb**, a recipe-sharing site. It begins as a weekend project. Then a food influencer with four million followers posts a Crumb link, and the traffic arrives overnight.
 
-Before that, one definition. A system is **scalable** if adding resources gets you a matching gain in capacity. If one server handles 1,000 requests a second and ten servers handle about 10,000, the system scales. If ten servers still handle only 1,500 because they all wait on one database, it doesn't. The primer's chapter on [performance vs scalability](/learn/performance-vs-scalability) puts it this way: a performance problem makes the system slow for one user, and a scalability problem makes it fast for one user but slow under load.
+Before that, one definition. A system is **scalable** if adding resources gets you a matching gain in capacity. If one server handles 1,000 requests a second and ten servers handle about 10,000, the system scales. If ten servers still handle only 1,500 because they all wait on one database, it doesn't. The [performance and latency](/learn/performance-and-latency-101) chapter puts it this way: a performance problem makes the system slow for one user, and a scalability problem makes it fast for one user but slow under load.
 
 ## Day one: everything on one box
 
@@ -107,7 +109,7 @@ The [cache](/learn/cache) chapter covers the other update strategies (write-thro
 
 Caching handles repeated reads. Writes, and reads the cache misses, still go to one database, and if it fails, Crumb is down. **Replication** keeps copies of the database on other machines.
 
-The most common setup is **primary-replica** (the primer calls it master-slave). All writes go to the primary, which streams its changes to one or more replicas. Reads can go to any replica.
+The most common setup is **primary-replica**, which older documentation calls master-slave. All writes go to the primary, which streams its changes to one or more replicas. Reads can go to any replica.
 
 ```diagram
 title: Writes go to the primary. Reads spread across replicas.
@@ -131,7 +133,7 @@ Instagram used this setup early on. In late 2011, with 14 million users and thre
 
 **The catch: replication lag.** Replicas apply changes a moment after the primary. Usually that's milliseconds, but under heavy load it can be seconds. A Crumb user posts a comment, the page reloads, the read goes to a replica that hasn't received the comment yet, and the comment seems to be missing. They post it again, and now there are two. The usual fix is **read-your-own-writes**: for a short time after a user writes something, send that user's reads to the primary.
 
-The lecture also covers **primary-primary** (master-master) replication, where both nodes accept writes. It helps with availability, but conflicting writes become your problem. The primer's [replication section](/learn/database#master-slave-replication) lists the drawbacks of each setup.
+There is also **primary-primary** replication (master-master), where both nodes accept writes. It helps with availability, but conflicting writes become your problem. The [database](/learn/database#master-slave-replication) chapter lists the drawbacks of each setup.
 
 ## Database partitioning
 
@@ -178,7 +180,7 @@ Instagram's 2011 setup used this pattern too: around 200 Python workers took tas
 
 Queues also absorb spikes. If Crumb gets 10,000 uploads in a minute and its workers handle 2,000 a minute, the queue holds the backlog and the workers catch up. Nothing crashes. Users just wait a bit longer for thumbnails.
 
-**Queues have limits too.** In November 2022, Ticketmaster ran Taylor Swift's Eras Tour presale through Verified Fan, an invite-and-queue system designed to control how many people reach checkout at once. About 1.5 million fans were invited. Bots and fans without codes [still sent 3.5 billion requests](https://www.nbcchicago.com/news/local/ticketmaster-breaks-down-what-happened-during-taylor-swift-presale-snafu/2999756/), four times Ticketmaster's previous peak. Ticketmaster had to slow and delay sales, and it later cancelled the general sale. A queue buys time, but if work keeps arriving faster than workers finish it, the queue only grows. At that point you need to turn requests away early, which the primer covers under [back pressure](/learn/asynchronism#back-pressure).
+**Queues have limits too.** In November 2022, Ticketmaster ran Taylor Swift's Eras Tour presale through Verified Fan, an invite-and-queue system designed to control how many people reach checkout at once. About 1.5 million fans were invited. Bots and fans without codes [still sent 3.5 billion requests](https://www.nbcchicago.com/news/local/ticketmaster-breaks-down-what-happened-during-taylor-swift-presale-snafu/2999756/), four times Ticketmaster's previous peak. Ticketmaster had to slow and delay sales, and it later cancelled the general sale. A queue buys time, but if work keeps arriving faster than workers finish it, the queue only grows. At that point you need to turn requests away early, a technique called [back pressure](/learn/asynchronism#back-pressure).
 
 The [asynchronism](/learn/asynchronism) chapter covers [message queues](/learn/asynchronism#message-queues) and [task queues](/learn/asynchronism#task-queues) in more depth.
 
@@ -221,7 +223,16 @@ Each change fixed a specific problem. When you're designing a system, start with
 | Too many writes, or too much data for one machine | Federation or sharding | [Partitioning](#database-partitioning) |
 | Requests are slow because of heavy work | Precompute it, or queue it for workers | [Asynchronism](#asynchronism) |
 
-Two warnings to finish. First, every fix adds parts, and parts fail. A single server is easy to reason about, and five layers of distributed systems are not. Scale for the load you have and the growth you expect, not for the load you hope to have someday. Second, these ideas are the foundation for the rest of the primer. Next come the trade-offs behind them, starting with [performance vs scalability](/learn/performance-vs-scalability), then the building blocks one at a time.
+Two warnings to finish. First, every fix adds parts, and parts fail. A single server is easy to reason about, and five layers of distributed systems are not. Scale for the load you have and the growth you expect, not for the load you hope to have someday. Second, everything is a trade-off. Each fix in this chapter buys something and costs something, and the rest of the handbook is about weighing those costs.
+
+## What comes next
+
+These ideas are the foundation for the rest of the handbook. Next come the high-level trade-offs behind them:
+
+- **Performance vs scalability**, and **latency vs throughput**, in [performance and latency](/learn/performance-and-latency-101).
+- **Availability vs consistency**, in [CAP and consistency](/learn/cap-and-consistency-101) and [availability](/learn/availability-101).
+
+After that, the building blocks get a chapter each, starting with DNS, CDNs and load balancers. Before you go on, read [the system design interview, step by step](/learn/system-design-interview) and [back-of-the-envelope estimation](/learn/estimation) if you haven't yet.
 
 ## Check yourself
 
@@ -262,7 +273,7 @@ Save the original photo, put a "make thumbnails" job on a queue, and respond rig
 
 ## Further reading
 
-The originals this chapter is based on:
+The two classics this chapter draws on:
 
 - [Scalability lecture, CS75 (Summer 2012), Harvard](https://www.youtube.com/watch?v=-W9F__D3oY4): David Malan's lecture. Watch it for the sections on RAID, high availability and how traffic moves through switches and load balancers, which this chapter leaves out.
 - [Scalability for Dummies](https://web.archive.org/web/20221030091841/http://www.lecloud.net/tagged/scalability/chrono): Sebastian Kreutzberger's 2011 series, in four short parts: [clones](https://web.archive.org/web/20220530193911/https://www.lecloud.net/post/7295452622/scalability-for-dummies-part-1-clones), [databases](https://web.archive.org/web/20220602114024/https://www.lecloud.net/post/7994751381/scalability-for-dummies-part-2-database), [caches](https://web.archive.org/web/20230126233752/https://www.lecloud.net/post/9246290032/scalability-for-dummies-part-3-cache) and [asynchronism](https://web.archive.org/web/20220926171507/https://www.lecloud.net/post/9699762917/scalability-for-dummies-part-4-asynchronism).
