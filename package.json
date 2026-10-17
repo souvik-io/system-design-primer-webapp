@@ -11,6 +11,7 @@
     "content": "node --disable-warning=ExperimentalWarning scripts/build-content.mjs",
     "verify-content": "node --disable-warning=ExperimentalWarning scripts/verify-content.mjs",
     "lint-diagrams": "node scripts/lint-diagrams.mjs",
+    "coverage": "node scripts/check-coverage.mjs",
     "predev": "node --disable-warning=ExperimentalWarning scripts/build-content.mjs --if-missing",
     "dev": "vite",
     "prebuild": "node --disable-warning=ExperimentalWarning scripts/build-content.mjs",

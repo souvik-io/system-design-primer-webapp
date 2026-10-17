@@ -6,6 +6,10 @@ These are original writing, not copied or closely paraphrased from any book or s
 
 A chapter can also be a **companion** to a primer chapter: always shown, placed in a primer part, and marked "Written for this site". `scalability-101` is one, a beginner's walkthrough of the lecture and article that "System design topics: start here" points to. Add it to a part's `readme` list as `{ companion: '<chapter-id>' }`, and add a note to the primer chapter that links to it with `PRIMER_NOTES` in the same script.
 
+## Coverage checklist
+
+The site is replacing the primer's own text with chapters written here. `COVERAGE.md` lists every topic the primer teaches and the section on this site that covers it. When a chapter covers a primer topic in full, fill in that row. `npm run coverage` checks the targets and reports what's left. The primer can be removed only once `npm run coverage -- --strict` passes.
+
 ## Writing a chapter
 
 One markdown file per chapter: `content-extra/<chapter-id>.md`.
