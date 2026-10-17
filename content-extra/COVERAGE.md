@@ -51,12 +51,12 @@ Every topic in The System Design Primer, and where this site covers it. The site
 | Content delivery network › Push CDNs |  |
 | Content delivery network › Pull CDNs |  |
 | Content delivery network › Disadvantage(s): CDN |  |
-| Load balancer |  |
-| Load balancer › Layer 4 load balancing |  |
-| Load balancer › Layer 7 load balancing |  |
-| Load balancer › Horizontal scaling |  |
-| Load balancer › Horizontal scaling › Disadvantage(s): horizontal scaling |  |
-| Load balancer › Disadvantage(s): load balancer |  |
+| Load balancer | load-balancing#what-a-load-balancer-does |
+| Load balancer › Layer 4 load balancing | load-balancing#layer-4 |
+| Load balancer › Layer 7 load balancing | load-balancing#layer-7 |
+| Load balancer › Horizontal scaling | load-balancing#horizontal-scaling-and-what-it-costs |
+| Load balancer › Horizontal scaling › Disadvantage(s): horizontal scaling | load-balancing#horizontal-scaling-and-what-it-costs |
+| Load balancer › Disadvantage(s): load balancer | load-balancing#when-the-load-balancer-is-the-problem |
 | Reverse proxy (web server) |  |
 | Reverse proxy (web server) › Load balancer vs reverse proxy |  |
 | Reverse proxy (web server) › Disadvantage(s): reverse proxy |  |
@@ -64,21 +64,21 @@ Every topic in The System Design Primer, and where this site covers it. The site
 | Application layer › Microservices |  |
 | Application layer › Service Discovery |  |
 | Application layer › Disadvantage(s): application layer |  |
-| Database |  |
-| Database › Relational database management system (RDBMS) |  |
-| Database › Relational database management system (RDBMS) › Master-slave replication |  |
-| Database › Relational database management system (RDBMS) › Master-master replication |  |
-| Database › Relational database management system (RDBMS) › Federation |  |
-| Database › Relational database management system (RDBMS) › Sharding |  |
-| Database › Relational database management system (RDBMS) › Denormalization |  |
-| Database › Relational database management system (RDBMS) › SQL tuning |  |
-| Database › NoSQL |  |
-| Database › NoSQL › Key-value store |  |
-| Database › NoSQL › Document store |  |
-| Database › NoSQL › Wide column store |  |
-| Database › NoSQL › Graph database |  |
-| Database › NoSQL › Source(s) and further reading: NoSQL |  |
-| Database › SQL or NoSQL |  |
+| Database | relational-databases |
+| Database › Relational database management system (RDBMS) | relational-databases#what-a-relational-database-is |
+| Database › Relational database management system (RDBMS) › Master-slave replication | relational-databases#primary-replica-replication |
+| Database › Relational database management system (RDBMS) › Master-master replication | relational-databases#primary-primary-replication |
+| Database › Relational database management system (RDBMS) › Federation | relational-databases#federation-one-database-per-feature |
+| Database › Relational database management system (RDBMS) › Sharding | relational-databases#sharding-splitting-one-table-across-databases |
+| Database › Relational database management system (RDBMS) › Denormalization | relational-databases#denormalization |
+| Database › Relational database management system (RDBMS) › SQL tuning | relational-databases#sql-tuning |
+| Database › NoSQL | nosql-databases#what-nosql-means |
+| Database › NoSQL › Key-value store | nosql-databases#key-value-stores |
+| Database › NoSQL › Document store | nosql-databases#document-stores |
+| Database › NoSQL › Wide column store | nosql-databases#wide-column-stores |
+| Database › NoSQL › Graph database | nosql-databases#graph-databases |
+| Database › NoSQL › Source(s) and further reading: NoSQL | nosql-databases#further-reading |
+| Database › SQL or NoSQL | nosql-databases#sql-or-nosql-making-the-choice |
 | Cache |  |
 | Cache › Client caching |  |
 | Cache › CDN caching |  |
@@ -93,23 +93,23 @@ Every topic in The System Design Primer, and where this site covers it. The site
 | Cache › When to update the cache › Write-behind (write-back) |  |
 | Cache › When to update the cache › Refresh-ahead |  |
 | Cache › Disadvantage(s): cache |  |
-| Asynchronism |  |
-| Asynchronism › Message queues |  |
-| Asynchronism › Task queues |  |
-| Asynchronism › Back pressure |  |
-| Asynchronism › Disadvantage(s): asynchronism |  |
-| Communication |  |
-| Communication › Hypertext transfer protocol (HTTP) |  |
-| Communication › Hypertext transfer protocol (HTTP) › Source(s) and further reading: HTTP |  |
-| Communication › Transmission control protocol (TCP) |  |
-| Communication › User datagram protocol (UDP) |  |
-| Communication › User datagram protocol (UDP) › Source(s) and further reading: TCP and UDP |  |
-| Communication › Remote procedure call (RPC) |  |
-| Communication › Remote procedure call (RPC) › Disadvantage(s): RPC |  |
-| Communication › Representational state transfer (REST) |  |
-| Communication › Representational state transfer (REST) › Disadvantage(s): REST |  |
-| Communication › RPC and REST calls comparison |  |
-| Communication › RPC and REST calls comparison › Source(s) and further reading: REST and RPC |  |
+| Asynchronism | queues-and-async#doing-work-outside-the-request |
+| Asynchronism › Message queues | queues-and-async#how-a-message-queue-works |
+| Asynchronism › Task queues | queues-and-async#message-queues-and-task-queues |
+| Asynchronism › Back pressure | queues-and-async#back-pressure-when-the-queue-keeps-growing |
+| Asynchronism › Disadvantage(s): asynchronism | queues-and-async#when-to-stay-synchronous |
+| Communication | protocols-and-apis#layers-how-one-request-is-built |
+| Communication › Hypertext transfer protocol (HTTP) | protocols-and-apis#http-requests-and-responses |
+| Communication › Hypertext transfer protocol (HTTP) › Source(s) and further reading: HTTP | protocols-and-apis#further-reading |
+| Communication › Transmission control protocol (TCP) | protocols-and-apis#tcp-reliable-delivery-with-a-price |
+| Communication › User datagram protocol (UDP) | protocols-and-apis#udp-fast-with-no-promises |
+| Communication › User datagram protocol (UDP) › Source(s) and further reading: TCP and UDP | protocols-and-apis#further-reading |
+| Communication › Remote procedure call (RPC) | protocols-and-apis#rpc-calling-a-function-on-another-machine |
+| Communication › Remote procedure call (RPC) › Disadvantage(s): RPC | protocols-and-apis#disadvantages-of-rpc |
+| Communication › Representational state transfer (REST) | protocols-and-apis#rest-resources-and-representations |
+| Communication › Representational state transfer (REST) › Disadvantage(s): REST | protocols-and-apis#disadvantages-of-rest |
+| Communication › RPC and REST calls comparison | protocols-and-apis#rpc-and-rest-side-by-side |
+| Communication › RPC and REST calls comparison › Source(s) and further reading: REST and RPC | protocols-and-apis#further-reading |
 | Security |  |
 | Appendix |  |
 | Appendix › Powers of two table |  |
