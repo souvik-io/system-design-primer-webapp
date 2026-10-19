@@ -1,9 +1,8 @@
-// Checks content-extra/COVERAGE.md, the list of every topic in The System Design Primer and the
-// chapter section on this site that covers it.
+// Checks content/COVERAGE.md, the list of every topic in The System Design Primer (where the
+// handbook's syllabus started) and the chapter section on this site that covers it.
 //
-// Every filled-in target must point at a chapter and heading that exist. Empty rows are topics
-// still to be written; with --strict they fail the check, so the primer can't be removed while
-// anything it teaches has no home here.
+// Every filled-in target must point at a chapter and heading that exist, so renaming a chapter or
+// heading can't quietly drop a topic. With --strict, empty rows fail the check too.
 //
 // Run after `npm run content`.
 
@@ -15,7 +14,7 @@ const CONTENT = path.join(ROOT, 'public/content')
 const strict = process.argv.includes('--strict')
 
 const rows = fs
-  .readFileSync(path.join(ROOT, 'content-extra/COVERAGE.md'), 'utf8')
+  .readFileSync(path.join(ROOT, 'content/COVERAGE.md'), 'utf8')
   .split('\n')
   .filter((line) => line.startsWith('| ') && !line.startsWith('| Topic') && !line.startsWith('| ---'))
   .map((line) => {
@@ -47,7 +46,8 @@ for (const { topic, target } of rows) {
   }
   // A flashcard deck written for this site: deck:<id>
   if (target.startsWith('deck:')) {
-    if (!fs.existsSync(path.join(CONTENT, 'flashcards', `${target.slice(5)}.json`))) problems.push(`"${topic}" points at deck "${target.slice(5)}", which doesn't exist`)
+    if (!fs.existsSync(path.join(CONTENT, 'flashcards', `${target.slice(5)}.json`)))
+      problems.push(`"${topic}" points at deck "${target.slice(5)}", which doesn't exist`)
     continue
   }
   const [chapter, heading] = target.split('#')

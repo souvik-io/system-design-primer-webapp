@@ -93,7 +93,7 @@ body {
 }
 
 /* ------------------------------------------------------------------ */
-/* Article content rendered from the primer's markdown                */
+/* Article content rendered from the chapters' markdown              */
 
 @layer components {
   .article {
@@ -386,7 +386,7 @@ body {
     display: none;
   }
 
-  /* "Check yourself" questions in the extra chapters */
+  /* "Check yourself" questions at the end of each chapter */
   .article details {
     border: 1px solid var(--rule);
     border-radius: 8px;

@@ -1,5 +1,5 @@
-import { useSettings } from './settings'
 import manifestJson from '../generated/manifest.json'
+import type { Redirects } from './legacy'
 
 export type SectionMeta = { id: string; title: string }
 export type ChapterMeta = {
@@ -8,14 +8,8 @@ export type ChapterMeta = {
   summary: string
   minutes: number
   sections: SectionMeta[]
-  /** The README's wording of this question, when it differs from the title */
-  alsoAsked?: string
   /** Reference material that doesn't count toward progress */
   untracked?: boolean
-  /** Written for this site, not part of the primer. Hidden unless the reader turns extra chapters on. */
-  extra?: boolean
-  /** Written for this site, but always shown, next to the primer chapter it accompanies */
-  companion?: boolean
 }
 export type Part = {
   id: string
@@ -23,25 +17,17 @@ export type Part = {
   description: string
   chapters: ChapterMeta[]
   untracked?: boolean
-  extra?: boolean
-  /** Questions listed in the primer that don't have a solution yet */
-  unsolved?: string[]
 }
 
 export type Heading = { id: string; title: string; depth: number }
 export type Section = SectionMeta & { html: string; headings: Heading[] }
-export type SourceFile = { name: string; url: string; html: string }
-export type Chapter = { id: string; title: string; sections: Section[]; sourceFiles: SourceFile[] }
+export type Chapter = { id: string; title: string; sections: Section[] }
 
 export type DeckMeta = {
   id: string
   title: string
   description: string
   cardIds: string[]
-  /** Written for this site, not one of the primer's Anki decks */
-  site?: boolean
-  /** Covers the extra chapters, so it's shown only when they are */
-  extra?: boolean
 }
 export type Card = { id: string; front: string; back: string; href?: string }
 export type Deck = { id: string; title: string; cards: Card[] }
@@ -49,33 +35,18 @@ export type Deck = { id: string; title: string; cards: Card[] }
 export const parts: Part[] = (manifestJson.parts as Part[]).filter((p) => p.chapters.length > 0)
 export const decks: DeckMeta[] = manifestJson.decks
 export const deckById = new Map(decks.map((d) => [d.id, d]))
-const decksWithoutExtras = decks.filter((d) => !d.extra)
-
-/** The decks the reader can see: all of them, less the extra chapters' decks when those are turned off. */
-export function useVisibleDecks() {
-  return useSettings((s) => s.showExtras) ? decks : decksWithoutExtras
-}
+export const redirects: Redirects = manifestJson.redirects
 
 export const chapters: (ChapterMeta & { part: Part })[] = parts.flatMap((part) => part.chapters.map((c) => ({ ...c, part })))
 
 export const chapterById = new Map(chapters.map((c) => [c.id, c]))
 
-export const extraParts = parts.filter((p) => p.extra)
-export const extraChapterCount = extraParts.reduce((n, p) => n + p.chapters.length, 0)
+/** Chapters that count toward progress */
+export const trackedChapters = chapters.filter((c) => !c.untracked)
+export const totalSections = trackedChapters.reduce((n, c) => n + c.sections.length, 0)
 
-const visible = (showExtras: boolean) => {
-  const shownParts = showExtras ? parts : parts.filter((p) => !p.extra)
-  const shownChapters = showExtras ? chapters : chapters.filter((c) => !c.extra)
-  const tracked = shownChapters.filter((c) => !c.untracked)
-  return { parts: shownParts, chapters: shownChapters, tracked, totalSections: tracked.reduce((n, c) => n + c.sections.length, 0) }
-}
-const withExtras = visible(true)
-const withoutExtras = visible(false)
-
-/** The parts and chapters the reader has chosen to see: the primer, plus the extra chapters if they're turned on. */
-export function useVisibleContent() {
-  return useSettings((s) => s.showExtras) ? withExtras : withoutExtras
-}
+const sectionKeys = new Set(chapters.flatMap((c) => c.sections.map((s) => sectionKey(c.id, s.id))))
+export const sectionExists = (key: string) => sectionKeys.has(key)
 
 export function sectionKey(chapterId: string, sectionId: string) {
   return `${chapterId}/${sectionId}`

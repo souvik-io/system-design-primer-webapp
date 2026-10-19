@@ -1,12 +1,10 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { chapters, sectionKey, type ChapterMeta, type SectionMeta } from './content'
-import { useSettings } from './settings'
 import { useProgress } from './progress'
 
-// Study plans based on the primer's study guide, which suggests what to cover for a short, medium
-// or long interview timeline. The primer doesn't give lengths or pick which questions to practice,
-// so the weeks and the question choices here are this site's suggestions.
+// Study plans for a short, medium or long interview timeline, as laid out in "How to use this handbook"
+// (content/how-to-use-this-handbook.md#pick-a-study-plan). Keep the two in step.
 
 export type PlanId = 'short' | 'medium' | 'long'
 
@@ -17,8 +15,8 @@ export type PlanDef = {
   description: string
   /** Practice questions to include. Every plan covers all the topic chapters. */
   questions: 'some' | 'many' | 'all'
-  /** Which extra chapters to add when the reader has them turned on */
-  extras: 'none' | 'concepts' | 'all'
+  /** Whether to include the "Deeper concepts" part */
+  concepts: boolean
 }
 
 export const PLANS: PlanDef[] = [
@@ -28,7 +26,7 @@ export const PLANS: PlanDef[] = [
     weeks: 2,
     description: 'Breadth across every topic, and a few practice questions.',
     questions: 'some',
-    extras: 'none',
+    concepts: false,
   },
   {
     id: 'medium',
@@ -36,7 +34,7 @@ export const PLANS: PlanDef[] = [
     weeks: 5,
     description: 'Breadth, some depth, and many practice questions.',
     questions: 'many',
-    extras: 'concepts',
+    concepts: true,
   },
   {
     id: 'long',
@@ -44,28 +42,39 @@ export const PLANS: PlanDef[] = [
     weeks: 10,
     description: 'Breadth, more depth, and every practice question.',
     questions: 'all',
-    extras: 'all',
+    concepts: true,
   },
 ]
 
 export const planById = new Map(PLANS.map((p) => [p.id, p]))
 
 const SOME = new Set(['design-pastebin', 'design-twitter', 'design-web-crawler', 'ood-hash-table', 'ood-lru-cache'])
-const MANY = new Set([...SOME, 'design-query-cache', 'design-sales-rank', 'design-scaling-aws', 'ood-parking-lot', 'ood-online-chat'])
+const MANY = new Set([
+  ...SOME,
+  'design-url-shortener',
+  'design-social-news-feed',
+  'design-query-cache',
+  'design-key-value-store',
+  'design-sales-rank',
+  'design-chat-system',
+  'design-scaling-aws',
+  'ood-parking-lot',
+  'ood-online-chat',
+])
 const QUESTION_PARTS = new Set(['system-design', 'ood'])
 
-/** The chapters a plan covers, in course order. Extra chapters count only while they're turned on. */
-export function planChapters(plan: PlanDef, showExtras: boolean): ChapterMeta[] {
+/** The chapters a plan covers, in course order. */
+export function planChapters(plan: PlanDef): ChapterMeta[] {
   return chapters.filter((c) => {
     if (c.untracked) return false
-    if (c.extra) return showExtras && (plan.extras === 'all' || (plan.extras === 'concepts' && c.part.id === 'extra-concepts'))
+    if (c.part.id === 'concepts') return plan.concepts
     if (!QUESTION_PARTS.has(c.part.id)) return true
     return plan.questions === 'all' || (plan.questions === 'many' ? MANY : SOME).has(c.id)
   })
 }
 
-export function planSize(plan: PlanDef, showExtras: boolean) {
-  const list = planChapters(plan, showExtras)
+export function planSize(plan: PlanDef) {
+  const list = planChapters(plan)
   return {
     chapters: list.length,
     sections: list.reduce((n, c) => n + c.sections.length, 0),
@@ -136,16 +145,11 @@ export type PlanStatus = {
 }
 
 /** Today's goal: what was left this morning, spread evenly over the days remaining. */
-export function planStatus(
-  plan: NonNullable<PlanData['plan']>,
-  completed: Record<string, number>,
-  showExtras: boolean,
-  now = Date.now(),
-): PlanStatus | null {
+export function planStatus(plan: NonNullable<PlanData['plan']>, completed: Record<string, number>, now = Date.now()): PlanStatus | null {
   const def = planById.get(plan.id)
   if (!def) return null
   const today = dayKey(now)
-  const list = planChapters(def, showExtras)
+  const list = planChapters(def)
   let total = 0
   let done = 0
   let doneToday = 0
@@ -169,8 +173,7 @@ export function planStatus(
 export function usePlanStatus() {
   const plan = usePlan((s) => s.plan)
   const completed = useProgress((s) => s.completed)
-  const showExtras = useSettings((s) => s.showExtras)
-  return plan ? planStatus(plan, completed, showExtras) : null
+  return plan ? planStatus(plan, completed) : null
 }
 
 /** Days in a row, up to today, with at least one section finished. Today doesn't break the streak until it's over. */

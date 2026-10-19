@@ -1,21 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, Navigate, useParams } from 'react-router'
 import clsx from 'clsx'
 import { ArrowLeft, BookOpen, Check } from 'lucide-react'
-import { deckById, loadDeck, type Card, type Deck, type DeckMeta } from '../lib/content'
+import { deckById, loadDeck, redirects, type Card, type Deck, type DeckMeta } from '../lib/content'
 import { deckStats, formatWait, RATINGS, schedule, useFlashcards, type Rating } from '../lib/flashcards'
 import { useArticleClicks } from '../components/useArticleClicks'
-import { ExtrasSwitch } from '../components/ExtrasToggle'
-import { useSettings } from '../lib/settings'
 import { NotFound } from './NotFound'
 
 /** What to do before revealing the answer, per deck. */
 const PROMPTS: Record<string, string> = {
-  'system-design': 'Explain it out loud: what it is, how it works, and its trade-offs.',
-  exercises: 'Talk through a design: use cases and constraints, high-level design, core components, then scaling.',
-  ood: 'Sketch the classes, what each is responsible for, and how they relate.',
+  topics: 'Explain it out loud: what it is, how it works, and its trade-offs.',
+  'design-walkthroughs': 'Talk through a design: use cases and constraints, high-level design, core components, then scaling.',
+  'object-oriented': 'Sketch the classes, what each is responsible for, and how they relate.',
 }
-// The decks written for this site ask one specific question per card.
+// The other decks ask one specific question per card.
 const SITE_PROMPT = 'Answer out loud or in your head, then check.'
 
 const RATING_LABEL: Record<Rating, string> = { again: 'Again', hard: 'Hard', good: 'Good', easy: 'Easy' }
@@ -35,31 +33,8 @@ function useDeck(id: string) {
 export function StudyPage() {
   const { deckId = '' } = useParams()
   const meta = deckById.get(deckId)
-  const showExtras = useSettings((s) => s.showExtras)
-  if (!meta) return <NotFound />
-  if (meta.extra && !showExtras) return <HiddenDeck meta={meta} />
+  if (!meta) return redirects.decks[deckId] ? <Navigate to={`/flashcards/${redirects.decks[deckId]}`} replace /> : <NotFound />
   return <Study key={meta.id} meta={meta} />
-}
-
-/** Someone followed a link to an extra chapters' deck while extra chapters are turned off. */
-function HiddenDeck({ meta }: { meta: DeckMeta }) {
-  useEffect(() => {
-    document.title = `${meta.title} | Flashcards`
-  }, [meta])
-  return (
-    <div className="mx-auto max-w-[70ch] px-4 pt-12 pb-16 sm:px-8">
-      <h1 className="text-[2rem] leading-tight font-semibold tracking-tight text-ink">{meta.title}</h1>
-      <p className="mt-4 font-serif text-lg leading-relaxed text-ink-2">
-        This deck covers the extra chapters written for this site, beyond the primer. Extra chapters are turned off. Turn them on to study it.
-      </p>
-      <ExtrasSwitch className="mt-6" />
-      <p className="mt-6 text-sm text-muted">
-        <Link to="/flashcards" className="text-accent hover:underline">
-          Back to all decks
-        </Link>
-      </p>
-    </div>
-  )
 }
 
 function Study({ meta }: { meta: DeckMeta }) {
@@ -299,9 +274,7 @@ function SessionDone({ meta, reviewed, onMore }: { meta: DeckMeta; reviewed: num
 export function BrowsePage() {
   const { deckId = '' } = useParams()
   const meta = deckById.get(deckId)
-  const showExtras = useSettings((s) => s.showExtras)
-  if (!meta) return <NotFound />
-  if (meta.extra && !showExtras) return <HiddenDeck meta={meta} />
+  if (!meta) return redirects.decks[deckId] ? <Navigate to={`/flashcards/${redirects.decks[deckId]}/browse`} replace /> : <NotFound />
   return <Browse key={meta.id} meta={meta} />
 }
 

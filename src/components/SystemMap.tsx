@@ -2,8 +2,8 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import clsx from 'clsx'
 import { Check } from 'lucide-react'
-import { chapterById } from '../lib/content'
-import { useChapterProgress } from '../lib/progress'
+import { chapterById, sectionHref, sectionKey } from '../lib/content'
+import { useChapterProgress, useProgress } from '../lib/progress'
 import { ProgressRing } from './ProgressRing'
 
 // The "Building blocks" chapters laid out as the path a request takes through a system.
@@ -14,17 +14,31 @@ const COL = [16, 262, 458, 654, 858]
 const ROW = [40, 178, 316]
 const CANVAS = { width: 1024, height: 404 }
 
-type NodeDef = { chapterId: string; label: string; x: number; y: number }
+// A node covers a whole chapter, or the run of its sections from `from` up to (not including) `until`,
+// where one chapter covers two boxes.
+type NodeDef = { chapterId: string; from?: string; until?: string; label: string; x: number; y: number }
 
 const NODES: NodeDef[] = [
-  { chapterId: 'domain-name-system', label: 'DNS', x: COL[1], y: ROW[0] },
-  { chapterId: 'load-balancer', label: 'Load balancer', x: COL[1], y: ROW[1] },
-  { chapterId: 'content-delivery-network', label: 'CDN', x: COL[1], y: ROW[2] },
-  { chapterId: 'reverse-proxy-web-server', label: 'Reverse proxy', x: COL[2], y: ROW[1] },
-  { chapterId: 'application-layer', label: 'Application layer', x: COL[3], y: ROW[1] },
+  { chapterId: 'dns-and-cdn', until: 'content-delivery-networks', label: 'DNS', x: COL[1], y: ROW[0] },
+  { chapterId: 'load-balancing', label: 'Load balancer', x: COL[1], y: ROW[1] },
+  { chapterId: 'dns-and-cdn', from: 'content-delivery-networks', label: 'CDN', x: COL[1], y: ROW[2] },
+  {
+    chapterId: 'reverse-proxy-and-api-gateway',
+    until: 'separating-the-web-and-application-layers',
+    label: 'Reverse proxy',
+    x: COL[2],
+    y: ROW[1],
+  },
+  {
+    chapterId: 'reverse-proxy-and-api-gateway',
+    from: 'separating-the-web-and-application-layers',
+    label: 'Application layer',
+    x: COL[3],
+    y: ROW[1],
+  },
   { chapterId: 'cache', label: 'Cache', x: COL[4], y: ROW[0] },
-  { chapterId: 'database', label: 'Database', x: COL[4], y: ROW[1] },
-  { chapterId: 'asynchronism', label: 'Asynchronism', x: COL[4], y: ROW[2] },
+  { chapterId: 'relational-databases', label: 'Database', x: COL[4], y: ROW[1] },
+  { chapterId: 'queues-and-async', label: 'Queues', x: COL[4], y: ROW[2] },
 ]
 
 const CLIENT = { x: COL[0], y: ROW[1], w: 112 }
@@ -103,11 +117,11 @@ export function SystemMap() {
             Client
           </div>
 
-          <Chip chapterId="communication" label="Communication" style={{ left: CLIENT.x + CLIENT.w + 6, top: mid(ROW[1]) - 13 }} />
+          <Chip chapterId="protocols-and-apis" label="Communication" style={{ left: CLIENT.x + CLIENT.w + 6, top: mid(ROW[1]) - 13 }} />
           <Chip chapterId="security" label="Security" style={{ left: SECURITY.x + 14, top: SECURITY.y - 13 }} />
 
           {NODES.map((n) => (
-            <MapNode key={n.chapterId} node={n} />
+            <MapNode key={n.label} node={n} />
           ))}
         </div>
       </div>
@@ -117,12 +131,17 @@ export function SystemMap() {
 
 function MapNode({ node }: { node: NodeDef }) {
   const chapter = chapterById.get(node.chapterId)!
-  const { done, total, ratio } = useChapterProgress(chapter)
+  const start = node.from ? chapter.sections.findIndex((s) => s.id === node.from) : 0
+  const end = node.until ? chapter.sections.findIndex((s) => s.id === node.until) : chapter.sections.length
+  const sections = chapter.sections.slice(start, end)
+  const done = useProgress((s) => sections.filter((sec) => s.completed[sectionKey(chapter.id, sec.id)]).length)
+  const total = sections.length
+  const ratio = done / total
   const complete = done === total
 
   return (
     <Link
-      to={`/learn/${chapter.id}`}
+      to={sectionHref(chapter.id, sections[0].id)}
       title={chapter.title}
       className={clsx(
         'group absolute flex flex-col justify-center overflow-hidden rounded-xl border px-3.5 transition-colors',

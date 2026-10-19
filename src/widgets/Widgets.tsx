@@ -2,8 +2,8 @@ import { lazy, Suspense, useEffect, useState, type ComponentType, type RefObject
 import { createPortal } from 'react-dom'
 
 // Interactive diagrams. The content build leaves an empty <div data-widget="name"> where each one
-// goes (see PRIMER_WIDGETS in scripts/build-content.mjs, and ```widget blocks in content-extra/), and
-// this renders the matching component into it. Each diagram's code loads only when its chapter does.
+// goes (from a ```widget block in content/), and this renders the matching component into it. Each
+// diagram's code loads only when its chapter does.
 
 const WIDGETS: Record<string, ComponentType> = {
   'hash-ring': lazy(() => import('./HashRing')),

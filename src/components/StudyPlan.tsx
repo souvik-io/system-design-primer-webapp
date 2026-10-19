@@ -4,7 +4,6 @@ import clsx from 'clsx'
 import { ArrowRight, Flame } from 'lucide-react'
 import { sectionHref } from '../lib/content'
 import { useProgress } from '../lib/progress'
-import { useSettings } from '../lib/settings'
 import { addDays, dayKey, planById, planSize, PLANS, streak, usePlan, usePlanStatus, type PlanId } from '../lib/plans'
 import { ProgressRing } from './ProgressRing'
 
@@ -26,7 +25,6 @@ export function StudyPlan() {
 }
 
 function PickPlan({ onDone }: { onDone?: () => void }) {
-  const showExtras = useSettings((s) => s.showExtras)
   const current = usePlan((s) => s.plan)
   const startPlan = usePlan((s) => s.startPlan)
   const [chosen, setChosen] = useState<PlanId | null>(current?.id ?? null)
@@ -41,17 +39,17 @@ function PickPlan({ onDone }: { onDone?: () => void }) {
             Study plan
           </h2>
           <p className="mt-1 max-w-2xl text-[0.95rem] text-muted">
-            Pick how long you have and get a daily goal. The three timelines follow the primer's{' '}
-            <Link to="/learn/study-guide" className="text-accent hover:underline">
-              study guide
+            Pick how long you have and get a daily goal. The three timelines are described in{' '}
+            <Link to="/learn/how-to-use-this-handbook#pick-a-study-plan" className="text-accent hover:underline">
+              How to use this handbook
             </Link>
-            ; the lengths and which practice questions to do are this site's suggestions.
+            .
           </p>
         </>
       )}
       <div role="radiogroup" aria-label="Timeline" className={clsx('grid gap-3 sm:grid-cols-3', !onDone && 'mt-4')}>
         {PLANS.map((p) => {
-          const size = planSize(p, showExtras)
+          const size = planSize(p)
           const perDay = Math.ceil(size.sections / (p.weeks * 7))
           const selected = chosen === p.id
           return (
