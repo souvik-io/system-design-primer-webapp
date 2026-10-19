@@ -63,6 +63,11 @@ INTENTIONAL.push([
   (b) => b.kind === 'image' && replacedSolutionImages.has(path.basename(b.text)),
   'Diagram from a design solution that a chapter written for this site replaces',
 ])
+// The About page written for this site (content-extra/about.md) replaces the README's own.
+if (fs.existsSync(path.join(ROOT, 'content-extra/about.md'))) {
+  for (const where of ['Anki flashcards', 'Under development', 'Contributing', 'Credits', 'Contact info', 'License'])
+    INTENTIONAL.push([where, () => true, 'About sections (replaced by the About page written for this site)'])
+}
 const intentionalReason = (b) => INTENTIONAL.find(([where, test]) => (where === '*' || where === b.chapter) && test(b))?.[2]
 
 let siteText = ''
@@ -163,6 +168,7 @@ for (const dir of fs.readdirSync(path.join(SRC, 'solutions/system_design'))) {
 }
 for (const dir of fs.readdirSync(path.join(SRC, 'solutions/object_oriented_design'))) {
   const d = path.join(SRC, 'solutions/object_oriented_design', dir)
+  if (fs.existsSync(path.join(ROOT, 'content-extra', `ood-${dir.replace(/_/g, '-')}.md`))) continue // replaced; see COVERAGE.md
   for (const f of fs.readdirSync(d).filter((f) => f.endsWith('.ipynb'))) {
     results.push(check(`solutions/object_oriented_design/${dir}/${f}`, notebookMarkdown(path.join(d, f))))
   }

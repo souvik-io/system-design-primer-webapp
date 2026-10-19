@@ -59,7 +59,7 @@ Here is what each plan covers:
 | Work through the object-oriented design questions | Some | Many | Most |
 | Try questions from the practice question bank | Some | Many | Most |
 
-The [appendix](/learn/appendix) has the [list of company engineering blogs](/learn/appendix#company-engineering-blogs), the [real-world architectures](/learn/appendix#real-world-architectures) and the [extra practice questions](/learn/appendix#additional-system-design-interview-questions).
+The Reference part has three chapters to come back to: [Numbers to know](/learn/numbers-to-know) for estimates, [Practice questions](/learn/practice-questions) for more questions to try, and [Real-world architectures](/learn/real-world-architectures) for papers, company architectures and engineering blogs.
 
 ## How to study a chapter
 

@@ -495,10 +495,10 @@ Use **parameterized queries**. Also sanitize all user inputs, and any input para
 - Use parameterized queries.
 - Follow the principle of least privilege.
 
-<!-- chapter: appendix -->
+<!-- chapter: numbers-to-know -->
 
 ## Roughly how much is 2^10, 2^20, 2^30 and 2^40 in bytes?
-<!-- /learn/appendix#powers-of-two-table -->
+<!-- /learn/numbers-to-know#powers-of-two -->
 
 | Power | Approx | Bytes |
 |---|---|---|
@@ -508,41 +508,41 @@ Use **parameterized queries**. Also sanitize all user inputs, and any input para
 | 2^40 | 1 trillion | 1 TB |
 
 ## What is 2^32 exactly, and roughly how many bytes is it?
-<!-- /learn/appendix#powers-of-two-table -->
+<!-- /learn/numbers-to-know#powers-of-two -->
 
 2^32 is exactly 4,294,967,296, which the table rounds to **4 GB**. Compare 2^30 (1,073,741,824), about 1 GB.
 
 ## Roughly how long does a round trip within the same datacenter take?
-<!-- /learn/appendix#latency-numbers-every-programmer-should-know -->
+<!-- /learn/numbers-to-know#latency-numbers-every-programmer-should-know -->
 
 About **500 us** (500,000 ns). That works out to about 2,000 round trips per second within a data center. An HDD seek (10 ms) is 20x longer.
 
 ## How long does a main memory reference take compared with L1 and L2 cache?
-<!-- /learn/appendix#latency-numbers-every-programmer-should-know -->
+<!-- /learn/numbers-to-know#latency-numbers-every-programmer-should-know -->
 
 Main memory reference: **100 ns**. That's 20x an L2 cache reference (7 ns) and 200x an L1 cache reference (0.5 ns).
 
 ## How long does it take to read 1 MB sequentially from memory, SSD and HDD?
-<!-- /learn/appendix#latency-numbers-every-programmer-should-know -->
+<!-- /learn/numbers-to-know#latency-numbers-every-programmer-should-know -->
 
 | Source | Time |
 |---|---|
 | Memory | 250 us |
 | SSD | 1 ms |
 | 1 Gbps network | 10 ms |
-| HDD | 30 ms |
+| HDD | 20 ms |
 
-HDD is 120x memory and 30x SSD.
+HDD is 80x memory and 20x SSD. (An older version of the table says 30 ms.)
 
 ## How long is a packet round trip from California to the Netherlands and back?
-<!-- /learn/appendix#latency-numbers-every-programmer-should-know -->
+<!-- /learn/numbers-to-know#latency-numbers-every-programmer-should-know -->
 
 About **150 ms**. That's why only 6-7 world-wide round trips fit in a second, compared with 2,000 within a data center.
 
 ## What sequential read throughput should you assume for HDD, 1 Gbps Ethernet, SSD and main memory?
-<!-- /learn/appendix#latency-numbers-every-programmer-should-know -->
+<!-- /learn/numbers-to-know#latency-numbers-every-programmer-should-know -->
 
-- HDD: 30 MB/s
+- HDD: 50 MB/s
 - 1 Gbps Ethernet: 100 MB/s
 - SSD: 1 GB/s
 - Main memory: 4 GB/s

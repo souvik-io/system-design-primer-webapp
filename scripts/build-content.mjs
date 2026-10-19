@@ -115,7 +115,7 @@ const PARTS = [
     id: 'reference',
     title: 'Reference',
     description: 'Numbers to memorise, more practice questions, and real-world architectures.',
-    readme: ['appendix'],
+    readme: ['appendix', { companion: 'numbers-to-know' }, { companion: 'practice-questions' }, { companion: 'real-world-architectures' }],
   },
   {
     id: 'system-design',
@@ -182,8 +182,8 @@ const PARTS = [
   },
   {
     id: 'about',
-    title: 'About the primer',
-    description: 'The flashcard decks, topics still being written, credits, contributing and the license.',
+    title: 'About',
+    description: 'The flashcards, what is being written next, contributing, credits and the license.',
     // Not study material, so it doesn't count toward progress.
     untracked: true,
     about: ['anki-flashcards', 'under-development', 'contributing', 'credits', 'contact-info', 'license'],
@@ -318,6 +318,11 @@ const PRIMER_NOTES = [
 // covers the extra chapters, so it's shown only when they are.
 const SITE_DECKS = [
   {
+    id: 'topics',
+    title: 'Topics, one card each',
+    description: 'One card per topic, from performance and scalability to security. Explain it in your own words, then check.',
+  },
+  {
     id: 'foundations',
     title: 'Start here and core trade-offs',
     description: 'Interview steps, scaling, performance and latency, CAP and consistency, and availability, including the 101 chapters.',
@@ -331,6 +336,16 @@ const SITE_DECKS = [
     id: 'design-decisions',
     title: 'Design questions, decision by decision',
     description: 'The key choices, numbers and trade-offs inside each worked system and object-oriented design.',
+  },
+  {
+    id: 'design-walkthroughs',
+    title: 'Design walkthroughs',
+    description: 'Talk through a whole design question in four steps, then compare with the outline from its chapter.',
+  },
+  {
+    id: 'object-oriented',
+    title: 'Object-oriented design',
+    description: 'Sketch the classes for each object-oriented question, then compare with the design in its chapter.',
   },
   {
     id: 'beyond-concepts',
@@ -775,7 +790,7 @@ for (const part of PARTS) {
         })
         .filter(Boolean)
     : part.about
-      ? [aboutChapter(readme, part.about)]
+      ? [fs.existsSync(path.join(EXTRA, `${ABOUT_ID}.md`)) ? extraChapter(ABOUT_ID) : aboutChapter(readme, part.about)]
       : part.extra
         ? part.extra.filter(extraExists).map(extraChapter)
         : part.files.map((f) => (fs.existsSync(path.join(EXTRA, `${f.id}.md`)) ? extraChapter(f.id) : fileChapter(f)))

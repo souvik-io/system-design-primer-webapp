@@ -45,6 +45,11 @@ for (const { topic, target } of rows) {
     open.push(topic)
     continue
   }
+  // A flashcard deck written for this site: deck:<id>
+  if (target.startsWith('deck:')) {
+    if (!fs.existsSync(path.join(CONTENT, 'flashcards', `${target.slice(5)}.json`))) problems.push(`"${topic}" points at deck "${target.slice(5)}", which doesn't exist`)
+    continue
+  }
   const [chapter, heading] = target.split('#')
   const ids = chapterHeadings(chapter)
   if (!ids) problems.push(`"${topic}" points at chapter "${chapter}", which doesn't exist`)

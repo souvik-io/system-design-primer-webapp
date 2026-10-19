@@ -4,7 +4,7 @@ Before you draw boxes, you need a rough idea of how big the problem is. Is it 50
 
 In an interview, this usually happens right after you clarify requirements, in the first of [the four interview steps](/learn/system-design-interview#step-1-outline-use-cases-constraints-and-assumptions). Nobody expects precision. Interviewers want to see that you can turn a vague product description into numbers, keep the units straight, and then let those numbers drive design choices.
 
-Two reference tables help: the [powers of two table](/learn/appendix#powers-of-two-table) and [latency numbers every programmer should know](/learn/appendix#latency-numbers-every-programmer-should-know). This chapter is about the method that uses them.
+Two reference tables help: the [powers of two table](/learn/numbers-to-know#powers-of-two) and [latency numbers every programmer should know](/learn/numbers-to-know#latency-numbers-every-programmer-should-know). This chapter is about the method that uses them.
 
 ## Units and shortcuts
 
@@ -128,7 +128,7 @@ An estimate with a misplaced exponent is worse than none, because you'll defend 
 
 - **Recompute per user.** 25 TB a day ÷ 50 million users = 500 KB per user per day, which matches 0.2 photos × 2.5 MB. If the per-user figure looks absurd (gigabytes a day for a messaging user), something upstream is wrong.
 - **Check the units at every step.** Write them next to each number. "15 GB/s" and "15 Gbps" differ by a factor of 8.
-- **Compare with physical limits.** A typical server has a 10–25 Gbps network card and tens to hundreds of GB of RAM, with a few TB on the largest machines. One SSD reads sequentially at 1 GB/s or more (see the [latency table](/learn/appendix#latency-numbers-every-programmer-should-know)); a current NVMe drive manages several GB/s. If one component would need to exceed these, you've found a scaling decision, not a typo.
+- **Compare with physical limits.** A typical server has a 10–25 Gbps network card and tens to hundreds of GB of RAM, with a few TB on the largest machines. One SSD reads sequentially at 1 GB/s or more (see the [latency table](/learn/numbers-to-know#latency-numbers-every-programmer-should-know)); a current NVMe drive manages several GB/s. If one component would need to exceed these, you've found a scaling decision, not a typo.
 - **Watch compounding.** Rounding every number up by 50% across four multiplications makes the result five times too big. Round some up and some down, or note the direction.
 - **Only compute what changes the design.** If storage is 2 GB, don't spend three minutes refining it to 2.3 GB. Move on to the number that matters.
 

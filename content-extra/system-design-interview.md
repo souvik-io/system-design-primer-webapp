@@ -114,8 +114,8 @@ For the URL shortener, the estimates in step 1 already point the way. Redirects 
 You may be asked to estimate numbers by hand at any point in the interview. Three resources help:
 
 - The [estimation](/learn/estimation) chapter, for the method and worked examples.
-- The [powers of two table](/learn/appendix#powers-of-two-table), for converting between bytes, kilobytes, megabytes and so on.
-- The [latency numbers every programmer should know](/learn/appendix#latency-numbers-every-programmer-should-know), for how long common operations take, from reading memory to a network round trip across the world.
+- The [powers of two table](/learn/numbers-to-know#powers-of-two), for converting between bytes, kilobytes, megabytes and so on.
+- The [latency numbers every programmer should know](/learn/numbers-to-know#latency-numbers-every-programmer-should-know), for how long common operations take, from reading memory to a network round trip across the world.
 
 Google's Jeff Dean argues that every engineer should be able to estimate how well different designs will perform this way, before building any of them. High Scalability's 2011 post, [Google Pro Tip: Use Back-of-the-Envelope Calculations to Choose the Best Design](https://highscalability.com/google-pro-tip-use-back-of-the-envelope-calculations-to-choo/), summarizes his advice with a worked example.
 

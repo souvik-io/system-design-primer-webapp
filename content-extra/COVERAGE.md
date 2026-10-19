@@ -3,7 +3,7 @@
 Every topic in The System Design Primer, and where this site covers it. The site is replacing the primer's own text with chapters written here, and nothing the primer teaches may be lost on the way: each row needs a chapter before the primer can be removed.
 
 - **Topic** is the primer's heading path (`›` separates levels), or a design question, object-oriented design question, Anki deck or About section.
-- **Covered in** is `<chapter-id>#<heading-id>` (or just `<chapter-id>`). Leave it empty while the topic still needs writing.
+- **Covered in** is `<chapter-id>#<heading-id>` (or just `<chapter-id>`), or `deck:<deck-id>` for a flashcard deck written for this site. Leave it empty while the topic still needs writing.
 - Fill a row only once that section teaches everything the primer's section does, including its disadvantages.
 - `npm run coverage` checks that every target exists and reports what's left. `npm run coverage -- --strict` fails while any row is empty.
 
@@ -111,14 +111,14 @@ Every topic in The System Design Primer, and where this site covers it. The site
 | Communication › RPC and REST calls comparison | protocols-and-apis#rpc-and-rest-side-by-side |
 | Communication › RPC and REST calls comparison › Source(s) and further reading: REST and RPC | protocols-and-apis#further-reading |
 | Security | security-101 |
-| Appendix |  |
-| Appendix › Powers of two table |  |
-| Appendix › Latency numbers every programmer should know |  |
-| Appendix › Latency numbers every programmer should know › Latency numbers visualized |  |
-| Appendix › Additional system design interview questions |  |
-| Appendix › Real world architectures |  |
-| Appendix › Company architectures |  |
-| Appendix › Company engineering blogs |  |
+| Appendix | numbers-to-know |
+| Appendix › Powers of two table | numbers-to-know#powers-of-two |
+| Appendix › Latency numbers every programmer should know | numbers-to-know#latency-numbers-every-programmer-should-know |
+| Appendix › Latency numbers every programmer should know › Latency numbers visualized | numbers-to-know#how-these-numbers-have-changed |
+| Appendix › Additional system design interview questions | practice-questions#more-system-design-questions |
+| Appendix › Real world architectures | real-world-architectures#systems-and-papers |
+| Appendix › Company architectures | real-world-architectures#company-architectures |
+| Appendix › Company engineering blogs | real-world-architectures#company-engineering-blogs |
 | Design question › Design Pastebin.com (or Bit.ly) | design-pastebin |
 | Design question › Design the Twitter timeline and search | design-twitter |
 | Design question › Design a web crawler | design-web-crawler |
@@ -127,19 +127,19 @@ Every topic in The System Design Primer, and where this site covers it. The site
 | Design question › Design a key-value store for a search engine | design-query-cache |
 | Design question › Design Amazon's sales ranking by category feature | design-sales-rank |
 | Design question › Design a system that scales to millions of users on AWS | design-scaling-aws |
-| Object-oriented design › Hash map |  |
-| Object-oriented design › Least recently used cache |  |
-| Object-oriented design › Call center |  |
-| Object-oriented design › Deck of cards |  |
-| Object-oriented design › Parking lot |  |
-| Object-oriented design › Chat server |  |
-| Anki deck › System design concepts |  |
-| Anki deck › System design exercises |  |
-| Anki deck › Object-oriented design |  |
-| About › Anki flashcards |  |
-| About › Coding Resource |  |
-| About › Under development |  |
-| About › Contributing |  |
-| About › Credits |  |
-| About › Contact info |  |
-| About › License |  |
+| Object-oriented design › Hash map | ood-hash-table |
+| Object-oriented design › Least recently used cache | ood-lru-cache |
+| Object-oriented design › Call center | ood-call-center |
+| Object-oriented design › Deck of cards | ood-deck-of-cards |
+| Object-oriented design › Parking lot | ood-parking-lot |
+| Object-oriented design › Chat server | ood-online-chat |
+| Anki deck › System design concepts | deck:topics |
+| Anki deck › System design exercises | deck:design-walkthroughs |
+| Anki deck › Object-oriented design | deck:object-oriented |
+| About › Anki flashcards | about#flashcards |
+| About › Coding Resource | about#coding-interview-practice |
+| About › Under development | about#under-development |
+| About › Contributing | about#contributing |
+| About › Credits | about#credits |
+| About › Contact info | about#contact-info |
+| About › License | about#license |
