@@ -274,30 +274,30 @@ One box: a web server on EC2 with MySQL for user data. You scale vertically by c
 - Open only ports 80 (HTTP), 443 (HTTPS) and 22 (SSH, whitelisted IPs only).
 - Stop the web server from initiating outbound connections.
 
-## At Users+ in the scaling on AWS exercise, what two moves lighten the single box?
-<!-- /learn/design-scaling-aws#users -->
+## At about 100 users in the scaling on AWS exercise, what two moves lighten the single box?
+<!-- /learn/design-scaling-aws#stage-1-100-users-move-the-database-and-files-off-the-web-server -->
 
 Vertical scaling got expensive and didn't let the database and web server scale independently. So:
 - Move static content (user files, JS, CSS, images, videos) to an **Object Store** like S3.
 - Move MySQL to its own box, using a managed service like **RDS**.
 Then lock it down with a VPC: a public subnet for the web server, a private subnet for everything else.
 
-## At Users++ in the scaling on AWS exercise, the web server bottlenecks at peak. What do you add?
-<!-- /learn/design-scaling-aws#users-1 -->
+## At about 1,000 users in the scaling on AWS exercise, the web server bottlenecks at peak. What do you add?
+<!-- /learn/design-scaling-aws#stage-2-1000-users-add-a-load-balancer-and-a-second-availability-zone -->
 
 - A **load balancer** (ELB or HAProxy) that terminates SSL.
 - Multiple web servers across availability zones.
-- MySQL in master-slave failover mode across zones.
+- The database in RDS Multi-AZ, with a standby in another zone that takes over on failure.
 - Separate web servers from application servers so each layer scales on its own.
 - A CDN like CloudFront for static content.
 
-## At Users+++ the database suffers from heavy reads. What does the scaling on AWS exercise try, and in what order?
-<!-- /learn/design-scaling-aws#users-2 -->
+## At about 100,000 users the database suffers from heavy reads. What does the scaling on AWS exercise try, and in what order?
+<!-- /learn/design-scaling-aws#stage-3-100000-users-add-a-cache-and-read-replicas -->
 
-First, try configuring the MySQL database cache. If that's not enough, move frequently accessed content to a **Memory Cache** like Elasticache. Add **MySQL read replicas**, with web server logic to split reads from writes. Add more web and application servers.
+First, give MySQL more memory for its own cache (the InnoDB buffer pool). If that's not enough, move frequently accessed content to a **memory cache** like ElastiCache. Add **MySQL read replicas**, with web server logic to split reads from writes. Add more web and application servers.
 
 ## In the scaling on AWS exercise, why move session data into a memory cache?
-<!-- /learn/design-scaling-aws#users-2 -->
+<!-- /learn/design-scaling-aws#stage-3-100000-users-add-a-cache-and-read-replicas -->
 
 With sessions in a Memory Cache instead of on the web servers, the web servers become **stateless**. Any server can handle any request, which is what makes autoscaling possible.
 
@@ -306,8 +306,8 @@ With sessions in a Memory Cache instead of on the web servers, the web servers b
 
 **Autoscaling**: one group per web server and per application server type, spread across availability zones, with min and max instance counts. CloudWatch triggers scaling on time of day or on CPU load, latency, network traffic or a custom metric. The catch: added complexity, and scaling up or down can lag behind demand.
 
-## At Users+++++ in the scaling on AWS exercise, how is slow, non-realtime work like thumbnail creation handled?
-<!-- /learn/design-scaling-aws#users-4 -->
+## At about 10 million users in the scaling on AWS exercise, how is slow, non-realtime work like thumbnail creation handled?
+<!-- /learn/design-scaling-aws#stage-5-10-million-users-split-the-data-and-go-asynchronous -->
 
 Run it asynchronously with **queues and workers**. The client uploads a photo, the application server puts a job on a queue like SQS, and a worker on EC2 or Lambda pulls it, creates the thumbnail, updates the database and stores the thumbnail in the Object Store. The same stage adds a data warehouse, SQL scaling patterns and NoSQL like DynamoDB.
 

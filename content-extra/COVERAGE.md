@@ -119,14 +119,14 @@ Every topic in The System Design Primer, and where this site covers it. The site
 | Appendix › Real world architectures |  |
 | Appendix › Company architectures |  |
 | Appendix › Company engineering blogs |  |
-| Design question › Design Pastebin.com (or Bit.ly) |  |
-| Design question › Design the Twitter timeline and search |  |
-| Design question › Design a web crawler |  |
-| Design question › Design Mint.com |  |
-| Design question › Design the data structures for a social network |  |
-| Design question › Design a key-value store for a search engine |  |
-| Design question › Design Amazon's sales ranking by category feature |  |
-| Design question › Design a system that scales to millions of users on AWS |  |
+| Design question › Design Pastebin.com (or Bit.ly) | design-pastebin |
+| Design question › Design the Twitter timeline and search | design-twitter |
+| Design question › Design a web crawler | design-web-crawler |
+| Design question › Design Mint.com | design-mint |
+| Design question › Design the data structures for a social network | design-social-graph |
+| Design question › Design a key-value store for a search engine | design-query-cache |
+| Design question › Design Amazon's sales ranking by category feature | design-sales-rank |
+| Design question › Design a system that scales to millions of users on AWS | design-scaling-aws |
 | Object-oriented design › Hash map |  |
 | Object-oriented design › Least recently used cache |  |
 | Object-oriented design › Call center |  |

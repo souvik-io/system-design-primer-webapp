@@ -2,6 +2,7 @@
 //
 //   source-repo/README.md            -> one chapter per "##" topic, split into "###" sections
 //   source-repo/solutions/system_design/*/README.md -> one chapter each, split into "##" steps
+//     (content-extra/<chapter-id>.md, when it exists, replaces the primer's version under the same id)
 //   source-repo/solutions/object_oriented_design/*/*.ipynb -> one chapter each
 //
 //   source-repo/README.md "About" sections (Anki, credits, license...) -> one untracked "About" chapter
@@ -777,7 +778,7 @@ for (const part of PARTS) {
       ? [aboutChapter(readme, part.about)]
       : part.extra
         ? part.extra.filter(extraExists).map(extraChapter)
-        : part.files.map(fileChapter)
+        : part.files.map((f) => (fs.existsSync(path.join(EXTRA, `${f.id}.md`)) ? extraChapter(f.id) : fileChapter(f)))
   const rows = questionTables[part.id] ?? []
 
   const chapters = []

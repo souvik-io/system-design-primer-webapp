@@ -48,6 +48,21 @@ const INTENTIONAL = [
     'Index of solutions (each is a chapter; unsolved ones are listed on the home page)',
   ],
 ]
+// Diagrams from primer solutions that a chapter written for this site now replaces (see content-extra/).
+const replacedSolutionImages = new Set(
+  fs
+    .readdirSync(path.join(SRC, 'solutions/system_design'))
+    .filter((dir) => fs.existsSync(path.join(ROOT, 'content-extra', `design-${dir.replace(/_/g, '-')}.md`)))
+    .flatMap((dir) => {
+      const f = path.join(SRC, 'solutions/system_design', dir, 'README.md')
+      return fs.existsSync(f) ? [...fs.readFileSync(f, 'utf8').matchAll(/imgur\.com\/(\w+\.\w+)/g)].map((m) => m[1]) : []
+    }),
+)
+INTENTIONAL.push([
+  '*',
+  (b) => b.kind === 'image' && replacedSolutionImages.has(path.basename(b.text)),
+  'Diagram from a design solution that a chapter written for this site replaces',
+])
 const intentionalReason = (b) => INTENTIONAL.find(([where, test]) => (where === '*' || where === b.chapter) && test(b))?.[2]
 
 let siteText = ''
@@ -142,7 +157,8 @@ function notebookMarkdown(file) {
 const results = [check('README.md', fs.readFileSync(path.join(SRC, 'README.md'), 'utf8'))]
 for (const dir of fs.readdirSync(path.join(SRC, 'solutions/system_design'))) {
   const f = path.join(SRC, 'solutions/system_design', dir, 'README.md')
-  if (fs.existsSync(f))
+  // A chapter written for this site replaces this one; COVERAGE.md tracks what it has to cover.
+  if (fs.existsSync(f) && !fs.existsSync(path.join(ROOT, 'content-extra', `design-${dir.replace(/_/g, '-')}.md`)))
     results.push(check(`solutions/system_design/${dir}/README.md`, fs.readFileSync(f, 'utf8'), `design-${dir.replace(/_/g, '-')}`))
 }
 for (const dir of fs.readdirSync(path.join(SRC, 'solutions/object_oriented_design'))) {
