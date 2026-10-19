@@ -8,9 +8,9 @@ This chapter answers five questions:
 - What trade-off do databases face on normal days, when nothing is broken?
 - What do "eventual" and "strong" consistency mean in practice, and how do quorums let you choose between them?
 
-The primer covers this ground in two short chapters. [Availability vs consistency](/learn/availability-vs-consistency) states the CAP theorem in a few lines. It points to four outside sources: Robert Greiner's blog post [CAP Theorem: Revisited](https://robertgreiner.com/cap-theorem-revisited/) (2014), Kaushik Sathupadi's [A plain English introduction to CAP theorem](http://ksat.me/a-plain-english-introduction-to-cap-theorem), Henry Robinson's [CAP FAQ](https://github.com/henryr/cap-faq) (2013), and a short [video lecture on the CAP theorem](https://www.youtube.com/watch?v=k-Yaq8AHlFA). [Consistency patterns](/learn/consistency-patterns) then lists three levels of consistency: weak, eventual and strong. Those come from Ryan Barrett's 2009 Google I/O talk [Transactions Across Datacenters](https://snarfed.org/s/transactions_across_datacenters_io.html).
+Good short introductions to CAP include Robert Greiner's blog post [CAP Theorem: Revisited](https://robertgreiner.com/cap-theorem-revisited/) (2014), Kaushik Sathupadi's [A plain English introduction to CAP theorem](http://ksat.me/a-plain-english-introduction-to-cap-theorem), Henry Robinson's [CAP FAQ](https://github.com/henryr/cap-faq) (2013), and a short [video lecture on the CAP theorem](https://www.youtube.com/watch?v=k-Yaq8AHlFA). The three levels of consistency, weak, eventual and strong, come from Ryan Barrett's 2009 Google I/O talk [Transactions Across Datacenters](https://snarfed.org/s/transactions_across_datacenters_io.html).
 
-All of those sources are short and still worth reading. This chapter fills in what they leave out, and every number in it links to its source.
+This chapter covers what those sources say and a good deal more, and every number in it links to its source.
 
 We'll follow one imaginary product throughout. **Pebble** is a small online bank. Asha and Ben share a joint account with $500 in it. Pebble runs in two data centers, East and West. It keeps a copy of every balance in both, so that either one can serve customers if the other goes down. Asha's requests usually go to East, and Ben's go to West.
 
@@ -44,7 +44,7 @@ Neither choice gives Ben an up-to-date answer. Only East knows about Asha's with
 
 ## What C, A and P actually mean
 
-The primer gives the usual informal definitions. The formal ones come from the [2002 proof](https://www.comp.nus.edu.sg/~gilbert/pubs/BrewersConjecture-SigAct.pdf) by Seth Gilbert and Nancy Lynch. They are narrower than most people assume.
+Most explanations of CAP use informal definitions. The formal ones come from the [2002 proof](https://www.comp.nus.edu.sg/~gilbert/pubs/BrewersConjecture-SigAct.pdf) by Seth Gilbert and Nancy Lynch. They are narrower than most people assume.
 
 ### C: consistency
 
@@ -85,7 +85,7 @@ If both sides must answer, the read can't possibly see the write.
 
 ## Why "pick two of three" misleads
 
-The primer states CAP as "you can only support two of the following guarantees," which is how it is usually taught. Brewer himself wrote in 2012 that "the '2 of 3' formulation was always misleading because it tended to oversimplify the tensions among properties." There are three problems with it.
+CAP is usually taught as "you can only have two of the three guarantees." Brewer himself wrote in 2012 that "the '2 of 3' formulation was always misleading because it tended to oversimplify the tensions among properties." There are three problems with it.
 
 ### Problem 1: you can't choose to give up P
 
@@ -122,7 +122,10 @@ Kleppmann adds that under the strict definitions, many real databases fit neithe
 - It isn't CAP-available, because clients that can't reach the leader can't write.
 - It isn't CAP-consistent, because the replicas can return stale data.
 
-He suggests describing a system by the specific guarantees it does offer, instead of by a two-letter label. The primer's [CP](/learn/availability-vs-consistency#cp---consistency-and-partition-tolerance) and [AP](/learn/availability-vs-consistency#ap---availability-and-partition-tolerance) labels are best read as a short description of what the system does during a partition.
+He suggests describing a system by the specific guarantees it does offer, instead of by a two-letter label. When people do use the labels, read them as a short description of what the system does during a partition:
+
+- A **CP** system keeps consistency. During a partition, it refuses or delays requests it can't answer correctly, so a request to the cut-off side may wait and then fail with a timeout error. CP is a good fit when the business needs reads and writes to be atomic, as with Pebble's balances.
+- An **AP** system keeps availability. During a partition, each side keeps answering with the most recent version of the data it has, which may not be the latest. Writes made on one side can take some time to reach the other side once the link is back. AP is a good fit when the business can accept eventual consistency, or when the system must keep working despite failures outside its control.
 
 ## Partitions really happen
 
@@ -207,13 +210,13 @@ The first group gives up consistency in both cases. The second group, which incl
 
 ## The consistency spectrum
 
-Consistency is not just on or off. The [consistency patterns](/learn/consistency-patterns) chapter describes three levels, taken from Barrett's talk.
+Consistency is not just on or off. Barrett's talk describes three levels.
 
-**[Weak consistency](/learn/consistency-patterns#weak-consistency): after a write, reads may or may not see it.** Barrett's slide calls it "best effort only." His examples are voice calls over the internet, live video and real-time multiplayer games, where a lost update doesn't matter because a new one arrives a moment later. The primer adds memcached: an entry in a [cache](/learn/cache) can be thrown out or go stale at any time. Pebble might accept weak consistency for a "recently viewed" list, but never for balances.
+**Weak consistency: after a write, reads may or may not see it.** Barrett's slide calls it "best effort only." His examples are voice calls over the internet, live video and real-time multiplayer games, where a lost update doesn't matter because a new one arrives a moment later. If your phone loses signal for a few seconds during a call, you don't hear what was said in the gap, and the call carries on. Memcached is another example: an entry in a [cache](/learn/cache-101) can be thrown out or go stale at any time. Pebble might accept weak consistency for a "recently viewed" list, but never for balances.
 
-**[Eventual consistency](/learn/consistency-patterns#eventual-consistency): after a write, reads will see it eventually, with no promise about when.** Werner Vogels of Amazon defines it in [Eventually Consistent](https://www.allthingsdistributed.com/2008/12/eventually_consistent.html) (revised for ACM Queue in 2008). It is a guarantee "that if no new updates are made to the object, eventually all accesses will return the last updated value." His classic example is DNS: when you change a domain's address, servers around the world pick up the change over time. The gap between the write and the moment every reader sees it is called the **inconsistency window**. Barrett's table puts [master-slave replication](/learn/database#master-slave-replication) with background copying in this group, and the primer notes that most [NoSQL](/learn/database#nosql) databases favor it.
+**Eventual consistency: after a write, reads will see it eventually, with no promise about when.** Werner Vogels of Amazon defines it in [Eventually Consistent](https://www.allthingsdistributed.com/2008/12/eventually_consistent.html) (revised for ACM Queue in 2008). It is a guarantee "that if no new updates are made to the object, eventually all accesses will return the last updated value." His classic example is DNS: when you change a domain's address, servers around the world pick up the change over time. Email works the same way. The gap between the write and the moment every reader sees it is called the **inconsistency window**. Data is usually copied to replicas in the background. Barrett's table puts [primary-replica replication](/learn/relational-databases#primary-replica-replication) with background copying in this group, and most [NoSQL](/learn/nosql-databases) databases favor it. Eventual consistency suits systems that must stay highly available.
 
-**[Strong consistency](/learn/consistency-patterns#strong-consistency): after a write, every read sees it.** Barrett's examples are file systems and relational databases. Every write is copied to the other replicas before it counts as done. That makes writes slower, and during some partitions part of the data can't be served at all. Pebble's balances belong here, with Brewer's limited stand-in mode for partitions.
+**Strong consistency: after a write, every read sees it.** Barrett's examples are file systems and relational databases. Every write is copied to the other replicas before it counts as done. Strong consistency suits systems that need transactions. That makes writes slower, and during some partitions part of the data can't be served at all. Pebble's balances belong here, with Brewer's limited stand-in mode for partitions.
 
 ## Guarantees for one user
 
@@ -265,11 +268,11 @@ Kleppmann adds two warnings:
 1. **Quorums aren't CAP-available.** During a partition, clients on the smaller side can't reach enough replicas, so their quorum reads and writes fail.
 2. **Don't rely on quorums alone for linearizability.** Real databases add features on top of the basic rule, such as **sloppy quorums**, which let other servers stand in when replicas are unreachable, and **read repair**, which fixes stale replicas during reads. These create edge cases where, for example, deleted data comes back.
 
-So treat the W + R > N rule as a good first approximation, not a full guarantee. The [database](/learn/database) chapter covers the replication setups it applies to.
+So treat the W + R > N rule as a good first approximation, not a full guarantee. The [relational databases](/learn/relational-databases#replication-copies-of-the-whole-database) and [NoSQL](/learn/nosql-databases) chapters cover the replication setups it applies to.
 
 ## What Barrett's talk adds
 
-The primer's only source for consistency patterns is Ryan Barrett's talk [Transactions Across Datacenters (and other weekend projects)](https://snarfed.org/s/transactions_across_datacenters_io.html), given at Google I/O in 2009. It uses Google App Engine's datastore as the case study. The page the primer links to is his slide deck, and the [video](https://www.youtube.com/watch?v=srOgpXECblk) runs about an hour.
+The three consistency levels come from Ryan Barrett's talk [Transactions Across Datacenters (and other weekend projects)](https://snarfed.org/s/transactions_across_datacenters_io.html), given at Google I/O in 2009. It uses Google App Engine's datastore as the case study. The page linked here is his slide deck, and the [video](https://www.youtube.com/watch?v=srOgpXECblk) runs about an hour.
 
 The weak, eventual and strong levels come from his opening slides. The main part of the talk compares five ways to keep data in more than one data center, summed up in one table:
 
@@ -284,8 +287,8 @@ The weak, eventual and strong levels come from his opening slides. The main part
 Here is what each column means:
 
 - **Backups** copy data to another place now and then. They are cheap, but you lose everything since the last backup.
-- **[Master/slave](/learn/database#master-slave-replication)** sends all writes to one main server, which copies them to the others in the background. It is fast, but when the main server dies, any writes it hadn't copied yet are lost.
-- **[Multi-master](/learn/database#master-master-replication)** accepts writes in every data center. It needs a way to merge conflicting writes later.
+- **[Master/slave](/learn/relational-databases#primary-replica-replication)** sends all writes to one main server, which copies them to the others in the background. It is fast, but when the main server dies, any writes it hadn't copied yet are lost.
+- **[Multi-master](/learn/relational-databases#primary-primary-replication)** accepts writes in every data center. It needs a way to merge conflicting writes later.
 - **Two-phase commit (2PC)** asks every server "are you ready?" and only commits if all of them say yes. It gives strong consistency, but it is "heavyweight, synchronous, high latency." Brewer's Spanner note adds that it has been called the "anti-availability" protocol, because every member must be up for it to work.
 - **Paxos** commits a write once a majority of servers agree. It gives strong consistency and keeps working if a minority of servers fail, at the cost of latency. Barrett quotes Mike Burrows, author of Google's Chubby paper: there is "either Paxos, or Paxos with cruft, or broken."
 
@@ -344,13 +347,13 @@ Latency versus consistency. A partition between East and West might happen a few
 
 ## Further reading
 
-The originals this chapter is a companion to (all were reachable when this chapter was written):
+Short introductions (all were reachable when this chapter was written):
 
-- [CAP Theorem: Revisited](https://robertgreiner.com/cap-theorem-revisited/): Robert Greiner's 2014 post, a short and clear explanation of why partition tolerance isn't optional. It revises his earlier post on CAP, and it's the source of the primer's CAP diagram.
+- [CAP Theorem: Revisited](https://robertgreiner.com/cap-theorem-revisited/): Robert Greiner's 2014 post, a short and clear explanation of why partition tolerance isn't optional. It revises his earlier post on CAP.
 - [A plain English introduction to CAP theorem](http://ksat.me/a-plain-english-introduction-to-cap-theorem): Kaushik Sathupadi's story of "Remembrance Inc", a phone-in memory service run by a couple with two notebooks. It ends with a bonus section on eventual consistency. The page works over plain http. The https version currently shows a certificate error.
 - [The CAP FAQ](https://github.com/henryr/cap-faq): Henry Robinson's 2013 question-and-answer guide. Read it for precise answers to "is my system CA?" and "can CAP be beaten?".
 - [L16: The CAP Theorem](https://www.youtube.com/watch?v=k-Yaq8AHlFA): a seven-and-a-half-minute lecture from the Distributed Systems Course channel on YouTube. Its description points to Brewer's 2012 article and to Michael Whittaker's [illustrated proof of the CAP theorem](https://mwhittaker.github.io/blog/an_illustrated_proof_of_the_cap_theorem/).
-- [Transactions Across Datacenters](https://snarfed.org/s/transactions_across_datacenters_io.html): Ryan Barrett's Google I/O 2009 slides, with the [video](https://www.youtube.com/watch?v=srOgpXECblk). The primer's link (snarfed.org/transactions_across_datacenters_io.html) redirects here.
+- [Transactions Across Datacenters](https://snarfed.org/s/transactions_across_datacenters_io.html): Ryan Barrett's Google I/O 2009 slides, with the [video](https://www.youtube.com/watch?v=srOgpXECblk).
 
 The papers behind the theorem:
 

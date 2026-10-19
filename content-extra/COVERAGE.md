@@ -34,36 +34,36 @@ Every topic in The System Design Primer, and where this site covers it. The site
 | Consistency patterns › Weak consistency | cap-and-consistency-101#the-consistency-spectrum |
 | Consistency patterns › Eventual consistency | cap-and-consistency-101#the-consistency-spectrum |
 | Consistency patterns › Strong consistency | cap-and-consistency-101#the-consistency-spectrum |
-| Availability patterns |  |
-| Availability patterns › Fail-over |  |
-| Availability patterns › Fail-over › Active-passive |  |
-| Availability patterns › Fail-over › Active-active |  |
-| Availability patterns › Disadvantage(s): failover |  |
-| Availability patterns › Replication |  |
-| Availability patterns › Replication › Master-slave and master-master |  |
-| Availability patterns › Availability in numbers |  |
-| Availability patterns › Availability in numbers › 99.9% availability - three 9s |  |
-| Availability patterns › Availability in numbers › 99.99% availability - four 9s |  |
-| Availability patterns › Availability in numbers › Availability in parallel vs in sequence |  |
-| Domain name system |  |
-| Domain name system › Disadvantage(s): DNS |  |
-| Content delivery network |  |
-| Content delivery network › Push CDNs |  |
-| Content delivery network › Pull CDNs |  |
-| Content delivery network › Disadvantage(s): CDN |  |
+| Availability patterns | availability-101#fail-over-and-replication |
+| Availability patterns › Fail-over | availability-101#fail-over-and-replication |
+| Availability patterns › Fail-over › Active-passive | availability-101#fail-over-active-passive |
+| Availability patterns › Fail-over › Active-active | availability-101#fail-over-active-active |
+| Availability patterns › Disadvantage(s): failover | availability-101#disadvantages-of-fail-over |
+| Availability patterns › Replication | availability-101#replication |
+| Availability patterns › Replication › Master-slave and master-master | availability-101#replication |
+| Availability patterns › Availability in numbers | availability-101#the-nines |
+| Availability patterns › Availability in numbers › 99.9% availability - three 9s | availability-101#the-nines |
+| Availability patterns › Availability in numbers › 99.99% availability - four 9s | availability-101#the-nines |
+| Availability patterns › Availability in numbers › Availability in parallel vs in sequence | availability-101#availability-in-sequence-and-in-parallel |
+| Domain name system | dns-and-cdn-101#how-dns-works |
+| Domain name system › Disadvantage(s): DNS | dns-and-cdn-101#the-costs-and-risks-of-dns |
+| Content delivery network | dns-and-cdn-101#content-delivery-networks |
+| Content delivery network › Push CDNs | dns-and-cdn-101#push-cdns |
+| Content delivery network › Pull CDNs | dns-and-cdn-101#pull-cdns |
+| Content delivery network › Disadvantage(s): CDN | dns-and-cdn-101#the-downsides-of-a-cdn |
 | Load balancer | load-balancing#what-a-load-balancer-does |
 | Load balancer › Layer 4 load balancing | load-balancing#layer-4 |
 | Load balancer › Layer 7 load balancing | load-balancing#layer-7 |
 | Load balancer › Horizontal scaling | load-balancing#horizontal-scaling-and-what-it-costs |
 | Load balancer › Horizontal scaling › Disadvantage(s): horizontal scaling | load-balancing#horizontal-scaling-and-what-it-costs |
 | Load balancer › Disadvantage(s): load balancer | load-balancing#when-the-load-balancer-is-the-problem |
-| Reverse proxy (web server) |  |
-| Reverse proxy (web server) › Load balancer vs reverse proxy |  |
-| Reverse proxy (web server) › Disadvantage(s): reverse proxy |  |
-| Application layer |  |
-| Application layer › Microservices |  |
-| Application layer › Service Discovery |  |
-| Application layer › Disadvantage(s): application layer |  |
+| Reverse proxy (web server) | reverse-proxy-and-api-gateway-101#what-a-reverse-proxy-is |
+| Reverse proxy (web server) › Load balancer vs reverse proxy | reverse-proxy-and-api-gateway-101#load-balancer-vs-reverse-proxy |
+| Reverse proxy (web server) › Disadvantage(s): reverse proxy | reverse-proxy-and-api-gateway-101#disadvantages-of-a-reverse-proxy |
+| Application layer | reverse-proxy-and-api-gateway-101#separating-the-web-and-application-layers |
+| Application layer › Microservices | reverse-proxy-and-api-gateway-101#microservices |
+| Application layer › Service Discovery | reverse-proxy-and-api-gateway-101#service-discovery |
+| Application layer › Disadvantage(s): application layer | reverse-proxy-and-api-gateway-101#disadvantages-of-the-application-layer-and-microservices |
 | Database | relational-databases |
 | Database › Relational database management system (RDBMS) | relational-databases#what-a-relational-database-is |
 | Database › Relational database management system (RDBMS) › Master-slave replication | relational-databases#primary-replica-replication |
@@ -79,20 +79,20 @@ Every topic in The System Design Primer, and where this site covers it. The site
 | Database › NoSQL › Graph database | nosql-databases#graph-databases |
 | Database › NoSQL › Source(s) and further reading: NoSQL | nosql-databases#further-reading |
 | Database › SQL or NoSQL | nosql-databases#sql-or-nosql-making-the-choice |
-| Cache |  |
-| Cache › Client caching |  |
-| Cache › CDN caching |  |
-| Cache › Web server caching |  |
-| Cache › Database caching |  |
-| Cache › Application caching |  |
-| Cache › Caching at the database query level |  |
-| Cache › Caching at the object level |  |
-| Cache › When to update the cache |  |
-| Cache › When to update the cache › Cache-aside |  |
-| Cache › When to update the cache › Write-through |  |
-| Cache › When to update the cache › Write-behind (write-back) |  |
-| Cache › When to update the cache › Refresh-ahead |  |
-| Cache › Disadvantage(s): cache |  |
+| Cache | cache-101#what-a-cache-is |
+| Cache › Client caching | cache-101#client-caching |
+| Cache › CDN caching | cache-101#cdn-caching |
+| Cache › Web server caching | cache-101#web-server-caching |
+| Cache › Database caching | cache-101#database-caching |
+| Cache › Application caching | cache-101#application-caching |
+| Cache › Caching at the database query level | cache-101#caching-at-the-database-query-level |
+| Cache › Caching at the object level | cache-101#caching-at-the-object-level |
+| Cache › When to update the cache | cache-101#when-to-update-the-cache |
+| Cache › When to update the cache › Cache-aside | cache-101#cache-aside |
+| Cache › When to update the cache › Write-through | cache-101#write-through |
+| Cache › When to update the cache › Write-behind (write-back) | cache-101#write-behind-write-back |
+| Cache › When to update the cache › Refresh-ahead | cache-101#refresh-ahead |
+| Cache › Disadvantage(s): cache | cache-101#the-costs-of-caching |
 | Asynchronism | queues-and-async#doing-work-outside-the-request |
 | Asynchronism › Message queues | queues-and-async#how-a-message-queue-works |
 | Asynchronism › Task queues | queues-and-async#message-queues-and-task-queues |
@@ -110,7 +110,7 @@ Every topic in The System Design Primer, and where this site covers it. The site
 | Communication › Representational state transfer (REST) › Disadvantage(s): REST | protocols-and-apis#disadvantages-of-rest |
 | Communication › RPC and REST calls comparison | protocols-and-apis#rpc-and-rest-side-by-side |
 | Communication › RPC and REST calls comparison › Source(s) and further reading: REST and RPC | protocols-and-apis#further-reading |
-| Security |  |
+| Security | security-101 |
 | Appendix |  |
 | Appendix › Powers of two table |  |
 | Appendix › Latency numbers every programmer should know |  |

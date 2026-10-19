@@ -7,13 +7,13 @@ This chapter answers four questions:
 - What is the difference between latency and throughput, and why can't you usually max out both?
 - Why do engineers watch the slowest requests instead of the average, and what does slowness cost a business?
 
-The primer covers this ground in two very short chapters, [performance vs scalability](/learn/performance-vs-scalability) and [latency vs throughput](/learn/latency-vs-throughput). Both point to three older sources: Werner Vogels's 2006 blog post [A Word on Scalability](https://www.allthingsdistributed.com/2006/03/a_word_on_scalability.html), Jonas Bonér's slide deck [Scalability, Availability & Stability Patterns](https://www.slideshare.net/jboner/scalability-availability-stability-patterns), and a Cadence blog post, [Understanding Latency versus Throughput](https://community.cadence.com/cadence_blogs_8/b/fv/posts/understanding-latency-vs-throughput). All three are brief, and the Cadence post was written for chip designers, not web developers. This chapter fills in what they leave out. Every number and story in it comes from a source you can check.
+The classic definitions of these ideas come from three short sources: Werner Vogels's 2006 blog post [A Word on Scalability](https://www.allthingsdistributed.com/2006/03/a_word_on_scalability.html), Jonas Bonér's slide deck [Scalability, Availability & Stability Patterns](https://www.slideshare.net/jboner/scalability-availability-stability-patterns), and a Cadence blog post, [Understanding Latency versus Throughput](https://community.cadence.com/cadence_blogs_8/b/fv/posts/understanding-latency-vs-throughput). This chapter starts from their definitions and goes much further: queueing, Little's Law, tail latency, and what slowness costs. Every number and story in it comes from a source you can check.
 
 We'll keep using **Crumb**, the recipe site from [Scalability 101](/learn/scalability-101). By now Crumb has several app servers behind a load balancer, a cache, and a database with read replicas. This chapter follows one feature, recipe search, as it gets slower and as more people use it.
 
 ## Performance and scalability are different problems
 
-Bonér's slides give a simple test, and the primer repeats it almost word for word:
+Bonér's slides give a simple test:
 
 - You have a **performance problem** if the system is slow even for a single user.
 - You have a **scalability problem** if the system is fast for a single user but slow when many people use it at once.
@@ -34,9 +34,9 @@ You find these with a profiler and fix them by making each request do less work.
 
 ### Where the definition of scalability comes from
 
-The primer's definition of scalability comes from Werner Vogels, Amazon's [CTO](https://allthingsdistributed.com/about.html). He wrote that a service is scalable "if when we increase the resources in a system, it results in increased performance in a manner proportional to resources added." In plain words: if you double the servers, you should be able to handle roughly double the work. Here, "more performance" usually means serving more requests, but it can also mean handling bigger jobs, for example when the data grows.
+The standard definition of scalability comes from Werner Vogels, Amazon's [CTO](https://allthingsdistributed.com/about.html). He wrote that a service is scalable "if when we increase the resources in a system, it results in increased performance in a manner proportional to resources added." In plain words: if you double the servers, you should be able to handle roughly double the work. Here, "more performance" usually means serving more requests, but it can also mean handling bigger jobs, for example when the data grows.
 
-His post makes three more points that the primer leaves out:
+His post makes three more points that are often left out:
 
 1. Adding machines for redundancy, meaning spare copies in case one fails, should not make the system slower.
 2. As a system grows, its servers become a mix of old and new hardware. Designs that assume every machine is identical will either break or leave the newer machines underused.
@@ -92,7 +92,7 @@ Here is what happens with α = 0.05 and β = 0.001:
 
 Going from 30 machines to 60 makes the system slower, because the extra coordination costs more than the extra machines add. Gunther's page calls this "retrograde" throughput, and it happens whenever β is above zero and the system gets big enough.
 
-The practical lesson is to share as little as possible between requests and between machines. That is why the primer keeps coming back to stateless servers, partitioned data and asynchronous work.
+The practical lesson is to share as little as possible between requests and between machines. That is why this handbook keeps coming back to stateless servers, partitioned data and asynchronous work.
 
 ## A real scalability failure: HealthCare.gov
 
@@ -113,13 +113,13 @@ u -> id : everyone
 id -> mk
 ```
 
-**The recovery.** By December, after weeks of fixes, the site could handle more than 35,000 users at once without crashing. When more people arrived than it could serve, it put them in a "waiting room" and offered to email them when it was their turn. This is the [back pressure](/learn/asynchronism#back-pressure) idea from the primer: turn extra work away politely instead of falling over. A year later, during the second enrollment period, the site handled 250,000 users at once with no outage. The median login time had dropped from 18.46 seconds to 3.21 seconds.
+**The recovery.** By December, after weeks of fixes, the site could handle more than 35,000 users at once without crashing. When more people arrived than it could serve, it put them in a "waiting room" and offered to email them when it was their turn. This is [back pressure](/learn/queues-and-async#back-pressure-when-the-queue-keeps-growing): turn extra work away politely instead of falling over. A year later, during the second enrollment period, the site handled 250,000 users at once with no outage. The median login time had dropped from 18.46 seconds to 3.21 seconds.
 
 **The lesson.** The Inspector General found that the root causes were mostly about management, not technology. Leadership was unclear, too much time went into policy and too little into building the website, and the site launched on schedule even though testing wasn't finished. Load testing only helps if you do it early enough to act on what it finds.
 
 ## Latency and throughput
 
-The primer takes its definitions from the Cadence post:
+The usual definitions come from the Cadence post:
 
 - **Latency** is how long it takes to do one thing. For a web service, it is the time from sending a request to getting the response.
 - **Throughput** is how many things get done in a unit of time. For a web service, it is requests handled per second.
@@ -132,9 +132,9 @@ On networks, people often say **bandwidth** to mean the most throughput a link c
 
 **High throughput, terrible latency: a truck full of hard drives.** In 2016 AWS launched [Snowmobile](https://aws.amazon.com/blogs/aws/aws-snowmobile-move-exabytes-of-data-to-the-cloud-in-weeks/), a 45-foot shipping container on a truck that could hold up to 100 PB of data. AWS said that moving that much data "across the Internet can take years or decades." The arithmetic backs this up. 100 PB is 8 × 10¹⁷ bits. Sending that over a 10 Gbps link running flat out would take about 926 days, or roughly two and a half years. Snowmobile instead loaded data at up to 1 Tb/s, which AWS said would fill the truck in about 10 days. Then the truck drove to an AWS data center. Every bit took days to arrive, which is awful latency. But the total amount moved per day was far more than a 10 Gbps link could carry. AWS [stopped offering Snowmobile in 2024](https://www.cnbc.com/2024/04/17/aws-stops-selling-snowmobile-truck-for-cloud-migrations.html) because newer services made moving data cheaper, but the example still shows the difference clearly.
 
-**Plenty of bandwidth, still slow: a small request sent far away.** The primer's [latency table](/learn/appendix#latency-numbers-every-programmer-should-know) lists a round trip from California to the Netherlands and back at 150 ms. A 1 KB request takes about that long whether the link runs at 1 Gbps or 100 Gbps. The delay comes from the distance and the speed of light, not from the size of the pipe. To reduce it, you move the data closer to the user, with a [CDN](/learn/content-delivery-network) or a nearer data center, or you make fewer round trips.
+**Plenty of bandwidth, still slow: a small request sent far away.** The [table of latency numbers every programmer should know](/learn/appendix#latency-numbers-every-programmer-should-know) lists a round trip from California to the Netherlands and back at 150 ms. A 1 KB request takes about that long whether the link runs at 1 Gbps or 100 Gbps. The delay comes from the distance and the speed of light, not from the size of the pipe. To reduce it, you move the data closer to the user, with a [CDN](/learn/dns-and-cdn-101#content-delivery-networks) or a nearer data center, or you make fewer round trips.
 
-The primer's advice is to aim for maximal throughput with acceptable latency. The next two sections show why you usually can't have the best of both.
+The standard advice, from Bonér's slides, is to aim for maximal throughput with acceptable latency. The next two sections show why you usually can't have the best of both.
 
 ## The trade-off: batching and queueing
 
@@ -266,11 +266,11 @@ So users who learn that a product is slow use it less, and they keep using it le
 
 A fraction of a percent sounds small. At Google's scale, it adds up to a lot of lost searches, all caused by delays shorter than half a second.
 
-## Where the original sources fit
+## Reading the classic sources
 
 **Vogels's post** is about 450 words and worth reading in full. Its value is the framing: you have to design for scale from the start, scaling covers redundancy as well as capacity, and a growing fleet ends up as a mix of old and new hardware.
 
-**Bonér's deck** has 196 slides. SlideShare lists it as published in May 2010, and the title slide gives his role as CTO of Typesafe. The primer's two chapters draw on only about six of those slides: "How do I know if I have a performance problem?", the same question for scalability, and "You should strive for maximal throughput with acceptable latency." The rest of the deck is a tour of patterns the primer covers later: the CAP theorem and eventual consistency, fail-over and replication, partitioning and HTTP caching, sharding, NoSQL databases, distributed caching, and concurrency models. The slides have very little explanation on them, so they work best as a checklist after you have read the matching primer chapters, such as [availability vs consistency](/learn/availability-vs-consistency), [cache](/learn/cache) and [database](/learn/database).
+**Bonér's deck** has 196 slides. SlideShare lists it as published in May 2010, and the title slide gives his role as CTO of Typesafe. This chapter uses only about six of those slides: "How do I know if I have a performance problem?", the same question for scalability, and "You should strive for maximal throughput with acceptable latency." The rest of the deck is a tour of patterns this handbook covers later: the CAP theorem and eventual consistency, fail-over and replication, partitioning and HTTP caching, sharding, NoSQL databases, distributed caching, and concurrency models. The slides have very little explanation on them, so they work best as a checklist after you have read the matching chapters, such as [CAP and consistency](/learn/cap-and-consistency-101), [caching](/learn/cache-101) and [relational databases](/learn/relational-databases).
 
 **The Cadence post** was written for hardware engineers learning high-level synthesis, a way of designing chips from code. After the definitions and the car-factory example, it moves on to measuring latency in clock cycles, which won't help with web services. It doesn't cover queueing, Little's Law or tail latency, which is why this chapter spends most of its length on them.
 
@@ -313,10 +313,10 @@ Waiting time grows sharply as a server gets close to 100% busy. In the simple M/
 
 ## Further reading
 
-The originals the primer cites:
+The three classic sources:
 
-- [A Word on Scalability](https://www.allthingsdistributed.com/2006/03/a_word_on_scalability.html): Werner Vogels's March 2006 post, the source of the primer's definition. The primer's `http://` link redirects to this address.
-- [Scalability, Availability & Stability Patterns](https://www.slideshare.net/jboner/scalability-availability-stability-patterns): Jonas Bonér's 196-slide deck. The primer's link redirects here. Read it as a checklist of patterns after the primer chapters.
+- [A Word on Scalability](https://www.allthingsdistributed.com/2006/03/a_word_on_scalability.html): Werner Vogels's March 2006 post, the source of the standard definition of scalability.
+- [Scalability, Availability & Stability Patterns](https://www.slideshare.net/jboner/scalability-availability-stability-patterns): Jonas Bonér's 196-slide deck. Read it as a checklist of patterns after the matching chapters.
 - [Understanding Latency versus Throughput](https://community.cadence.com/cadence_blogs_8/b/fv/posts/understanding-latency-vs-throughput): Cadence's post with the car-factory example. The page sits behind a browser check that blocks some tools. If it won't load, there's an [archived copy from February 2026](https://web.archive.org/web/20260215115328/https://community.cadence.com/cadence_blogs_8/b/fv/posts/understanding-latency-vs-throughput).
 
 Papers and reports:

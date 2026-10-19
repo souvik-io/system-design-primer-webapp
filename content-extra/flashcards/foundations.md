@@ -318,7 +318,7 @@ Both servers manage traffic and share the load. If they're public-facing, **DNS*
 
 <!-- chapter: availability-101 -->
 
-## Your servers were up all month, yet shops say charges failed. What should you measure instead of uptime?
+## Your servers were up all month, yet users say recipe pages failed to load. What should you measure instead of uptime?
 <!-- /learn/availability-101#what-availability-means -->
 
 **Aggregate availability**: the fraction of real requests that succeed. Time-based availability only asks whether servers ran, and a running server can still time out or return errors. Google's SRE book says time-based metrics usually aren't meaningful for globally distributed services. At 99.99%, 2.5 million requests a day may include up to 250 errors.
@@ -326,7 +326,7 @@ Both servers manage traffic and share the load. If they're public-facing, **DNS*
 ## How do you tell an SLO from an SLA?
 <!-- /learn/availability-101#slis-slos-and-slas -->
 
-Ask "what happens if the SLOs aren't met?" If nothing happens, it's an **SLO**, a target for an SLI such as "99.95% of charges succeed over 30 days". If someone owes a refund or penalty, it's an **SLA**, a contract. Companies usually set internal SLOs stricter than the SLAs they sign, to notice trouble before it costs money.
+Ask "what happens if the SLOs aren't met?" If nothing happens, it's an **SLO**, a target for an SLI such as "99.95% of recipe page loads succeed over 30 days". If someone owes a refund or penalty, it's an **SLA**, a contract. Companies usually set internal SLOs stricter than the SLAs they sign, to notice trouble before it costs money.
 
 ## S3 promises 11 nines of durability but only 99.99% availability. What's the difference?
 <!-- /learn/availability-101#availability-vs-durability -->
@@ -343,10 +343,10 @@ Ask "what happens if the SLOs aren't met?" If nothing happens, it's an **SLO**, 
 
 4 minutes 23 seconds a month is less than it takes an on-call engineer to wake up and log in, so most failures must be recovered automatically.
 
-## Your SLO is 99.95% on 10 million charges a month. What's your error budget, and what is it for?
+## Your SLO is 99.95% on 10 million page loads a month. What's your error budget, and what is it for?
 <!-- /learn/availability-101#why-not-100 -->
 
-The budget is one minus the target: 0.05% of 10 million, or **5,000 failed charges**. A bad deploy failing 2,000 uses 40% of it. The budget is meant to be spent on shipping changes. While it lasts, the team releases; when an outage uses it up, releases slow down. 100% is the wrong target because users can't tell it from 99.999%.
+The budget is one minus the target: 0.05% of 10 million, or **5,000 failed page loads**. A bad deploy that breaks 2,000 uses 40% of it. The budget is meant to be spent on shipping changes. While it lasts, the team releases; when an outage uses it up, releases slow down. 100% is the wrong target because users can't tell it from 99.999%.
 
 ## A server fails every 30 days and takes 4 hours to fix. Should you halve failures or cut repair to 30 minutes?
 <!-- /learn/availability-101#failures-and-recovery-mtbf-and-mttr -->
@@ -390,10 +390,10 @@ When that dependency hiccups, every server fails the check at once and the whole
 
 Put the standby in a different zone from the primary. Redundancy only helps across **failure domains**, sets of things that fail together: a rack, a data center, a region, a deploy, a config system. Treat changes as one too, rolling config and code out to one zone or a small slice of traffic first. Multiple regions add protection, but cross-region failover brings latency and divergent data.
 
-## Your fraud-scoring service is down. How does graceful degradation keep a payments API useful?
+## Crumb's search service is down. How does graceful degradation keep the site useful?
 <!-- /learn/availability-101#graceful-degradation -->
 
-Do part of the job instead of failing it: approve small charges from returning customers with simpler rules and hold the rest. If receipts are down, charge now and email receipts later. Each dependency made optional drops out of the sequence multiplication. Decide what's essential and build the off switches before you need them.
+Do part of the job instead of failing it: show popular recipes with a note that search will be back soon. Likewise, load recipe pages without comments if comments are down, and go read-only if the primary database is down. Each dependency made optional drops out of the sequence multiplication. Decide what's essential and build the off switches before you need them.
 
 ## Why should you trigger failover on purpose, and how did Netflix do it?
 <!-- /learn/availability-101#test-failover-on-purpose -->
