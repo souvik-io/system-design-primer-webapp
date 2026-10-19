@@ -1,54 +1,38 @@
-import { Fragment, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import clsx from 'clsx'
 import { ArrowRight, Info } from 'lucide-react'
-import {
-  chapterById,
-  chapters,
-  extraChapterCount,
-  parts,
-  sectionHref,
-  sectionKey,
-  type ChapterMeta,
-  type DeckMeta,
-  type Part,
-  useVisibleDecks,
-} from '../lib/content'
+import { chapterById, chapters, decks, parts, sectionHref, sectionKey, type ChapterMeta, type DeckMeta, type Part } from '../lib/content'
 import { useDeckStats } from '../lib/flashcards'
 import { useChapterProgress, useOverallProgress, useProgress } from '../lib/progress'
 import { useAccount } from '../lib/account'
-import { useSettings } from '../lib/settings'
 import { ProgressRing } from '../components/ProgressRing'
 import { SystemMap } from '../components/SystemMap'
-import { ExtrasSwitch } from '../components/ExtrasToggle'
+import { MovedNotice } from '../components/MovedNotice'
 import { StudyPlan } from '../components/StudyPlan'
 
 export function HomePage() {
   const overall = useOverallProgress()
   const lastVisited = useProgress((s) => s.lastVisited)
-  const showExtras = useSettings((s) => s.showExtras)
-  const decks = useVisibleDecks()
   const location = useLocation()
 
   useEffect(() => {
-    document.title = 'System Design Primer'
+    document.title = 'System Design Handbook'
     const id = location.hash.slice(1)
     if (id) document.getElementById(id)?.scrollIntoView()
     else window.scrollTo(0, 0)
   }, [location.key, location.hash])
 
-  const visited = lastVisited && chapterById.get(lastVisited.chapterId)
-  const resume = visited && (showExtras || !visited.extra) ? visited : null
-  const firstExtraPart = parts.find((p) => p.extra)?.id
+  const resume = lastVisited && chapterById.get(lastVisited.chapterId)
   const resumeSection = resume?.sections.find((s) => s.id === lastVisited?.sectionId)
 
   return (
     <div className="mx-auto max-w-[66rem] px-4 pt-10 pb-16 sm:px-8 lg:pt-16">
       <section className="max-w-2xl">
-        <h1 className="text-[2.25rem] leading-[1.1] font-semibold tracking-tight text-ink sm:text-[3rem]">The System Design Primer</h1>
+        <h1 className="text-[2.25rem] leading-[1.1] font-semibold tracking-tight text-ink sm:text-[3rem]">System Design Handbook</h1>
         <p className="mt-4 font-serif text-lg leading-relaxed text-ink-2">
-          Donne Martin's guide to designing large-scale systems, arranged as a course. Read a section, mark it done, and pick up where you left off
-          next time.
+          A free course in designing large-scale systems, from the interview method to databases, caches and worked designs. Read a section, mark it
+          done, and pick up where you left off next time.
         </p>
 
         <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-4">
@@ -77,6 +61,8 @@ export function HomePage() {
           </span>
         </div>
       </section>
+
+      <MovedNotice />
 
       <StudyPlan />
 
@@ -110,10 +96,7 @@ export function HomePage() {
 
       <div className="mt-16 space-y-14">
         {parts.map((part) => (
-          <Fragment key={part.id}>
-            {part.id === firstExtraPart && <ExtrasIntro />}
-            {(!part.extra || showExtras) && <PartSection part={part} />}
-          </Fragment>
+          <PartSection key={part.id} part={part} />
         ))}
       </div>
 
@@ -134,27 +117,6 @@ function PartSection({ part }: { part: Part }) {
           <ChapterRow key={ch.id} chapter={ch} />
         ))}
       </ol>
-      {part.unsolved && <p className="mt-3 text-sm text-muted">Also in the primer, without a solution yet: {part.unsolved.join(', ')}.</p>}
-    </section>
-  )
-}
-
-/** Introduces the extra chapters and holds the switch that shows them. */
-function ExtrasIntro() {
-  const showExtras = useSettings((s) => s.showExtras)
-  return (
-    <section id="extras" aria-labelledby="extras-heading" className="scroll-mt-20 rounded-xl border border-dashed border-rule px-5 py-5 sm:px-6">
-      <h2 id="extras-heading" className="text-xl font-semibold tracking-tight text-ink">
-        Beyond the primer
-      </h2>
-      <p className="mt-1 max-w-2xl text-[0.95rem] text-muted">
-        {extraChapterCount} extra chapters on topics the primer doesn't cover, like rate limiting, consistent hashing and designing a chat system.
-        They're written for this site, not by the primer's author, and each one lists its sources.
-      </p>
-      <ExtrasSwitch className="mt-4" />
-      {showExtras && (
-        <p className="mt-2 text-sm text-muted">They're listed below and in the sidebar, show up in search, and count toward your progress.</p>
-      )}
     </section>
   )
 }
@@ -207,7 +169,6 @@ function DeckLink({ deck }: { deck: DeckMeta }) {
 function ResetProgress() {
   const [confirming, setConfirming] = useState(false)
   const completed = useProgress((s) => s.completed)
-  // Every completed section, including any in extra chapters that are hidden right now.
   const count = chapters.filter((c) => !c.untracked).reduce((n, c) => n + c.sections.filter((s) => completed[sectionKey(c.id, s.id)]).length, 0)
   const reset = useProgress((s) => s.reset)
   const signedIn = useAccount((s) => Boolean(s.email))

@@ -10,7 +10,7 @@
 //   dist/robots.txt, dist/sitemap.xml
 //
 // Set SITE_URL (in .env.local, .env or the environment) to the address the site is served from, e.g.
-// https://sdp.example.com. Without it, links are root-relative and there's no sitemap,
+// https://handbook.example.com. Without it, links are root-relative and there's no sitemap,
 // since sitemaps need full URLs.
 
 import fs from 'node:fs'
@@ -41,8 +41,9 @@ if (!fs.existsSync(path.join(DIST, 'index.html'))) throw new Error('Run `vite bu
 const shell = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8')
 if (!shell.includes('<div id="root"></div>')) throw new Error('dist/index.html has already been prerendered. Run `npm run build` again.')
 
-const PRIMER = 'The System Design Primer'
-const PRIMER_URL = 'https://github.com/donnemartin/system-design-primer'
+const SITE_NAME = 'System Design Handbook'
+const DESCRIPTION =
+  'A free course in system design, from the interview method to databases, caches and worked designs, with progress tracking and flashcards.'
 
 // ---------------------------------------------------------------------------
 // HTML -> Markdown
@@ -92,22 +93,9 @@ const md = (html) => String(toMarkdown.processSync(html)).trim()
 const chapters = manifest.parts.flatMap((part) => part.chapters.map((c) => ({ ...c, part })))
 const load = (id) => JSON.parse(fs.readFileSync(path.join(DIST, 'content', `${id}.json`), 'utf8'))
 
-const written = (c) => c.extra || c.companion
-
-function sourceNote(c) {
-  return written(c)
-    ? `Written for this site, not part of ${PRIMER}. The sources it draws on are listed under Further reading.`
-    : `From [${PRIMER}](${PRIMER_URL}) by Donne Martin, licensed under CC BY 4.0, arranged into chapters for this site.`
-}
-
 function chapterMarkdown(c, body) {
-  const parts = [`# ${c.title}`, `> ${sourceNote(c)} Part of "${c.part.title}". Web page: ${abs(`/learn/${c.id}`)}`]
-  if (c.alsoAsked) parts.push(`Also asked as: ${c.alsoAsked}`)
+  const parts = [`# ${c.title}`, `> From the ${SITE_NAME}, part "${c.part.title}". Web page: ${abs(`/learn/${c.id}`)}`]
   for (const s of body.sections) parts.push(md(s.html))
-  if (body.sourceFiles.length) {
-    parts.push('## Full source code')
-    for (const f of body.sourceFiles) parts.push(`### ${f.name}`, md(f.html))
-  }
   return parts.join('\n\n') + '\n'
 }
 
@@ -134,7 +122,7 @@ function page({ urlPath, title, description, body, markdown, preload }) {
     .replace('<div id="root"></div>', `<div id="root"><div class="prerender">${body}</div></div>`)
 }
 
-const nav = `<p class="prerender-nav"><a href="/">System Design Primer</a> · <a href="/llms.txt">llms.txt</a></p>`
+const nav = `<p class="prerender-nav"><a href="/">${SITE_NAME}</a> · <a href="/llms.txt">llms.txt</a></p>`
 
 fs.mkdirSync(path.join(DIST, 'learn'), { recursive: true })
 const full = []
@@ -151,9 +139,7 @@ for (const [i, c] of chapters.entries()) {
     nav,
     `<p><a href="/#${c.part.id}">${esc(c.part.title)}</a></p>`,
     `<h1>${esc(c.title)}</h1>`,
-    written(c) ? `<p><em>${esc(sourceNote(c))}</em></p>` : '',
     ...body.sections.map((s) => `<section class="article">${s.html}</section>`),
-    ...body.sourceFiles.map((f) => `<section class="article"><h3>${esc(f.name)}</h3>${f.html}</section>`),
     `<p>${prev ? `Previous: <a href="/learn/${prev.id}">${esc(prev.title)}</a>` : ''}${prev && next ? ' · ' : ''}${
       next ? `Next: <a href="/learn/${next.id}">${esc(next.title)}</a>` : ''
     }</p>`,
@@ -162,8 +148,8 @@ for (const [i, c] of chapters.entries()) {
     path.join(DIST, 'learn', `${c.id}.html`),
     page({
       urlPath: `/learn/${c.id}`,
-      title: `${c.title} | System Design Primer`,
-      description: c.summary || `${c.title}, from ${PRIMER}.`,
+      title: `${c.title} | ${SITE_NAME}`,
+      description: c.summary || `${c.title}, from the ${SITE_NAME}.`,
       body: article,
       markdown: `/learn/${c.id}.md`,
       preload: `/content/${c.id}.json`,
@@ -174,17 +160,15 @@ for (const [i, c] of chapters.entries()) {
 // ---------------------------------------------------------------------------
 // Index pages
 
-const primerCount = chapters.filter((c) => !written(c)).length
-const extraCount = chapters.length - primerCount
+const tracked = chapters.filter((c) => !c.untracked)
 const intro =
-  `Donne Martin's ${PRIMER} (CC BY 4.0), the guide to designing large-scale systems, reorganized into ${primerCount} chapters: ` +
-  `core trade-offs, building blocks from DNS to databases, and worked system design and object-oriented design interview questions. ` +
-  `Also ${extraCount} chapters written for this site: companions that explain the primer's opening topics and trade-offs in more depth (Scalability 101, Performance and latency 101, CAP and consistency 101, Availability 101), and topics the primer doesn't cover, such as rate limiting, consistent hashing and consensus.`
+  `A free, open-source course in designing large-scale systems, in ${tracked.length} chapters: how to run a system design interview, ` +
+  `the core trade-offs, building blocks from DNS to databases and caches, deeper concepts such as consistent hashing and consensus, ` +
+  `worked system design and object-oriented design questions, and reference material. Each chapter lists its sources under Further reading.`
 
-const llms = [`# ${PRIMER}, as a course`, `> ${intro}`]
+const llms = [`# ${SITE_NAME}`, `> ${intro}`]
 llms.push(
-  `Each chapter is available as Markdown at \`/learn/<chapter-id>.md\`, and the whole course is in one file at [llms-full.txt](${abs('/llms-full.txt')}). ` +
-    `The chapters ending in "101" and those in the "Beyond the primer" parts are written for this site, not by the primer's author.`,
+  `Each chapter is available as Markdown at \`/learn/<chapter-id>.md\`, and the whole course is in one file at [llms-full.txt](${abs('/llms-full.txt')}).`,
 )
 for (const part of manifest.parts) {
   const optional = part.untracked
@@ -194,11 +178,11 @@ for (const part of manifest.parts) {
   )
 }
 fs.writeFileSync(path.join(DIST, 'llms.txt'), llms.join('\n\n') + '\n')
-fs.writeFileSync(path.join(DIST, 'llms-full.txt'), [`# ${PRIMER}, as a course`, `> ${intro}`, ...full].join('\n\n---\n\n'))
+fs.writeFileSync(path.join(DIST, 'llms-full.txt'), [`# ${SITE_NAME}`, `> ${intro}`, ...full].join('\n\n---\n\n'))
 
 const home = [
   nav,
-  `<h1>The System Design Primer</h1>`,
+  `<h1>${SITE_NAME}</h1>`,
   `<p>${esc(intro)}</p>`,
   ...manifest.parts.map(
     (part) =>
@@ -214,8 +198,8 @@ fs.writeFileSync(
   path.join(DIST, 'index.html'),
   page({
     urlPath: '/',
-    title: 'System Design Primer',
-    description: 'The System Design Primer as an interactive course with progress tracking.',
+    title: SITE_NAME,
+    description: DESCRIPTION,
     body: home,
     markdown: '/llms.txt',
   }),

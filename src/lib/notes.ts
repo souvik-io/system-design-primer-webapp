@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { sectionKey } from './content'
+import { redirects, sectionExists, sectionKey } from './content'
+import { DATA_VERSION, migrateNotes } from './legacy'
 
 // Notes and bookmarks per section, keyed like progress ("chapter/section"). Each entry keeps the
 // time it last changed, and deleting one keeps an empty entry, so syncing can pick the latest edit.
@@ -37,7 +38,13 @@ export const useNotes = create<NotesState>()(
           return { bookmarks: { ...s.bookmarks, [key]: { on, at: Date.now() } } }
         }),
     }),
-    { name: 'sdp-notes', version: 1 },
+    {
+      name: 'sdp-notes',
+      // Notes and bookmarks in renamed or replaced chapters move to the section that now covers the same heading.
+      version: DATA_VERSION,
+      migrate: (state, version) =>
+        (version < DATA_VERSION ? { ...(state as NotesData), ...migrateNotes(redirects, state as NotesData, sectionExists) } : state) as NotesState,
+    },
   ),
 )
 

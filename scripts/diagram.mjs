@@ -1,5 +1,5 @@
-// Draws the `diagram` code blocks used in content-extra/ as inline SVG.
-// The syntax is described in content-extra/README.md. Colors come from CSS classes
+// Draws the `diagram` code blocks used in content/ as inline SVG.
+// The syntax is described in content/README.md. Colors come from CSS classes
 // (see .diagram in src/index.css), so diagrams follow the light and dark theme.
 
 const COL = 160 // grid column width

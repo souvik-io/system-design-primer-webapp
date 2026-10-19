@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { sectionKey, useVisibleContent, type ChapterMeta } from './content'
+import { redirects, sectionKey, totalSections, trackedChapters, type ChapterMeta } from './content'
+import { DATA_VERSION, migrateProgress } from './legacy'
 
 type LastVisited = { chapterId: string; sectionId: string; at: number }
 
@@ -40,7 +41,12 @@ export const useProgress = create<ProgressState>()(
       visit: (chapterId, sectionId) => set({ lastVisited: { chapterId, sectionId, at: Date.now() } }),
       reset: () => set({ completed: {}, removed: {}, resetAt: Date.now(), lastVisited: null }),
     }),
-    { name: 'sdp-progress', version: 1 },
+    {
+      name: 'sdp-progress',
+      // Progress in renamed chapters follows the new ids.
+      version: DATA_VERSION,
+      migrate: (state, version) => (version < DATA_VERSION ? migrateProgress(redirects, state as ProgressData) : state) as ProgressState,
+    },
   ),
 )
 
@@ -67,12 +73,11 @@ export function useChapterProgress(chapter: ChapterMeta) {
   return { done, total: chapter.sections.length, ratio: done / chapter.sections.length }
 }
 
-/** Progress across the chapters on show: the primer, plus the extra chapters when they're turned on. */
+/** Progress across every chapter that counts. */
 export function useOverallProgress() {
   const completed = useProgress((s) => s.completed)
-  const { tracked, totalSections } = useVisibleContent()
   let done = 0
-  for (const c of tracked) for (const sec of c.sections) if (completed[sectionKey(c.id, sec.id)]) done++
+  for (const c of trackedChapters) for (const sec of c.sections) if (completed[sectionKey(c.id, sec.id)]) done++
   return { done, total: totalSections, ratio: done / totalSections }
 }
 

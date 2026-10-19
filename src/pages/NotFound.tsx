@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 
 export function NotFound() {
   useEffect(() => {
-    document.title = 'Page not found | System Design Primer'
+    document.title = 'Page not found | System Design Handbook'
   }, [])
 
   return (

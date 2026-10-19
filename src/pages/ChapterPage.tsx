@@ -1,47 +1,27 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router'
+import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router'
 import clsx from 'clsx'
-import { ArrowLeft, ArrowRight, Bookmark, Check, Clock, ExternalLink, PenLine } from 'lucide-react'
-import { chapterById, loadChapter, sectionHref, sectionKey, useVisibleContent, type Chapter, type ChapterMeta, type SourceFile } from '../lib/content'
+import { ArrowLeft, ArrowRight, Bookmark, Check, Clock } from 'lucide-react'
+import { chapterById, chapters, loadChapter, redirects, sectionHref, sectionKey, type Chapter, type ChapterMeta } from '../lib/content'
+import { movedChapterUrl } from '../lib/legacy'
 import { useChapterProgress, useProgress } from '../lib/progress'
 import { useNotes } from '../lib/notes'
-import { useSettings } from '../lib/settings'
 import { useArticleClicks } from '../components/useArticleClicks'
-import { ExtrasSwitch } from '../components/ExtrasToggle'
 import { SectionTools } from '../components/SectionTools'
 import { Widgets } from '../widgets/Widgets'
 import { NotFound } from './NotFound'
 
+const chapterExists = (id: string) => chapterById.has(id)
+
 export function ChapterPage() {
   const { chapterId = '' } = useParams()
+  const { search, hash } = useLocation()
+  // Old links: a renamed or replaced chapter, or (once the page is in) a heading that moved.
+  const moved = movedChapterUrl(redirects, chapterId, search, hash, chapterExists)
+  if (moved && !moved.ifMissing) return <Navigate to={moved.url} replace />
   const meta = chapterById.get(chapterId)
-  const showExtras = useSettings((s) => s.showExtras)
   if (!meta) return <NotFound />
-  if (meta.extra && !showExtras) return <HiddenExtra meta={meta} />
   return <ChapterView key={meta.id} meta={meta} />
-}
-
-/** Someone followed a link to an extra chapter while extra chapters are turned off. */
-function HiddenExtra({ meta }: { meta: ChapterMeta }) {
-  useEffect(() => {
-    document.title = `${meta.title} | System Design Primer`
-  }, [meta])
-  return (
-    <div className="mx-auto max-w-[70ch] px-4 pt-12 pb-16 sm:px-8">
-      <h1 className="text-[2rem] leading-tight font-semibold tracking-tight text-ink">{meta.title}</h1>
-      <p className="mt-4 font-serif text-lg leading-relaxed text-ink-2">
-        This is one of the extra chapters written for this site, beyond the primer. Extra chapters are turned off. Turn them on to read it.
-      </p>
-      <ExtrasSwitch className="mt-6" />
-      <p className="mt-6 text-sm text-muted">
-        You can change this any time from the{' '}
-        <Link to="/#extras" className="text-accent hover:underline">
-          course overview
-        </Link>
-        .
-      </p>
-    </div>
-  )
 }
 
 function ChapterView({ meta }: { meta: ChapterMeta & { part: { id: string; title: string } } }) {
@@ -50,15 +30,15 @@ function ChapterView({ meta }: { meta: ChapterMeta & { part: { id: string; title
   const [activeSection, setActiveSection] = useState<string | null>(null)
   const articleRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
+  const navigate = useNavigate()
   const { onClick: onArticleClick, zoom } = useArticleClicks()
   const tracked = !meta.untracked
   const visit = useProgress((s) => s.visit)
   const setChapterDone = useProgress((s) => s.setChapterDone)
   const progress = useChapterProgress(meta)
-  const { chapters } = useVisibleContent()
 
   useEffect(() => {
-    document.title = `${meta.title} | System Design Primer`
+    document.title = `${meta.title} | System Design Handbook`
     loadChapter(meta.id).then(setChapter, (e: Error) => setError(e.message))
   }, [meta])
 
@@ -68,7 +48,9 @@ function ChapterView({ meta }: { meta: ChapterMeta & { part: { id: string; title
     const id = decodeURIComponent(location.hash.slice(1))
     const el = id ? document.getElementById(id) : null
     if (!el) {
-      window.scrollTo(0, 0)
+      const moved = id && movedChapterUrl(redirects, meta.id, '', location.hash, chapterExists)
+      if (moved) navigate(moved.url, { replace: true })
+      else window.scrollTo(0, 0)
       return
     }
     el.scrollIntoView()
@@ -105,7 +87,7 @@ function ChapterView({ meta }: { meta: ChapterMeta & { part: { id: string; title
       follow.disconnect()
       clearTimeout(stop)
     }
-  }, [chapter, location.key, location.hash])
+  }, [chapter, location.key, location.hash, meta.id, navigate])
 
   // Track which section is being read, for the outline and "continue where you left off".
   useEffect(() => {
@@ -143,16 +125,6 @@ function ChapterView({ meta }: { meta: ChapterMeta & { part: { id: string; title
           <h1 id={meta.id} className="mt-2 text-[2rem] leading-tight font-semibold tracking-tight text-ink sm:text-[2.5rem]">
             {meta.title}
           </h1>
-          {meta.alsoAsked && <p className="mt-2 text-muted">Also asked as: {meta.alsoAsked}</p>}
-          {(meta.extra || meta.companion) && (
-            <p className="mt-4 flex gap-2.5 rounded-lg border border-dashed border-rule px-3.5 py-2.5 text-sm text-ink-2">
-              <PenLine size={16} className="mt-0.5 shrink-0 text-muted" aria-hidden />
-              <span>
-                Written for this site, not part of The System Design Primer. The sources it draws on are listed under Further reading at the end.
-              </span>
-            </p>
-          )}
-
           {tracked && (
             <>
               <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-muted">
@@ -199,7 +171,6 @@ function ChapterView({ meta }: { meta: ChapterMeta & { part: { id: string; title
                 <SectionTools chapterId={meta.id} sectionId={sec.id} title={sec.title} tracked={tracked} />
               </section>
             ))}
-            {chapter.sourceFiles.length > 0 && <SourceFiles files={chapter.sourceFiles} />}
             <Widgets root={articleRef} chapter={chapter} />
           </div>
         )}
@@ -228,7 +199,7 @@ function ChapterView({ meta }: { meta: ChapterMeta & { part: { id: string; title
 
       <aside className="sticky top-24 hidden h-fit max-h-[calc(100vh-7rem)] w-56 shrink-0 overflow-y-auto xl:block">
         <h2 className="mb-3 text-sm font-semibold text-ink">In this chapter</h2>
-        <Outline meta={meta} active={activeSection} hasSource={Boolean(chapter?.sourceFiles.length)} />
+        <Outline meta={meta} active={activeSection} />
       </aside>
 
       {zoom}
@@ -236,42 +207,7 @@ function ChapterView({ meta }: { meta: ChapterMeta & { part: { id: string; title
   )
 }
 
-/** The runnable .py files behind a solution, collapsed by default. Not part of progress. */
-function SourceFiles({ files }: { files: SourceFile[] }) {
-  return (
-    <section data-section="source-code" className="pt-10">
-      <h3 id="source-code" className="text-2xl font-semibold tracking-tight text-ink">
-        Full source code
-      </h3>
-      <p className="mt-2 font-serif text-ink-2">The complete Python files for this solution. The text above quotes the key parts.</p>
-      <div className="mt-5 space-y-3">
-        {files.map((f) => (
-          <details key={f.name} className="group overflow-hidden rounded-lg border border-rule bg-surface">
-            <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 font-mono text-sm text-ink hover:bg-accent-soft/40">
-              <ArrowRight size={14} className="text-muted transition-transform group-open:rotate-90" />
-              {f.name}
-              <a
-                href={f.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="ml-auto flex items-center gap-1 font-sans text-xs text-muted hover:text-accent"
-                onClick={(e) => e.stopPropagation()}
-              >
-                GitHub <ExternalLink size={12} />
-              </a>
-            </summary>
-            <div
-              className="article max-w-none border-t border-rule [&_pre]:rounded-none [&_pre]:border-0"
-              dangerouslySetInnerHTML={{ __html: f.html }}
-            />
-          </details>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function Outline({ meta, active, hasSource }: { meta: ChapterMeta; active: string | null; hasSource: boolean }) {
+function Outline({ meta, active }: { meta: ChapterMeta; active: string | null }) {
   const completed = useProgress((s) => s.completed)
   const bookmarks = useNotes((s) => s.bookmarks)
   return (
@@ -295,19 +231,6 @@ function Outline({ meta, active, hasSource }: { meta: ChapterMeta; active: strin
           </li>
         )
       })}
-      {hasSource && (
-        <li>
-          <Link
-            to={`/learn/${meta.id}#source-code`}
-            className={clsx(
-              '-ml-px flex border-l py-1 pl-3 leading-snug',
-              active === 'source-code' ? 'border-accent text-ink' : 'border-transparent text-muted hover:text-ink',
-            )}
-          >
-            Full source code
-          </Link>
-        </li>
-      )}
     </ul>
   )
 }

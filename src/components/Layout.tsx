@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
 import { Menu, Moon, Search, Sun, X } from 'lucide-react'
 import { useTheme } from '../lib/theme'
-import { useSettings } from '../lib/settings'
 import { useOverallProgress } from '../lib/progress'
 import { ProgressRing } from './ProgressRing'
 import { Sidebar } from './Sidebar'
@@ -14,7 +13,6 @@ export function Layout() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const { isDark, toggle } = useTheme()
   const overall = useOverallProgress()
-  const showExtras = useSettings((s) => s.showExtras)
   const location = useLocation()
 
   useEffect(() => {
@@ -49,14 +47,14 @@ export function Layout() {
 
           <Link to="/" className="flex items-center gap-2.5 font-semibold tracking-tight text-ink">
             <img src="/favicon.svg" alt="" className="size-7" />
-            <span className="hidden sm:inline">System Design Primer</span>
+            <span className="hidden sm:inline">System Design Handbook</span>
           </Link>
 
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
             className="ml-auto flex h-9 items-center gap-2 rounded-lg border border-rule bg-surface px-3 text-sm text-muted hover:border-muted/50 sm:w-72 md:ml-8 md:mr-auto"
-            aria-label="Search the primer"
+            aria-label="Search the handbook"
           >
             <Search size={16} />
             <span className="hidden sm:inline">Search topics</span>
@@ -93,7 +91,7 @@ export function Layout() {
         <main className="min-w-0 flex-1">
           <Outlet />
           <footer className="border-t border-rule px-4 py-8 text-sm text-muted sm:px-8">
-            Content from{' '}
+            Every chapter is written for this site and lists its sources under Further reading. The syllabus began as{' '}
             <a
               className="underline underline-offset-2 hover:text-ink"
               href="https://github.com/donnemartin/system-design-primer"
@@ -102,7 +100,7 @@ export function Layout() {
             >
               The System Design Primer
             </a>{' '}
-            by Donne Martin, licensed under{' '}
+            by Donne Martin (
             <a
               className="underline underline-offset-2 hover:text-ink"
               href="https://creativecommons.org/licenses/by/4.0/"
@@ -111,7 +109,10 @@ export function Layout() {
             >
               CC BY 4.0
             </a>
-            . Reorganized into chapters and sections for this site.{showExtras && ' Chapters marked “Beyond the primer” are written for this site.'}
+            ).{' '}
+            <Link className="underline underline-offset-2 hover:text-ink" to="/learn/about">
+              About the handbook
+            </Link>
           </footer>
         </main>
       </div>

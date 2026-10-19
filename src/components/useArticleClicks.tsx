@@ -9,7 +9,7 @@ import { ExternalLink, X } from 'lucide-react'
 type Zoomed = { src: string } | { svg: string; width: number } | { frame: string; title: string }
 
 /**
- * Behaviour for rendered primer HTML: internal links go through the router,
+ * Behaviour for rendered chapter HTML: internal links go through the router,
  * clicking a diagram (an image or a drawn `diagram` block) opens it full size,
  * and a link to an interactive diagram opens it in place, in the site's theme.
  * Render `zoom` somewhere in the page.

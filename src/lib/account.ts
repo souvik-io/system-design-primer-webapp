@@ -5,6 +5,8 @@ import { useFlashcards } from './flashcards'
 import { useNotes } from './notes'
 import { usePlan } from './plans'
 import { emptyDoc, mergeDocs, parseDoc, sameDoc, SYNC_VERSION, type SyncDoc } from './syncDoc'
+import { redirects, sectionExists } from './content'
+import { migrateNotes, migrateProgress } from './legacy'
 
 // Optional accounts. VITE_PROGRESS_STORAGE picks where progress lives:
 // - "browser" (the default): localStorage only, no sign-in.
@@ -119,6 +121,11 @@ function snapshot(): SyncDoc {
   }
 }
 
+/** The account's copy may predate renamed chapters, like this browser's did. Running this on a current copy changes nothing. */
+function migrateDoc(doc: SyncDoc): SyncDoc {
+  return { ...doc, progress: migrateProgress(redirects, doc.progress), notes: migrateNotes(redirects, doc.notes, sectionExists) }
+}
+
 let applying = false
 
 function applyDoc(doc: SyncDoc) {
@@ -165,7 +172,7 @@ async function runSync(): Promise<boolean> {
       if (error) throw error
       if (userId !== id) return false
 
-      const remote = row ? parseDoc(row.data) : null
+      const remote = row ? migrateDoc(parseDoc(row.data)) : null
       const local = snapshot()
       const merged = remote ? mergeDocs(local, remote) : local
       if (!sameDoc(merged, local)) applyDoc(merged)

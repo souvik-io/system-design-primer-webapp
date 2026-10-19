@@ -1,4 +1,186 @@
 {
   "cleanUrls": true,
-  "rewrites": [{ "source": "/:path((?!content/|repo/|assets/|learn/[^/]+\\.md$).*)", "destination": "/app" }]
+  "redirects": [
+    {
+      "source": "/learn/scalability-101",
+      "destination": "/learn/scalability",
+      "permanent": true
+    },
+    {
+      "source": "/learn/performance-and-latency-101",
+      "destination": "/learn/performance-and-latency",
+      "permanent": true
+    },
+    {
+      "source": "/learn/cap-and-consistency-101",
+      "destination": "/learn/cap-and-consistency",
+      "permanent": true
+    },
+    {
+      "source": "/learn/availability-101",
+      "destination": "/learn/availability",
+      "permanent": true
+    },
+    {
+      "source": "/learn/dns-and-cdn-101",
+      "destination": "/learn/dns-and-cdn",
+      "permanent": true
+    },
+    {
+      "source": "/learn/reverse-proxy-and-api-gateway-101",
+      "destination": "/learn/reverse-proxy-and-api-gateway",
+      "permanent": true
+    },
+    {
+      "source": "/learn/database-101",
+      "destination": "/learn/database-internals",
+      "permanent": true
+    },
+    {
+      "source": "/learn/cache-101",
+      "destination": "/learn/cache",
+      "permanent": true
+    },
+    {
+      "source": "/learn/security-101",
+      "destination": "/learn/security",
+      "permanent": true
+    },
+    {
+      "source": "/learn/motivation",
+      "destination": "/learn/how-to-use-this-handbook?from=motivation",
+      "permanent": true
+    },
+    {
+      "source": "/learn/study-guide",
+      "destination": "/learn/how-to-use-this-handbook?from=study-guide",
+      "permanent": true
+    },
+    {
+      "source": "/learn/how-to-approach-a-system-design-interview-question",
+      "destination": "/learn/system-design-interview?from=how-to-approach-a-system-design-interview-question",
+      "permanent": true
+    },
+    {
+      "source": "/learn/system-design-topics-start-here",
+      "destination": "/learn/scalability?from=system-design-topics-start-here",
+      "permanent": true
+    },
+    {
+      "source": "/learn/performance-vs-scalability",
+      "destination": "/learn/performance-and-latency?from=performance-vs-scalability",
+      "permanent": true
+    },
+    {
+      "source": "/learn/latency-vs-throughput",
+      "destination": "/learn/performance-and-latency?from=latency-vs-throughput",
+      "permanent": true
+    },
+    {
+      "source": "/learn/availability-vs-consistency",
+      "destination": "/learn/cap-and-consistency?from=availability-vs-consistency",
+      "permanent": true
+    },
+    {
+      "source": "/learn/consistency-patterns",
+      "destination": "/learn/cap-and-consistency?from=consistency-patterns",
+      "permanent": true
+    },
+    {
+      "source": "/learn/availability-patterns",
+      "destination": "/learn/availability?from=availability-patterns",
+      "permanent": true
+    },
+    {
+      "source": "/learn/domain-name-system",
+      "destination": "/learn/dns-and-cdn?from=domain-name-system",
+      "permanent": true
+    },
+    {
+      "source": "/learn/content-delivery-network",
+      "destination": "/learn/dns-and-cdn?from=content-delivery-network",
+      "permanent": true
+    },
+    {
+      "source": "/learn/load-balancer",
+      "destination": "/learn/load-balancing?from=load-balancer",
+      "permanent": true
+    },
+    {
+      "source": "/learn/reverse-proxy-web-server",
+      "destination": "/learn/reverse-proxy-and-api-gateway?from=reverse-proxy-web-server",
+      "permanent": true
+    },
+    {
+      "source": "/learn/application-layer",
+      "destination": "/learn/reverse-proxy-and-api-gateway?from=application-layer",
+      "permanent": true
+    },
+    {
+      "source": "/learn/database",
+      "destination": "/learn/relational-databases?from=database",
+      "permanent": true
+    },
+    {
+      "source": "/learn/asynchronism",
+      "destination": "/learn/queues-and-async?from=asynchronism",
+      "permanent": true
+    },
+    {
+      "source": "/learn/communication",
+      "destination": "/learn/protocols-and-apis?from=communication",
+      "permanent": true
+    },
+    {
+      "source": "/learn/appendix",
+      "destination": "/learn/numbers-to-know?from=appendix",
+      "permanent": true
+    },
+    {
+      "source": "/learn/system-design-interview-questions-with-solutions",
+      "destination": "/learn/practice-questions?from=system-design-interview-questions-with-solutions",
+      "permanent": true
+    },
+    {
+      "source": "/learn/object-oriented-design-interview-questions-with-solutions",
+      "destination": "/learn/practice-questions?from=object-oriented-design-interview-questions-with-solutions",
+      "permanent": true
+    },
+    {
+      "source": "/flashcards/system-design",
+      "destination": "/flashcards/topics",
+      "permanent": true
+    },
+    {
+      "source": "/flashcards/system-design/browse",
+      "destination": "/flashcards/topics/browse",
+      "permanent": true
+    },
+    {
+      "source": "/flashcards/exercises",
+      "destination": "/flashcards/design-walkthroughs",
+      "permanent": true
+    },
+    {
+      "source": "/flashcards/exercises/browse",
+      "destination": "/flashcards/design-walkthroughs/browse",
+      "permanent": true
+    },
+    {
+      "source": "/flashcards/ood",
+      "destination": "/flashcards/object-oriented",
+      "permanent": true
+    },
+    {
+      "source": "/flashcards/ood/browse",
+      "destination": "/flashcards/object-oriented/browse",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/:path((?!content/|assets/|learn/[^/]+\\.md$).*)",
+      "destination": "/app"
+    }
+  ]
 }

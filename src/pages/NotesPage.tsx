@@ -4,7 +4,6 @@ import clsx from 'clsx'
 import { Bookmark, Download, NotebookPen } from 'lucide-react'
 import { chapters, sectionHref, sectionKey, type ChapterMeta, type SectionMeta } from '../lib/content'
 import { useNotes } from '../lib/notes'
-import { useSettings } from '../lib/settings'
 import { NoteEditor } from '../components/SectionTools'
 
 type Filter = 'all' | 'bookmarks' | 'notes'
@@ -13,11 +12,10 @@ type Item = { chapter: ChapterMeta; section: SectionMeta; note: string; noteAt: 
 export function NotesPage() {
   const notes = useNotes((s) => s.notes)
   const bookmarks = useNotes((s) => s.bookmarks)
-  const showExtras = useSettings((s) => s.showExtras)
   const [filter, setFilter] = useState<Filter>('all')
 
   useEffect(() => {
-    document.title = 'Notes and bookmarks | System Design Primer'
+    document.title = 'Notes and bookmarks | System Design Handbook'
     window.scrollTo(0, 0)
   }, [])
 
@@ -31,11 +29,9 @@ export function NotesPage() {
       if (note || bookmarked) items.push({ chapter, section, note, noteAt: notes[key]?.at ?? 0, bookmarked })
     }
   }
-  const hiddenExtras = showExtras ? 0 : items.filter((i) => i.chapter.extra).length
-  const shown = items.filter((i) => (showExtras || !i.chapter.extra) && (filter === 'all' || (filter === 'notes' ? i.note : i.bookmarked)))
-  const counts = { all: items.length - hiddenExtras, bookmarks: 0, notes: 0 }
+  const shown = items.filter((i) => filter === 'all' || (filter === 'notes' ? i.note : i.bookmarked))
+  const counts = { all: items.length, bookmarks: 0, notes: 0 }
   for (const i of items) {
-    if (!showExtras && i.chapter.extra) continue
     if (i.bookmarked) counts.bookmarks++
     if (i.note) counts.notes++
   }
@@ -81,21 +77,13 @@ export function NotesPage() {
             {counts.notes > 0 && (
               <button
                 type="button"
-                onClick={() => downloadNotes(items.filter((i) => i.note && (showExtras || !i.chapter.extra)))}
+                onClick={() => downloadNotes(items.filter((i) => i.note))}
                 className="ml-auto flex items-center gap-1.5 rounded-lg border border-rule bg-surface px-3 py-1.5 text-sm font-medium text-ink-2 hover:border-muted/50 hover:text-ink"
               >
                 <Download size={15} /> Download notes
               </button>
             )}
           </div>
-          {hiddenExtras > 0 && (
-            <p className="mt-3 text-sm text-muted">
-              {hiddenExtras} more {hiddenExtras === 1 ? 'is' : 'are'} in extra chapters, which are turned off.{' '}
-              <Link to="/#extras" className="text-accent hover:underline">
-                Turn them on
-              </Link>
-            </p>
-          )}
 
           {groups.length === 0 ? (
             <p className="mt-8 text-muted">{filter === 'notes' ? 'No notes yet.' : 'No bookmarks yet.'}</p>
@@ -176,7 +164,7 @@ function NoteItem({ item }: { item: Item }) {
 
 /** Saves the notes as a Markdown file, grouped by chapter. */
 function downloadNotes(items: Item[]) {
-  const lines = ['# My System Design Primer notes', '']
+  const lines = ['# My System Design Handbook notes', '']
   let chapter = ''
   for (const i of items) {
     if (i.chapter.id !== chapter) {

@@ -1,6 +1,8 @@
-# System Design Primer: interactive course
+# System Design Handbook
 
-A React app that presents [The System Design Primer](https://github.com/donnemartin/system-design-primer) as a course: chapters split into sections, progress tracking, study plans with a daily goal, notes and bookmarks, interactive diagrams, spaced-repetition flashcards, search, and dark mode.
+A free, open-source course in system design: how large systems are built, and how to answer the system design interview. It's a React app with chapters split into sections, progress tracking, study plans with a daily goal, notes and bookmarks, interactive diagrams, spaced-repetition flashcards, search, and dark mode.
+
+Every chapter is written for this site, and each lists its sources under "Further reading". The syllabus started from [The System Design Primer](https://github.com/donnemartin/system-design-primer) by Donne Martin, and covers everything it teaches and more ([`content/COVERAGE.md`](content/COVERAGE.md) maps each of its topics to the section that covers it here).
 
 **Live site: [system.tangentbyte.com](https://system.tangentbyte.com)**
 
@@ -11,74 +13,57 @@ npm install
 npm run dev              # http://localhost:5173
 npm run build            # static site in dist/, plus llms.txt and prerendered pages
 npm run preview          # serve dist/ locally
-npm run verify-content   # check nothing from the primer went missing
-npm test                 # unit tests (sync merging)
+npm run verify-content   # check internal links and redirects
+npm run coverage         # check every syllabus topic still has a home
+npm run lint-diagrams    # flag diagrams that will draw badly
+npm test                 # unit tests (sync merging, old-link redirects and data migration)
 ```
 
-The first run clones the primer into `source-repo/` and generates the content. Building needs Node 22.13 or newer (the flashcard decks are read with `node:sqlite`).
+The first run generates the content. Building needs Node 22.13 or newer.
 
 ## How content is built
 
-`scripts/build-content.mjs` reads the primer at build time and writes:
+All content is markdown in [`content/`](content/): one file per chapter, one per flashcard deck. [`content/README.md`](content/README.md) explains the format, diagrams, decks, and how to rename a chapter without breaking readers' links and notes. `scripts/build-content.mjs` turns it into:
 
-| Output                             | What it is                                                     |
-| ---------------------------------- | -------------------------------------------------------------- |
-| `src/generated/manifest.json`      | Course outline: parts, chapters, sections, reading time, decks |
-| `public/content/<chapter>.json`    | Pre-rendered HTML per chapter (syntax highlighting done here)  |
-| `public/content/flashcards/*.json` | The three Anki decks, cleaned up, and the site's own decks     |
-| `public/content/search.json`       | Plain-text index used by search                                |
-| `public/repo/...`                  | Diagrams referenced by the content                             |
+| Output                             | What it is                                                                  |
+| ---------------------------------- | --------------------------------------------------------------------------- |
+| `src/generated/manifest.json`      | Course outline: parts, chapters, sections, reading time, decks, old URLs    |
+| `public/content/<chapter>.json`    | Pre-rendered HTML per chapter (syntax highlighting and diagrams drawn here) |
+| `public/content/flashcards/*.json` | One file per deck                                                           |
+| `public/content/search.json`       | Plain-text index used by search                                             |
 
-- README `##` topics become chapters, and `###` headings become trackable sections. Database also splits at `####`. "Disadvantage(s)" and "Source(s)" are folded into the section before them.
-- Solution READMEs and the OOD notebooks each become a chapter. Each solution also shows its full `.py` files under "Full source code".
-- The README's Anki, Under development, Contributing, Credits, Contact and License sections form an "About the primer" chapter, which doesn't count toward progress.
-- `scripts/flashcards.mjs` unpacks the `.apkg` decks (zip + SQLite), strips GitHub's inline styles, and re-highlights the code.
-- Links between topics are rewritten to in-app routes. Imgur and GitHub camo diagrams are swapped for the copies in the repo where they exist.
+- `##` headings become trackable sections. "Further reading" is folded into the section before it.
+- Fenced `diagram` blocks are drawn as SVG that follows the theme ([`scripts/diagram.mjs`](scripts/diagram.mjs)).
+- The curriculum order lives in the `PARTS` array at the top of the build script, and the decks in `DECKS`.
 
-To pull upstream changes, run `git -C source-repo pull`, then `npm run content` and `npm run verify-content`. The curriculum order lives in the `PARTS` array at the top of the build script.
+## Old links
 
-## Checking content
+The site used to present the primer's own text, with some chapters ending in "101". Those chapters were renamed or replaced, and [`content/redirects.json`](content/redirects.json) records where each old chapter, heading and deck went:
 
-`npm run verify-content` compares every paragraph, heading, list item, table cell, code block and image in the primer with the generated site, and checks that every internal link and image resolves. It lists what is left out on purpose (the README's tables of contents, language links and notebook attribution lines) and exits with an error if anything else is missing.
-
-## Extra chapters
-
-`content-extra/` holds chapters written for this site on topics the primer doesn't cover, such as rate limiting, consistent hashing and a chat system design. They're original writing. Each one lists the books, papers and docs it draws on under "Further reading".
-
-They're off by default. Readers turn them on with **Show extra chapters** on the home page, and the choice is saved in that browser (`sdp-settings`). When they're on, they appear in the course list, the sidebar and search, and count toward progress. When they're off, a link to one shows a page with the same switch.
-
-Four of them are always shown, because they're companions to primer chapters that are short and lean on old external links. Each sits right after the chapters it covers, and those chapters link to it:
-
-- **Scalability 101**, after "System design topics: start here": what Harvard's scalability lecture and the _Scalability for Dummies_ series cover.
-- **Performance and latency 101**, after "Performance vs scalability" and "Latency vs throughput".
-- **CAP and consistency 101**, after "Availability vs consistency" and "Consistency patterns".
-- **Availability 101**, after "Availability patterns".
-
-They're fact-checked against the original sources and primary accounts (papers, post-mortems, official docs), with real examples. Readers can use the originals, the companions, or both.
-
-`scripts/build-content.mjs` builds them like the primer chapters. `##` headings become trackable sections, and fenced `diagram` blocks are drawn as SVG that follows the theme ([`scripts/diagram.mjs`](scripts/diagram.mjs)). See [`content-extra/README.md`](content-extra/README.md) for the format. `npm run verify-content` checks their internal links too.
+- `vercel.json` sends old URLs to their new home with a permanent redirect. A replaced chapter's redirect carries `?from=<old id>`, so the app can send a link to one of its headings to the section that covers it now. `npm run verify-content` checks the two files agree.
+- Readers' saved data moves too ([`src/lib/legacy.ts`](src/lib/legacy.ts)): progress in renamed chapters, and notes and bookmarks to the section that now holds the same heading. Progress in replaced chapters doesn't count any more, and a one-time notice on the home page says so.
 
 ## Interactive diagrams
 
 Four topics have a diagram the reader can play with, in [`src/widgets/`](src/widgets/):
 
-| Diagram            | Chapter                                     | What it shows                                                                              |
-| ------------------ | ------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `cache-strategies` | Cache, "When to update the cache"           | Cache-aside, write-through and write-behind: hits, stale reads, write latency, lost writes |
-| `replication`      | Database, "Master-slave replication"        | Replication lag, stale reads from replicas, and which writes a failover loses              |
-| `hash-ring`        | Consistent hashing (extra), "Virtual nodes" | Which keys move when servers come and go, against hash mod N, and how points even out load |
-| `rate-limiter`     | Rate limiting (extra), "The algorithms"     | Fixed window, sliding log, sliding counter and token bucket on the same traffic            |
+| Diagram            | Chapter                                              | What it shows                                                                              |
+| ------------------ | ---------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `cache-strategies` | Caching, "When to update the cache"                  | Cache-aside, write-through and write-behind: hits, stale reads, write latency, lost writes |
+| `replication`      | Relational databases, "Synchronous, asynchronous..." | Replication lag, stale reads from replicas, and which writes a failover loses              |
+| `hash-ring`        | Consistent hashing, "Virtual nodes"                  | Which keys move when servers come and go, against hash mod N, and how points even out load |
+| `rate-limiter`     | Rate limiting, "The algorithms"                      | Fixed window, sliding log, sliding counter and token bucket on the same traffic            |
 
-The content build leaves an empty placeholder where each goes and the chapter page renders the component into it. Each diagram's code loads only with its chapter. See [`content-extra/README.md`](content-extra/README.md) to add one.
+The content build leaves an empty placeholder where each goes and the chapter page renders the component into it. A chapter places one with a fenced `widget` block. Each diagram's code loads only with its chapter. See [`content/README.md`](content/README.md) to add one.
 
 ## Progress, plans, notes and flashcards
 
 Everything a reader does is stored in `localStorage`: reading progress (`sdp-progress`), flashcard history (`sdp-flashcards`), notes and bookmarks (`sdp-notes`) and the study plan (`sdp-plan`). Without an account it stays in that browser. Signing in (optional, see below) syncs all of it across devices.
 
-- **Study plans** follow the primer's study guide: short, medium or long. Each covers every topic chapter plus some, many or all of the practice questions, and adds extra chapters when they're turned on. The lengths (2, 5 and 10 weeks) and the question choices are this site's suggestions ([`src/lib/plans.ts`](src/lib/plans.ts)). Today's goal is what was left this morning divided by the days left, so it doesn't move while you read.
+- **Study plans** follow "How to use this handbook": short, medium or long. Each covers every topic chapter plus some, many or all of the design questions; the medium and long plans add the deeper concepts. The lengths (2, 5 and 10 weeks) and the question choices are this site's suggestions ([`src/lib/plans.ts`](src/lib/plans.ts)). Today's goal is what was left this morning divided by the days left, so it doesn't move while you read.
 - **Notes and bookmarks** are per section, added from the buttons at the end of each one. The Notes and bookmarks page lists them in course order and downloads the notes as Markdown.
 
-There are two sets of flashcard decks. The primer's three Anki decks have one card per topic or question. Five more decks, written for this site in [`content-extra/flashcards/`](content-extra/flashcards/), ask one specific question per card across every chapter, the 101 chapters and worked solutions included. Each answer is drawn from the chapter it links to. The two decks covering the extra chapters are shown only when extra chapters are turned on.
+Eight flashcard decks in [`content/flashcards/`](content/flashcards/) cover the course: one card per topic, specific questions on every chapter and design, design walkthroughs, and object-oriented designs. Each answer is drawn from the chapter it links to.
 
 Flashcards use an SM-2 style schedule like Anki's: Again (1 minute), Hard, Good and Easy, with intervals growing by each card's ease. New cards are limited per deck per day, 10 by default.
 
@@ -127,10 +112,10 @@ The app replaces the prerendered article as soon as it starts. Set `SITE_URL` (f
 
 ## Deploying
 
-This is a static site. `vercel.json` turns on clean URLs, so `/learn/cache` serves the prerendered `learn/cache.html`, and rewrites every other route to the app shell, `app.html` (served at `/app` because of clean URLs). Other hosts need the same two rules. The live site runs on Vercel with `SITE_URL=https://system.tangentbyte.com`, and every push to `main` redeploys it. `npm run preview` behaves the same way. The app assumes it's served from the domain root.
+This is a static site. `vercel.json` turns on clean URLs, so `/learn/cache` serves the prerendered `learn/cache.html`, redirects old URLs (see [Old links](#old-links)), and rewrites every other route to the app shell, `app.html` (served at `/app` because of clean URLs). Other hosts need the same rules. The live site runs on Vercel with `SITE_URL=https://system.tangentbyte.com`, and every push to `main` redeploys it. `npm run preview` behaves the same way. The app assumes it's served from the domain root.
 
 ## License
 
 - **The site's code** is released under the [MIT License](LICENSE), © 2026 Souvik Samanta.
-- **The primer's content** is © Donne Martin, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), and is credited in the site footer. It isn't stored in this repository; the build fetches it from the [original repo](https://github.com/donnemartin/system-design-primer).
-- **The extra chapters** in `content-extra/` are © 2026 Souvik Samanta, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+- **The chapters and flashcards** in `content/` are © 2026 Souvik Samanta, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+- **The syllabus** started from [The System Design Primer](https://github.com/donnemartin/system-design-primer), © Donne Martin, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), and credited in the site footer and on the About page.
