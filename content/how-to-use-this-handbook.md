@@ -16,10 +16,11 @@ The chapters build on each other, so the order matters most at the start.
 1. **Start here.** This chapter, [the system design interview, step by step](/learn/system-design-interview), [scalability](/learn/scalability) and [back-of-the-envelope estimation](/learn/estimation). Read these first, whatever your goal.
 2. **Core trade-offs.** The tensions every design has to balance: [performance and latency](/learn/performance-and-latency), [CAP and consistency](/learn/cap-and-consistency), and [availability](/learn/availability).
 3. **Building blocks.** The parts a request passes through, one chapter each: DNS and CDNs, load balancers, reverse proxies and API gateways, databases, caches, queues, network protocols and security.
-4. **Advanced concepts.** Ideas that come up again and again in larger designs, such as [consistent hashing](/learn/consistent-hashing), [rate limiting](/learn/rate-limiting), [event streaming](/learn/event-streaming) and [consensus](/learn/consensus).
+4. **Deeper concepts.** Ideas that come up again and again in larger designs, such as [consistent hashing](/learn/consistent-hashing), [rate limiting](/learn/rate-limiting), [event streaming](/learn/event-streaming) and [consensus](/learn/consensus).
 5. **Design questions.** Full worked answers to common interview questions, such as a [URL shortener](/learn/design-url-shortener), a [news feed](/learn/design-social-news-feed) and a [chat system](/learn/design-chat-system). Each one follows the four interview steps.
 6. **Object-oriented design questions.** Smaller exercises where you design classes instead of services, such as a parking lot or a deck of cards, with code.
-7. **Reference.** Numbers worth remembering, a bank of extra practice questions, and real-world architectures from companies' engineering blogs.
+7. **AI systems.** How large language models are served and how products are built on them: [how LLM inference works](/learn/llm-inference), GPUs, inference engines, estimating AI workloads, [retrieval-augmented generation](/learn/rag), agents, evaluation and security.
+8. **Reference.** Numbers worth remembering, a bank of extra practice questions, and real-world architectures from companies' engineering blogs.
 
 Every chapter ends with **Check yourself** questions. Try to answer each one before you open it. Then each chapter lists **Further reading**, the sources it draws on, for when you want to go deeper.
 
@@ -53,12 +54,15 @@ Here is what each plan covers:
 | --- | --- | --- | --- |
 | Read the topic chapters (start here, trade-offs, building blocks) to understand how systems work | Yes | Yes | Yes |
 | Read the deeper concepts, from consistent hashing to batch processing | No | Yes | Yes |
+| Read the AI systems chapters | No | No | Yes |
 | Read a few articles from the engineering blogs of the companies you're interviewing with | Yes | Yes | Yes |
 | Read a few real-world architectures | Yes | Yes | Yes |
 | Review [the system design interview, step by step](/learn/system-design-interview) | Yes | Yes | Yes |
 | Work through the system design questions | Some | Many | Most |
 | Work through the object-oriented design questions | Some | Many | Most |
 | Try questions from the practice question bank | Some | Many | Most |
+
+If you're interviewing for a role that builds AI products or AI infrastructure, add the AI systems part to whichever plan you follow. Read them after the building blocks, since they build on caches, queues, load balancers and rate limits.
 
 The Reference part has three chapters to come back to: [Numbers to know](/learn/numbers-to-know) for estimates, [Practice questions](/learn/practice-questions) for more questions to try, and [Real-world architectures](/learn/real-world-architectures) for papers, company architectures and engineering blogs.
 

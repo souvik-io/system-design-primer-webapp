@@ -17,6 +17,8 @@ export type PlanDef = {
   questions: 'some' | 'many' | 'all'
   /** Whether to include the "Deeper concepts" part */
   concepts: boolean
+  /** Whether to include the two AI parts, chapters and design questions */
+  ai: boolean
 }
 
 export const PLANS: PlanDef[] = [
@@ -27,6 +29,7 @@ export const PLANS: PlanDef[] = [
     description: 'Breadth across every topic, and a few practice questions.',
     questions: 'some',
     concepts: false,
+    ai: false,
   },
   {
     id: 'medium',
@@ -35,14 +38,16 @@ export const PLANS: PlanDef[] = [
     description: 'Breadth, some depth, and many practice questions.',
     questions: 'many',
     concepts: true,
+    ai: false,
   },
   {
     id: 'long',
     title: 'Long',
     weeks: 10,
-    description: 'Breadth, more depth, and every practice question.',
+    description: 'Breadth, more depth, every practice question, and the AI systems part.',
     questions: 'all',
     concepts: true,
+    ai: true,
   },
 ]
 
@@ -62,12 +67,14 @@ const MANY = new Set([
   'ood-online-chat',
 ])
 const QUESTION_PARTS = new Set(['system-design', 'ood'])
+const AI_PARTS = new Set(['ai-systems', 'ai-design'])
 
 /** The chapters a plan covers, in course order. */
 export function planChapters(plan: PlanDef): ChapterMeta[] {
   return chapters.filter((c) => {
     if (c.untracked) return false
     if (c.part.id === 'concepts') return plan.concepts
+    if (AI_PARTS.has(c.part.id)) return plan.ai
     if (!QUESTION_PARTS.has(c.part.id)) return true
     return plan.questions === 'all' || (plan.questions === 'many' ? MANY : SOME).has(c.id)
   })

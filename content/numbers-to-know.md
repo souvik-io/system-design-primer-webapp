@@ -238,7 +238,7 @@ This is only the weights. Running a model also needs memory for intermediate res
 
 The gist that popularized the latency table added rows for language models in 2026. They are rough, but useful for scale: a hosted frontier model produces a token about every 20 ms, takes about 1 second before its first token on a short prompt, about 10 seconds to read a 100,000-token prompt with no cache, and about 30 seconds for a single reasoning response.
 
-A later part of the handbook covers model inference in depth: batching, caching, and how to size a serving fleet.
+The [AI systems](/learn/llm-inference) part of the handbook covers model inference in depth. [Estimating AI workloads](/learn/ai-estimation) works through these numbers step by step, including the memory each conversation's cache takes and how many GPUs a product needs.
 
 ## Check yourself
 
