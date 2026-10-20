@@ -117,6 +117,41 @@ const PARTS = [
     chapters: ['ood-hash-table', 'ood-lru-cache', 'ood-call-center', 'ood-deck-of-cards', 'ood-parking-lot', 'ood-online-chat'],
   },
   {
+    id: 'ai-systems',
+    title: 'AI systems',
+    description: 'How language models are served, from GPUs and inference engines to retrieval, agents, evaluation and security.',
+    chapters: [
+      'llm-inference',
+      'gpus-for-ai',
+      'inference-engines',
+      'ai-estimation',
+      'inference-fleets',
+      'llm-gateways',
+      'vector-search',
+      'rag',
+      'ai-agents',
+      'ai-evals-and-observability',
+      'ai-security',
+      'training-infrastructure',
+    ],
+  },
+  // TODO: AI system design questions, still being written. Restore this part once the chapters exist.
+  // {
+  //   id: 'ai-design',
+  //   title: 'AI system design questions',
+  //   description: 'Worked designs for products built on language and image models, in the same four steps.',
+  //   chapters: [
+  //     'design-chat-assistant',
+  //     'design-inference-platform',
+  //     'design-llm-gateway',
+  //     'design-rag-qa',
+  //     'design-coding-assistant',
+  //     'design-agent-platform',
+  //     'design-vector-database',
+  //     'design-image-generation',
+  //   ],
+  // },
+  {
     id: 'reference',
     title: 'Reference',
     description: 'Numbers to memorise, more practice questions, and real-world architectures.',
@@ -181,7 +216,7 @@ const FOLD_INTO_PREVIOUS = /^(source\(s\)|disadvantage\(s\)|further reading)/i
 
 // Interactive diagrams (src/widgets/Widgets.tsx), placed with a ```widget block. The build leaves an
 // empty placeholder where each one goes and the app renders into it.
-const WIDGET_NAMES = new Set(['hash-ring', 'cache-strategies', 'replication', 'rate-limiter'])
+const WIDGET_NAMES = new Set(['hash-ring', 'cache-strategies', 'replication', 'rate-limiter', 'kv-cache-calculator', 'batching-simulator'])
 
 function widgetNode(name, where) {
   if (!WIDGET_NAMES.has(name)) throw new Error(`${where}: no interactive diagram called "${name}". Known: ${[...WIDGET_NAMES].join(', ')}.`)

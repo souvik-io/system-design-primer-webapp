@@ -10,6 +10,8 @@ const WIDGETS: Record<string, ComponentType> = {
   'cache-strategies': lazy(() => import('./CacheStrategies')),
   replication: lazy(() => import('./Replication')),
   'rate-limiter': lazy(() => import('./RateLimiter')),
+  'kv-cache-calculator': lazy(() => import('./KvCacheCalculator')),
+  'batching-simulator': lazy(() => import('./BatchingSimulator')),
 }
 
 export function Widgets({ root, chapter }: { root: RefObject<HTMLElement | null>; chapter: unknown }) {
