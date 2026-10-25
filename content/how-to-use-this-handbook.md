@@ -20,7 +20,8 @@ The chapters build on each other, so the order matters most at the start.
 5. **Design questions.** Full worked answers to common interview questions, such as a [URL shortener](/learn/design-url-shortener), a [news feed](/learn/design-social-news-feed) and a [chat system](/learn/design-chat-system). Each one follows the four interview steps.
 6. **Object-oriented design questions.** Smaller exercises where you design classes instead of services, such as a parking lot or a deck of cards, with code.
 7. **AI systems.** How large language models are served and how products are built on them: [how LLM inference works](/learn/llm-inference), GPUs, inference engines, estimating AI workloads, [retrieval-augmented generation](/learn/rag), agents, evaluation and security.
-8. **Reference.** Numbers worth remembering, a bank of extra practice questions, and real-world architectures from companies' engineering blogs.
+8. **AI system design questions.** Worked answers for products built on models, in the same four steps, such as a [chat assistant](/learn/design-chat-assistant), an [LLM gateway](/learn/design-llm-gateway) and a [coding assistant](/learn/design-coding-assistant).
+9. **Reference.** Numbers worth remembering, a bank of extra practice questions, and real-world architectures from companies' engineering blogs.
 
 Every chapter ends with **Check yourself** questions. Try to answer each one before you open it. Then each chapter lists **Further reading**, the sources it draws on, for when you want to go deeper.
 
@@ -55,6 +56,7 @@ Here is what each plan covers:
 | Read the topic chapters (start here, trade-offs, building blocks) to understand how systems work | Yes | Yes | Yes |
 | Read the deeper concepts, from consistent hashing to batch processing | No | Yes | Yes |
 | Read the AI systems chapters | No | No | Yes |
+| Work through the AI system design questions | No | No | Most |
 | Read a few articles from the engineering blogs of the companies you're interviewing with | Yes | Yes | Yes |
 | Read a few real-world architectures | Yes | Yes | Yes |
 | Review [the system design interview, step by step](/learn/system-design-interview) | Yes | Yes | Yes |
@@ -62,7 +64,7 @@ Here is what each plan covers:
 | Work through the object-oriented design questions | Some | Many | Most |
 | Try questions from the practice question bank | Some | Many | Most |
 
-If you're interviewing for a role that builds AI products or AI infrastructure, add the AI systems part to whichever plan you follow. Read them after the building blocks, since they build on caches, queues, load balancers and rate limits.
+If you're interviewing for a role that builds AI products or AI infrastructure, add the AI systems chapters and the AI system design questions to whichever plan you follow. Read them after the building blocks, since they build on caches, queues, load balancers and rate limits.
 
 The Reference part has three chapters to come back to: [Numbers to know](/learn/numbers-to-know) for estimates, [Practice questions](/learn/practice-questions) for more questions to try, and [Real-world architectures](/learn/real-world-architectures) for papers, company architectures and engineering blogs.
 

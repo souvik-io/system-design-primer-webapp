@@ -18,7 +18,7 @@ System design is usually one round of several. Most interview loops also include
 
 ## Under development
 
-The handbook is still growing. The newest part covers AI systems: [how large language models are served](/learn/llm-inference), what GPUs and inference engines do, retrieval, agents, evaluation and security. AI moves quickly, so these chapters date the facts that will age and link to the sources they come from. Worked design questions for AI products, such as a chat assistant, a document question-answering service and an inference platform, are being written next.
+The handbook is still growing. The newest part covers AI systems: [how large language models are served](/learn/llm-inference), what GPUs and inference engines do, retrieval, agents, evaluation and security. AI moves quickly, so these chapters date the facts that will age and link to the sources they come from. Worked design questions apply them to AI products, such as a [chat assistant](/learn/design-chat-assistant), a [document question-answering service](/learn/design-rag-qa) and an [inference platform](/learn/design-inference-platform).
 
 Some topics that were once listed here as unfinished now have full chapters:
 

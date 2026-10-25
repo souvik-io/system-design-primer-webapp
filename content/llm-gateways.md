@@ -15,7 +15,7 @@ This chapter answers five questions:
 - What can a gateway cache, and how can a cache return a wrong answer?
 - How do streams pass through a gateway, and how do you track cost per team?
 
-We'll follow **Crumb**, the recipe site from earlier chapters. Its recipe helper answers cooking questions with a hosted model. The search team wants a second provider as a backup, and the data team runs a small **open-weight** model (one whose weights are published for download) on its own GPUs. Without a gateway, each service would need its own keys, retries, token counts and logs.
+We'll follow **Crumb**, the recipe site from earlier chapters. Its recipe helper answers cooking questions with a hosted model. The search team wants a second provider as a backup, and the data team runs a small **open-weight** model (one whose weights are published for download) on its own GPUs. Without a gateway, each service would need its own keys, retries, token counts and logs. The [LLM gateway design question](/learn/design-llm-gateway) sizes the same parts for a company with 200 apps.
 
 ## What a gateway adds
 

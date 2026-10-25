@@ -135,22 +135,21 @@ const PARTS = [
       'training-infrastructure',
     ],
   },
-  // TODO: AI system design questions, still being written. Restore this part once the chapters exist.
-  // {
-  //   id: 'ai-design',
-  //   title: 'AI system design questions',
-  //   description: 'Worked designs for products built on language and image models, in the same four steps.',
-  //   chapters: [
-  //     'design-chat-assistant',
-  //     'design-inference-platform',
-  //     'design-llm-gateway',
-  //     'design-rag-qa',
-  //     'design-coding-assistant',
-  //     'design-agent-platform',
-  //     'design-vector-database',
-  //     'design-image-generation',
-  //   ],
-  // },
+  {
+    id: 'ai-design',
+    title: 'AI system design questions',
+    description: 'Worked designs for products built on language and image models, in the same four steps.',
+    chapters: [
+      'design-chat-assistant',
+      'design-inference-platform',
+      'design-llm-gateway',
+      'design-rag-qa',
+      'design-coding-assistant',
+      'design-agent-platform',
+      'design-vector-database',
+      'design-image-generation',
+    ],
+  },
   {
     id: 'reference',
     title: 'Reference',
