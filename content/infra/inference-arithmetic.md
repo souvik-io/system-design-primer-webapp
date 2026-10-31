@@ -19,8 +19,6 @@ Applying the roofline to the whole step at once can mislead, because one part ca
 
 Element-wise operations are small enough to leave out of a first estimate, and the [previous chapter's table](/learn/transformer-as-workload#where-the-bytes-go) shows they are under 2% of a decode step.
 
-<!-- Planned interactive diagram: roofline-explorer (pick GPU, precision, batch and context; watch the step move along the roofline). -->
-
 ## Measuring your own roofline
 
 The roofline's two numbers, peak FLOPs and bandwidth, come from spec sheets, and real hardware reaches only part of them. Measure them first. The probe below times a large copy (pure bandwidth) and a large square matmul (near-peak compute), then sweeps the batch size of a decode-shaped matmul: one 4,096 × 14,336 weight, Llama 3.1 8B's up projection, multiplied by B token vectors. For each B it prints the measured time next to the roofline's prediction from the two measured numbers.
@@ -205,6 +203,18 @@ Four lessons come out of the decode rows.
 2. **Batching is nearly free until the KV cache takes over.** Going from batch 1 to 8 multiplies total throughput by 7 and costs each user 11% of their speed. By batch 64, the KV cache reads exceed the weight reads, and from there each added user slows everyone down.
 3. **Memory, not compute, caps throughput here.** The weight matmuls would turn compute-bound at batch 295 (the H100's ridge point), but memory runs out at batch 213 for 2,000-token contexts. At 32,000-token contexts, only 13 sequences fit. For this model on this GPU, decode is memory-bound at every batch it can run; the way to more throughput is fewer bytes (FP8 weights, FP8 KV cache) or more memory, not more FLOPS.
 4. **The L4 is about 11 times slower per step.** Its bandwidth is 300 GB/s against 3,350, and decode follows bandwidth. It is still useful for labs, and for low-traffic models where the H100 would sit idle.
+
+The explorer below runs the same model for six chips and three Llama sizes. Things to try:
+
+- **Slide the batch from 1 to 512 on the H100 with the 8B model.** The weight matmuls move right along the slanted roof, while attention stays put at 4 FLOPs per byte. Memory runs out at batch 213, well before the weights reach the ridge point.
+- **Switch the KV cache to FP8.** Attention's intensity doubles to 8 and the batch memory allows roughly doubles, which is often the cheapest throughput gain available.
+- **Switch the weights to FP8.** The roof rises (FP8 Tensor Cores double the peak), the weight bytes halve, and the batch-1 step gets almost twice as fast.
+- **Choose Prefill and a 2,000-token prompt.** Both points jump far to the right, past the ridge: prefill is the compute-bound phase. Raise the prompt to 128K and watch attention's share grow.
+- **Choose the Apple M2 and the 1B model.** A laptop's ridge point is about 30, so it turns compute-bound at small batches, as the probe above measured.
+
+```widget
+roofline-explorer
+```
 
 ## Latency against throughput
 

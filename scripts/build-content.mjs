@@ -248,7 +248,15 @@ const FOLD_INTO_PREVIOUS = /^(source\(s\)|disadvantage\(s\)|further reading)/i
 
 // Interactive diagrams (src/widgets/Widgets.tsx), placed with a ```widget block. The build leaves an
 // empty placeholder where each one goes and the app renders into it.
-const WIDGET_NAMES = new Set(['hash-ring', 'cache-strategies', 'replication', 'rate-limiter', 'kv-cache-calculator', 'batching-simulator'])
+const WIDGET_NAMES = new Set([
+  'hash-ring',
+  'cache-strategies',
+  'replication',
+  'rate-limiter',
+  'kv-cache-calculator',
+  'batching-simulator',
+  'roofline-explorer',
+])
 
 function widgetNode(name, where) {
   if (!WIDGET_NAMES.has(name)) throw new Error(`${where}: no interactive diagram called "${name}". Known: ${[...WIDGET_NAMES].join(', ')}.`)

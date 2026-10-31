@@ -12,6 +12,7 @@ const WIDGETS: Record<string, ComponentType> = {
   'rate-limiter': lazy(() => import('./RateLimiter')),
   'kv-cache-calculator': lazy(() => import('./KvCacheCalculator')),
   'batching-simulator': lazy(() => import('./BatchingSimulator')),
+  'roofline-explorer': lazy(() => import('./RooflineExplorer')),
 }
 
 export function Widgets({ root, chapter }: { root: RefObject<HTMLElement | null>; chapter: unknown }) {

@@ -121,7 +121,7 @@ Start applying around week 26 to 28; interview prep (Part 10) runs alongside the
 | 1.1 | `transformer-as-workload.md` | Drafted 2026-10-31 |
 | 1.2 | `inference-arithmetic.md` | Drafted 2026-10-31. Lab part B (vLLM on a rented GPU) has no measured reference output yet |
 
-All four are published at `/infra` (two parts in `PARTS` with `handbook: 'infra'`), pass `lint-diagrams` and `verify-content`. The roofline-explorer widget is marked with an HTML comment in 1.2 and is not built yet.
+All four are published at `/infra` (two parts in `PARTS` with `handbook: 'infra'`), pass `lint-diagrams` and `verify-content`. The `roofline-explorer` widget (`src/widgets/RooflineExplorer.tsx`) is built and sits in 1.2.
 
 ## Part 0: Orientation
 
