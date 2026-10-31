@@ -72,7 +72,7 @@ const AI_PARTS = new Set(['ai-systems', 'ai-design'])
 /** The chapters a plan covers, in course order. */
 export function planChapters(plan: PlanDef): ChapterMeta[] {
   return chapters.filter((c) => {
-    if (c.untracked) return false
+    if (c.untracked || c.part.handbook !== 'system-design') return false
     if (c.part.id === 'concepts') return plan.concepts
     if (AI_PARTS.has(c.part.id)) return plan.ai
     if (!QUESTION_PARTS.has(c.part.id)) return true

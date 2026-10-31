@@ -164,7 +164,30 @@ const PARTS = [
     untracked: true,
     chapters: ['about'],
   },
+
+  // The AI Infrastructure Engineer Handbook, a second course on the same site at /infra. Its chapters live in
+  // content/infra/ (dir) and its progress, home page and sidebar are separate from the system design course
+  // (handbook). content/infra/SYLLABUS.md is the plan for the rest of it.
+  {
+    id: 'infra-orientation',
+    handbook: 'infra',
+    dir: 'infra',
+    title: 'Orientation',
+    description: 'What an inference engineer does, how the job is hired for, and the models and machines the labs use.',
+    chapters: ['inference-engineer-role', 'models-and-machines'],
+  },
+  {
+    id: 'infra-workload',
+    handbook: 'infra',
+    dir: 'infra',
+    title: 'The model as a workload',
+    description: 'Where the FLOPs and bytes of a transformer go, and the arithmetic that predicts speed, latency and cost.',
+    chapters: ['transformer-as-workload', 'inference-arithmetic'],
+  },
 ]
+
+/** Folders under content/ that hold a handbook's chapters, besides content/ itself. */
+const CHAPTER_DIRS = [...new Set(PARTS.map((p) => p.dir).filter(Boolean))]
 
 // content/flashcards/<id>.md
 const DECKS = [
@@ -342,8 +365,8 @@ async function renderSection(section, ctx) {
 // Sources
 
 /** A chapter: "##" headings become sections, shifted down a level so they render as <h3>. */
-function readChapter(id) {
-  const file = `content/${id}.md`
+function readChapter(id, dir) {
+  const file = dir ? `content/${dir}/${id}.md` : `content/${id}.md`
   if (!fs.existsSync(path.join(ROOT, file))) throw new Error(`${file} doesn't exist, but PARTS lists it.`)
   const tree = parser.parse(fs.readFileSync(path.join(ROOT, file), 'utf8'))
   slugHeadings(tree)
@@ -413,10 +436,12 @@ fs.mkdirSync(path.join(OUT_CONTENT, 'flashcards'), { recursive: true })
 fs.mkdirSync(path.dirname(OUT_MANIFEST), { recursive: true })
 
 const listed = PARTS.flatMap((p) => p.chapters)
-for (const f of fs.readdirSync(CONTENT)) {
-  const id = f.replace(/\.md$/, '')
-  if (f.endsWith('.md') && !['README', 'COVERAGE'].includes(id) && !listed.includes(id)) {
-    console.warn(`  content/${f} isn't in PARTS, so it isn't published.`)
+for (const dir of ['', ...CHAPTER_DIRS]) {
+  for (const f of fs.readdirSync(path.join(CONTENT, dir))) {
+    const id = f.replace(/\.md$/, '')
+    if (f.endsWith('.md') && !['README', 'COVERAGE', 'SYLLABUS'].includes(id) && !listed.includes(id)) {
+      console.warn(`  content/${dir ? dir + '/' : ''}${f} isn't in PARTS, so it isn't published.`)
+    }
   }
 }
 
@@ -433,7 +458,7 @@ const sectionsOf = new Map() // chapter id -> rendered sections
 for (const part of PARTS) {
   const chapters = []
   for (const id of part.chapters) {
-    const src = readChapter(id)
+    const src = readChapter(id, part.dir)
     const sections = []
     for (const s of splitSections(src.nodes, 3)) sections.push(await renderSection(s, src.ctx))
     sectionsOf.set(id, sections)
@@ -454,6 +479,7 @@ for (const part of PARTS) {
   }
   manifest.parts.push({
     id: part.id,
+    handbook: part.handbook ?? 'system-design',
     title: part.title,
     description: part.description,
     ...(part.untracked ? { untracked: true } : {}),

@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import { Layout } from './components/Layout'
 import { HomePage } from './pages/HomePage'
+import { InfraHomePage } from './pages/InfraHomePage'
 import { ChapterPage } from './pages/ChapterPage'
 import { NotFound } from './pages/NotFound'
 import { FlashcardsPage } from './pages/FlashcardsPage'
@@ -15,6 +16,7 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { path: '/', element: <HomePage /> },
+      { path: '/infra', element: <InfraHomePage /> },
       { path: '/learn/:chapterId', element: <ChapterPage /> },
       { path: '/flashcards', element: <FlashcardsPage /> },
       { path: '/flashcards/:deckId', element: <StudyPage /> },

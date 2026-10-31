@@ -115,12 +115,22 @@ export function lintDiagram(src) {
 }
 
 const dir = path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'content')
+// content/ and the handbook folders inside it, such as content/infra/
+const dirs = [
+  dir,
+  ...fs
+    .readdirSync(dir, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && e.name !== 'flashcards')
+    .map((e) => path.join(dir, e.name)),
+]
 const files = process.argv.slice(2).length
   ? process.argv.slice(2)
-  : fs
-      .readdirSync(dir)
-      .filter((f) => f.endsWith('.md'))
-      .map((f) => path.join(dir, f))
+  : dirs.flatMap((d) =>
+      fs
+        .readdirSync(d)
+        .filter((f) => f.endsWith('.md'))
+        .map((f) => path.join(d, f)),
+    )
 let total = 0
 for (const file of files) {
   const md = fs.readFileSync(file, 'utf8')

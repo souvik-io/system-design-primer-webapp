@@ -42,6 +42,12 @@ const shell = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8')
 if (!shell.includes('<div id="root"></div>')) throw new Error('dist/index.html has already been prerendered. Run `npm run build` again.')
 
 const SITE_NAME = 'System Design Handbook'
+// The second course on the site, at /infra (parts with handbook: 'infra' in the manifest).
+const INFRA_NAME = 'AI Infrastructure Engineer Handbook'
+const INFRA_DESCRIPTION =
+  'Inference from kernels to clusters: how models run on GPUs, how serving engines schedule them, and how to make them fast and cheap. Each chapter has a lab.'
+const bookName = (part) => (part.handbook === 'infra' ? INFRA_NAME : SITE_NAME)
+const bookHome = (part) => (part.handbook === 'infra' ? '/infra' : '/')
 const DESCRIPTION =
   'A free course in system design, from the interview method to databases, caches and worked designs, with progress tracking and flashcards.'
 
@@ -94,7 +100,7 @@ const chapters = manifest.parts.flatMap((part) => part.chapters.map((c) => ({ ..
 const load = (id) => JSON.parse(fs.readFileSync(path.join(DIST, 'content', `${id}.json`), 'utf8'))
 
 function chapterMarkdown(c, body) {
-  const parts = [`# ${c.title}`, `> From the ${SITE_NAME}, part "${c.part.title}". Web page: ${abs(`/learn/${c.id}`)}`]
+  const parts = [`# ${c.title}`, `> From the ${bookName(c.part)}, part "${c.part.title}". Web page: ${abs(`/learn/${c.id}`)}`]
   for (const s of body.sections) parts.push(md(s.html))
   return parts.join('\n\n') + '\n'
 }
@@ -133,11 +139,12 @@ for (const [i, c] of chapters.entries()) {
   fs.writeFileSync(path.join(DIST, 'learn', `${c.id}.md`), markdown)
   full.push(markdown)
 
-  const prev = chapters[i - 1]
-  const next = chapters[i + 1]
+  // Previous and next stay inside the chapter's own handbook.
+  const prev = chapters[i - 1]?.part.handbook === c.part.handbook ? chapters[i - 1] : undefined
+  const next = chapters[i + 1]?.part.handbook === c.part.handbook ? chapters[i + 1] : undefined
   const article = [
     nav,
-    `<p><a href="/#${c.part.id}">${esc(c.part.title)}</a></p>`,
+    `<p><a href="${bookHome(c.part)}#${c.part.id}">${esc(c.part.title)}</a></p>`,
     `<h1>${esc(c.title)}</h1>`,
     ...body.sections.map((s) => `<section class="article">${s.html}</section>`),
     `<p>${prev ? `Previous: <a href="/learn/${prev.id}">${esc(prev.title)}</a>` : ''}${prev && next ? ' · ' : ''}${
@@ -148,8 +155,8 @@ for (const [i, c] of chapters.entries()) {
     path.join(DIST, 'learn', `${c.id}.html`),
     page({
       urlPath: `/learn/${c.id}`,
-      title: `${c.title} | ${SITE_NAME}`,
-      description: c.summary || `${c.title}, from the ${SITE_NAME}.`,
+      title: `${c.title} | ${bookName(c.part)}`,
+      description: c.summary || `${c.title}, from the ${bookName(c.part)}.`,
       body: article,
       markdown: `/learn/${c.id}.md`,
       preload: `/content/${c.id}.json`,
@@ -160,7 +167,7 @@ for (const [i, c] of chapters.entries()) {
 // ---------------------------------------------------------------------------
 // Index pages
 
-const tracked = chapters.filter((c) => !c.untracked)
+const tracked = chapters.filter((c) => !c.untracked && c.part.handbook !== 'infra')
 const intro =
   `A free, open-source course in designing large-scale systems, in ${tracked.length} chapters: how to run a system design interview, ` +
   `the core trade-offs, building blocks from DNS to databases and caches, deeper concepts such as consistent hashing and consensus, ` +
@@ -173,23 +180,44 @@ llms.push(
 for (const part of manifest.parts) {
   const optional = part.untracked
   llms.push(
-    `## ${optional ? 'Optional' : part.title}`,
+    `## ${optional ? 'Optional' : part.handbook === 'infra' ? `${INFRA_NAME}: ${part.title}` : part.title}`,
     part.chapters.map((c) => `- [${c.title}](${abs(`/learn/${c.id}.md`)})${c.summary ? `: ${c.summary}` : ''}`).join('\n'),
   )
 }
 fs.writeFileSync(path.join(DIST, 'llms.txt'), llms.join('\n\n') + '\n')
 fs.writeFileSync(path.join(DIST, 'llms-full.txt'), [`# ${SITE_NAME}`, `> ${intro}`, ...full].join('\n\n---\n\n'))
 
-const home = [
-  nav,
-  `<h1>${SITE_NAME}</h1>`,
-  `<p>${esc(intro)}</p>`,
-  ...manifest.parts.map(
+const partList = (parts) =>
+  parts.map(
     (part) =>
       `<section id="${part.id}"><h2>${esc(part.title)}</h2><p>${esc(part.description)}</p><ul>${part.chapters
         .map((c) => `<li><a href="/learn/${c.id}">${esc(c.title)}</a>${c.summary ? `: ${esc(c.summary)}` : ''}</li>`)
         .join('')}</ul></section>`,
-  ),
+  )
+const infraParts = manifest.parts.filter((p) => p.handbook === 'infra')
+fs.writeFileSync(
+  path.join(DIST, 'infra.html'),
+  page({
+    urlPath: '/infra',
+    title: INFRA_NAME,
+    description: INFRA_DESCRIPTION,
+    body: [nav, `<h1>${INFRA_NAME}</h1>`, `<p>${esc(INFRA_DESCRIPTION)}</p>`, ...partList(infraParts)].join('\n'),
+  }),
+)
+
+const home = [
+  nav,
+  `<h1>${SITE_NAME}</h1>`,
+  `<p>${esc(intro)}</p>`,
+  `<p><a href="/infra">${INFRA_NAME}</a>: ${esc(INFRA_DESCRIPTION)}</p>`,
+  ...manifest.parts
+    .filter((p) => p.handbook !== 'infra')
+    .map(
+      (part) =>
+        `<section id="${part.id}"><h2>${esc(part.title)}</h2><p>${esc(part.description)}</p><ul>${part.chapters
+          .map((c) => `<li><a href="/learn/${c.id}">${esc(c.title)}</a>${c.summary ? `: ${esc(c.summary)}` : ''}</li>`)
+          .join('')}</ul></section>`,
+    ),
 ].join('\n')
 
 // Every route without its own page gets the empty shell, so it doesn't flash the overview.
@@ -205,7 +233,7 @@ fs.writeFileSync(
   }),
 )
 
-const urls = ['/', '/flashcards', ...chapters.map((c) => `/learn/${c.id}`)]
+const urls = ['/', '/infra', '/flashcards', ...chapters.map((c) => `/learn/${c.id}`)]
 fs.writeFileSync(path.join(DIST, 'robots.txt'), `User-agent: *\nAllow: /\n${SITE ? `\nSitemap: ${SITE}/sitemap.xml\n` : ''}`)
 if (SITE) {
   const today = new Date().toISOString().slice(0, 10)

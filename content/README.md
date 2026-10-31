@@ -5,6 +5,7 @@ Every chapter and flashcard deck on the site lives in this folder as markdown. T
 - `<chapter-id>.md`: one chapter each. The curriculum order lives in the `PARTS` array in `scripts/build-content.mjs`; a chapter that isn't listed there isn't published.
 - `flashcards/<deck-id>.md`: one deck each, listed in `DECKS` in the same script.
 - `redirects.json`: chapters, headings and decks that were renamed or replaced, and where they went. Old links, notes and bookmarks follow it (see below).
+- `infra/`: the chapters of the second course on the site, the AI Infrastructure Engineer Handbook at `/infra`, and `infra/SYLLABUS.md`, its plan. Parts in `PARTS` with `handbook: 'infra'` and `dir: 'infra'` read their chapters from here, and get their own home page, sidebar, progress and previous/next order. Chapter ids share the `/learn/<id>` namespace, so they must not clash with the system design chapters.
 - `COVERAGE.md`: every topic in The System Design Primer, which this handbook's syllabus started from, and the section that now covers it. `npm run coverage` checks that each target still exists, so a rename can't quietly drop a topic.
 
 ## Writing a chapter

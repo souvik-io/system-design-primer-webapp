@@ -11,8 +11,10 @@ export type ChapterMeta = {
   /** Reference material that doesn't count toward progress */
   untracked?: boolean
 }
+export type HandbookId = 'system-design' | 'infra'
 export type Part = {
   id: string
+  handbook: HandbookId
   title: string
   description: string
   chapters: ChapterMeta[]
@@ -33,17 +35,36 @@ export type Card = { id: string; front: string; back: string; href?: string }
 export type Deck = { id: string; title: string; cards: Card[] }
 
 export const parts: Part[] = (manifestJson.parts as Part[]).filter((p) => p.chapters.length > 0)
+
+/** The site holds two courses. Each has its own home page, sidebar, progress and chapter order. */
+export const HANDBOOKS: Record<HandbookId, { title: string; short: string; home: string; description: string }> = {
+  'system-design': {
+    title: 'System Design Handbook',
+    short: 'System design',
+    home: '/',
+    description: 'A free course in designing large-scale systems, from the interview method to databases, caches and worked designs.',
+  },
+  infra: {
+    title: 'AI Infrastructure Engineer Handbook',
+    short: 'AI infrastructure',
+    home: '/infra',
+    description:
+      'Inference from kernels to clusters: how models run on GPUs, how serving engines schedule them, and how to make them fast and cheap. Each chapter has a lab.',
+  },
+}
+
+export const partsOf = (handbook: HandbookId) => parts.filter((p) => p.handbook === handbook)
 export const decks: DeckMeta[] = manifestJson.decks
 export const deckById = new Map(decks.map((d) => [d.id, d]))
 export const redirects: Redirects = manifestJson.redirects
 
 export const chapters: (ChapterMeta & { part: Part })[] = parts.flatMap((part) => part.chapters.map((c) => ({ ...c, part })))
+export const chaptersOf = (handbook: HandbookId) => chapters.filter((c) => c.part.handbook === handbook)
 
 export const chapterById = new Map(chapters.map((c) => [c.id, c]))
 
-/** Chapters that count toward progress */
-export const trackedChapters = chapters.filter((c) => !c.untracked)
-export const totalSections = trackedChapters.reduce((n, c) => n + c.sections.length, 0)
+/** Chapters that count toward a handbook's progress */
+export const trackedChaptersOf = (handbook: HandbookId) => chaptersOf(handbook).filter((c) => !c.untracked)
 
 const sectionKeys = new Set(chapters.flatMap((c) => c.sections.map((s) => sectionKey(c.id, s.id))))
 export const sectionExists = (key: string) => sectionKeys.has(key)
