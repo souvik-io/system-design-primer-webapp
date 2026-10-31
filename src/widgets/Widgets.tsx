@@ -17,6 +17,12 @@ const WIDGETS: Record<string, ComponentType> = {
   'attention-variants': lazy(() => import('./AttentionVariants')),
   'rope-rotation': lazy(() => import('./RopeRotation')),
   'expert-router': lazy(() => import('./ExpertRouter')),
+  'warp-access': lazy(() => import('./WarpAccess')),
+  occupancy: lazy(() => import('./Occupancy')),
+  'matmul-tiling': lazy(() => import('./MatmulTiling')),
+  'warp-reduce': lazy(() => import('./WarpReduce')),
+  'online-softmax': lazy(() => import('./OnlineSoftmax')),
+  'decode-timeline': lazy(() => import('./DecodeTimeline')),
 }
 
 export function Widgets({ root, chapter }: { root: RefObject<HTMLElement | null>; chapter: unknown }) {

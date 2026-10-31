@@ -122,7 +122,15 @@ Start applying around week 26 to 28; interview prep (Part 10) runs alongside the
 | 1.2 | `inference-arithmetic.md` | Drafted 2026-10-31. Lab part B (vLLM on a rented GPU) has no measured reference output yet |
 | 1.3 | `mixture-of-experts.md` | Drafted 2026-10-31. Labs A and B measured on the M2 (Granite 3.1 1B-A400M as the real router); part C (vLLM on an H100) not yet run |
 
-Part 0 and Part 1 are complete and published at `/infra` (two parts in `PARTS` with `handbook: 'infra'`). The deck `infra-workload` covers both parts (32 cards). Widgets built so far: `roofline-explorer` (1.2 and 1.3, includes Qwen3-30B-A3B), `layer-explorer`, `attention-variants` and `rope-rotation` (1.1), and `expert-router` (1.3).
+| 2.1 | `gpu-execution.md` | Drafted 2026-11-01. Measured on Modal H100 and A10; the M2 part uses `access_patterns.py` |
+| 2.2 | `triton-kernels.md` | Drafted 2026-11-01. Four Triton kernels measured on H100 and A10; grouped tile order +3% on H100, +25% on A10 |
+| 2.3 | `cuda-basics.md` | Drafted 2026-11-01. CUDA RMSNorm on H100; compute-sanitizer demo on A10 (both need `--toolkit`) |
+| 2.4 | `flash-attention.md` | Drafted 2026-11-01. Triton FlashAttention 364 TFLOP/s vs SDPA 586 on H100 |
+| 2.5 | `profiling.md` | Drafted 2026-11-01. Real torch.profiler trace of a Llama 3.2 1B decode step drives the `decode-timeline` widget; Nsight Compute works with `--clock-control none`; nsys failed to import its trace in the Modal container |
+
+Part 2 runs its GPU labs on Modal through `public/labs/infra/gpu/modal_run.py`, which logs each run's cost to `modal_costs.jsonl` (gitignored). The handbook's planned cheap GPU was the L4, but Modal had no L4 capacity for over an hour on 2026-10-31, so Part 2 uses the A10 (24 GB GDDR6, 600 GB/s, 125 TFLOPS dense BF16, no FP8) as its low-end GPU. Part 2's GPU runs cost about $0.25 in total. Deck `infra-kernels` covers Part 2 (27 cards). Part 2 widgets: `warp-access`, `occupancy`, `matmul-tiling`, `warp-reduce`, `online-softmax`, `decode-timeline`.
+
+Part 0 and Part 1 are complete and published at `/infra`, and Part 2 is drafted (three parts in `PARTS` with `handbook: 'infra'`). The deck `infra-workload` covers both parts (32 cards). Widgets built so far: `roofline-explorer` (1.2 and 1.3, includes Qwen3-30B-A3B), `layer-explorer`, `attention-variants` and `rope-rotation` (1.1), and `expert-router` (1.3).
 
 Every lab script is a downloadable file in `public/labs/infra/` (served at `/labs/infra/`), with a README and `requirements.txt`. Scripts that need an NVIDIA GPU live in `public/labs/infra/gpu/`, and that folder's README lists what to run and what results to send back. Still waiting on a GPU session: `gpu/decode_sweep.py` (1.2 part B) and `gpu/moe_decode_sweep.py` (1.3 part C).
 
@@ -460,8 +468,8 @@ Existing widgets to reuse: `kv-cache-calculator`, `batching-simulator`.
 | --- | --- | --- |
 | Roofline explorer, built | 1.2, 1.3, 2.x | 1 |
 | Layer explorer (FLOPs/bytes per op), built | 1.1 | 1 |
-| Tiling animator | 2.2 | 1 |
-| Online softmax stepper | 2.4 | 1 |
+| Tiling animator, built as `matmul-tiling` | 2.2 | 1 |
+| Online softmax stepper, built as `online-softmax` | 2.4 | 1 |
 | Quantization playground | 4.2 | 1 |
 | Bit/format explorer | 4.1 | 2 |
 | Paged KV allocator (extends existing) | 5.1 | 1 |
@@ -476,8 +484,10 @@ Existing widgets to reuse: `kv-cache-calculator`, `batching-simulator`.
 | LoRA rank explorer | 7.1 | 3 |
 | Autoscaler sim | 8.3 | 2 |
 | Latency-throughput curve | 8.5 | 1 |
-| Warp memory access | 2.1 | 3 |
-| Nsight timeline reader | 2.5 | 3 |
+| Warp memory access, built as `warp-access` (with bank conflicts) | 2.1 | 3 |
+| Nsight timeline reader, built as `decode-timeline` from a real trace | 2.5 | 3 |
+| Occupancy calculator, built as `occupancy` | 2.1 | 2 |
+| Warp shuffle reduction, built as `warp-reduce` | 2.3 | 2 |
 
 ---
 

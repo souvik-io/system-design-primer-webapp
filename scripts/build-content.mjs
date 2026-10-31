@@ -185,6 +185,14 @@ const PARTS = [
       'Where the FLOPs and bytes of a transformer go, the arithmetic that predicts speed, latency and cost, and what mixture-of-experts models change.',
     chapters: ['transformer-as-workload', 'inference-arithmetic', 'mixture-of-experts'],
   },
+  {
+    id: 'infra-kernels',
+    handbook: 'infra',
+    dir: 'infra',
+    title: 'GPUs and kernels',
+    description: 'How a GPU runs threads and moves memory, how to write kernels in Triton and read them in CUDA, FlashAttention, and profiling.',
+    chapters: ['gpu-execution', 'triton-kernels', 'cuda-basics', 'flash-attention', 'profiling'],
+  },
 ]
 
 /** Folders under content/ that hold a handbook's chapters, besides content/ itself. */
@@ -249,6 +257,12 @@ const DECKS = [
     title: 'Orientation and the model as a workload',
     description: 'The inference role, model and hardware numbers, FLOPs and bytes per layer, attention variants, RoPE, the roofline, and MoE.',
   },
+  {
+    id: 'infra-kernels',
+    handbook: 'infra',
+    title: 'GPUs and kernels',
+    description: 'Warps, occupancy, coalescing and banks, tensor-core peaks, Triton and CUDA kernels, FlashAttention, and profiling.',
+  },
 ]
 
 // Sections too small to track on their own; they're folded into the preceding section.
@@ -268,6 +282,12 @@ const WIDGET_NAMES = new Set([
   'attention-variants',
   'rope-rotation',
   'expert-router',
+  'warp-access',
+  'occupancy',
+  'matmul-tiling',
+  'warp-reduce',
+  'online-softmax',
+  'decode-timeline',
 ])
 
 function widgetNode(name, where) {
