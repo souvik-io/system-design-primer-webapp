@@ -13,6 +13,10 @@ const WIDGETS: Record<string, ComponentType> = {
   'kv-cache-calculator': lazy(() => import('./KvCacheCalculator')),
   'batching-simulator': lazy(() => import('./BatchingSimulator')),
   'roofline-explorer': lazy(() => import('./RooflineExplorer')),
+  'layer-explorer': lazy(() => import('./LayerExplorer')),
+  'attention-variants': lazy(() => import('./AttentionVariants')),
+  'rope-rotation': lazy(() => import('./RopeRotation')),
+  'expert-router': lazy(() => import('./ExpertRouter')),
 }
 
 export function Widgets({ root, chapter }: { root: RefObject<HTMLElement | null>; chapter: unknown }) {

@@ -27,6 +27,7 @@ export type Chapter = { id: string; title: string; sections: Section[] }
 
 export type DeckMeta = {
   id: string
+  handbook: HandbookId
   title: string
   description: string
   cardIds: string[]
@@ -54,7 +55,7 @@ export const HANDBOOKS: Record<HandbookId, { title: string; short: string; home:
 }
 
 export const partsOf = (handbook: HandbookId) => parts.filter((p) => p.handbook === handbook)
-export const decks: DeckMeta[] = manifestJson.decks
+export const decks = manifestJson.decks as DeckMeta[]
 export const deckById = new Map(decks.map((d) => [d.id, d]))
 export const redirects: Redirects = manifestJson.redirects
 

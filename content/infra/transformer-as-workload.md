@@ -2,11 +2,11 @@
 
 To a GPU, a transformer is a list of matrix multiplies with some element-wise work in between. Which of those operations takes the time depends on how many tokens go through at once, and that number is very different in prefill and decode. This chapter walks one decoder layer of Llama 3.1 8B operation by operation, counts the FLOPs and bytes each one costs, and shows how attention variants and positional encoding change those costs. The lab has you write the layer yourself and check it against Hugging Face to six decimal places.
 
-Prerequisites: [from prompt to answer](/learn/llm-inference#from-prompt-to-answer), [prefill and decode](/learn/llm-inference#prefill-and-decode), and the shapes in [models and machines](/learn/models-and-machines#reading-configjson).
+Before this chapter, read [from prompt to answer](/learn/llm-inference#from-prompt-to-answer), [prefill and decode](/learn/llm-inference#prefill-and-decode), and the shapes in [models and machines](/learn/models-and-machines#reading-configjson).
 
 ## One layer as a list of operations
 
-Every token enters a layer as a vector of d = 4,096 numbers and leaves as a vector of the same size. In between, Llama 3.1 8B does this:
+Every token enters a layer as a vector of d = 4,096 numbers and leaves as a vector of the same size. In between, Llama 3.1 8B runs the following steps:
 
 ```diagram
 title: One Llama decoder layer. The layer adds its results to the input twice, so the vector keeps its size.
@@ -47,7 +47,7 @@ down -> out
 | SiLU × up | SiLU of the gate, multiplied element-wise by the up output | none |
 | Down projection | 14,336 → 4,096, then added to the residual | 58.7M |
 
-Only the four matmuls have weights worth counting, 218M per layer. Attention has none of its own, but it reads the KV cache, which grows with every token. Everything else is element-wise: cheap arithmetic, but it reads and writes the whole activation.
+Only the four matmuls have weights worth counting, 218M per layer. Attention has none of its own, but it reads the KV cache, which grows with every token. Everything else is element-wise: the arithmetic is cheap, but each operation reads and writes the whole activation.
 
 ## Prefill and decode shapes
 
@@ -56,7 +56,7 @@ Each matmul multiplies a T × d matrix of token vectors by a d × d_out weight m
 - **Prefill** processes the whole prompt at once, so T is the prompt length: 2,000 tokens means a 2,000 × 4,096 matrix times each weight. This is a matrix-matrix multiply (GEMM), and each weight that is read is used 2,000 times.
 - **Decode** adds one token per sequence, so T is the batch size. At batch 1, each matmul is a vector times a matrix (GEMV): every weight is read once and used once.
 
-The same weights, the same code, and a different T. That one number moves the work from one end of the roofline to the other.
+Prefill and decode use the same weights and the same code, and differ only in T. That one number moves the work from one end of the roofline to the other.
 
 Attention has a second size: the context length c, the number of tokens already in the cache. In prefill, the prompt attends to itself, so the scores form a T × T square, half of it masked by causality. In decode, one new query per sequence attends to c cached keys.
 
@@ -64,7 +64,7 @@ Attention has a second size: the context length c, the number of tokens already 
 
 A matmul with T tokens, d_in inputs and d_out outputs costs 2 × T × d_in × d_out FLOPs: one multiply and one add per weight per token. Summed over a layer's matmuls, that is the 2 × parameters rule from [models and machines](/learn/models-and-machines#counting-parameters): 15.0 GFLOP per token for the whole 8B model.
 
-Attention adds work that the parameter count misses. For each new token, each query head computes a dot product with every cached key (2 × head_dim FLOPs each) and a weighted sum of every cached value (another 2 × head_dim). Per token at context c:
+Attention adds work that the parameter count misses. For each new token, each query head computes a dot product with every cached key (2 × head_dim FLOPs each) and a weighted sum of every cached value (another 2 × head_dim). Per token at context c, the total is:
 
 attention FLOPs = 2 matmuls × 2 × layers × query heads × head_dim × c = 4 × 32 × 32 × 128 × c = 524,288 × c
 
@@ -152,6 +152,18 @@ The element-wise byte counts are rough (each op is assumed to read and write its
 3. **Attention's intensity in decode is the group size.** Each cached key and value (2 bytes per number) is used by the 4 query heads that share it, for 2 FLOPs each, so the intensity is H ÷ KV = 32 ÷ 8 = 4. Batch size does not change it. Only the attention layout does, which is why the next section matters.
 4. **In prefill, the matmuls are compute-bound and the element-wise ops show up.** With 2,000 tokens per weight read, the matmuls run at over 1,000 FLOPs per byte. The norms, RoPE and SiLU do 0.03% of the FLOPs but take about 10% of the ideal time, because each one reads and writes the full activation. Fusing them into neighbouring kernels removes those trips, and engines ship fused kernels for exactly these operations (Part 2 writes one).
 
+The widget below runs the same formulas as `layer_ops.py`, which you can [download](/labs/infra/layer_ops.py) and edit. Try these settings to see the four lessons for yourself:
+
+- Start at decode, batch 1, on the H100. Every matmul shows "memory", and the time bars follow the weight counts, so the gate and up projection takes about half the layer.
+- Move the batch to 64. The matmuls' intensity rises with the batch, while attention stays at 4 FLOPs per byte and takes a growing share of the time.
+- Raise the context to 32,000 tokens at batch 64. Attention now takes most of the layer, although it has no weights at all.
+- Switch to prefill. The grey FLOP bars of the element-wise rows almost vanish, but their time bars do not.
+- Pick the Apple M2. Its ridge point is about 30, so prefill reaches compute-bound at a much smaller prompt than on the H100.
+
+```widget
+layer-explorer
+```
+
 ## Attention variants
 
 The attention layout sets two things: how many bytes of KV cache each token costs, and how many FLOPs each byte of cache feeds in decode. The table assumes the 8B shape (32 layers, 32 query heads of 128).
@@ -161,39 +173,60 @@ The attention layout sets two things: how many bytes of KV cache each token cost
 | Multi-head (MHA) | 32, one per query head | 524,288 | 1 FLOP per byte | The original transformer, Llama 2 7B |
 | Grouped-query (GQA) | 8, each shared by 4 query heads | 131,072 | 4 | Llama 3, Qwen3, Mistral |
 | Multi-query (MQA) | 1, shared by all | 16,384 | 32 | PaLM, Falcon 7B |
-| Multi-head latent (MLA) | none; a compressed latent per token | depends on the latent size | high | DeepSeek-V2 and V3 |
+| Multi-head latent (MLA) | none; one compressed latent per token | 36,864 with DeepSeek's latent of 512 + 64 | about 60 | DeepSeek-V2 and V3 |
 
 - **Multi-query attention** (Shazeer, 2019) shares one key and one value head across all query heads. The cache shrinks by the head count, but quality can drop.
-- **Grouped-query attention** (Ainslie et al., 2023) is the middle ground: a few KV heads, each shared by a group. The GQA paper reports quality close to multi-head attention at speed close to multi-query. Most open models now use it.
+- **Grouped-query attention** (Ainslie et al., 2023) is the middle ground, with a few KV heads that are each shared by a group of query heads. The GQA paper reports quality close to multi-head attention at speed close to multi-query. Most open models now use it.
 - **Multi-head latent attention** (DeepSeek-V2, 2024) caches one small latent vector per token and layer, and projects it back up to per-head keys and values when needed. The DeepSeek-V2 paper reports a 93.3% smaller KV cache than its earlier 67B dense model. The cost is extra matmuls to expand the latent, which engines often fold into the query and output projections.
-- **Sliding-window attention** limits each token to the last W tokens, so a layer's cache stops growing at W. Mistral 7B used a 4,096-token window. Gemma 3 mixes the two: five local sliding-window layers (1,024 tokens) for each global layer, which keeps most of the cache short.
+- **Sliding-window attention** limits each token to the last W tokens, so a layer's cache stops growing at W. Mistral 7B used a 4,096-token window. Gemma 3 mixes the two, with five local sliding-window layers (1,024 tokens) for each global layer, which keeps most of the cache short.
 
 For serving, fewer KV bytes per token means more sequences fit in memory, and higher intensity means decode attention wastes less of each byte read. Both raise throughput.
+
+The MLA row places DeepSeek's latent sizes on the 8B shape to make the rows comparable, so it describes a hypothetical model. Its intensity assumes the "absorbed" form, in which every query head scores the 576-number cached vector directly. In the widget below, change the number of key/value heads and watch the cache size, the number of sequences that fit on one H100, and the decode intensity move together:
+
+- Compare 32 heads with 8 at a 2,000-token context and a batch of 64. With 8 heads the batch fits with room to spare, and with 32 heads it no longer fits.
+- Pick 1 head, which is multi-query attention, and then the latent cache. The latent is smaller than 8 grouped heads but larger than 1, and each byte does more work than in either.
+
+```widget
+attention-variants
+```
 
 ## Positions and RoPE
 
 Attention by itself ignores order: shuffle the keys and the scores shuffle with them. Rotary position embedding (RoPE) fixes that by rotating each query and key, pair of dimensions by pair of dimensions, through an angle proportional to the token's position. The dot product between a rotated query and a rotated key then depends on the distance between their positions.
 
-Three consequences for serving:
+RoPE has three consequences for serving:
 
 - **The cache stores rotated keys.** A token's key is rotated once, at its position, then cached. That works because a token's position never changes once generated.
 - **Prefix caching relies on equal positions.** Two requests that share the same first 1,000 tokens produce identical rotated keys for them, so one can reuse the other's cache. The same text at a different offset would not match.
 - **Long context is a RoPE setting.** Llama 3.1's config sets `rope_scaling` to type `llama3` with factor 8, which stretches the low-frequency rotations so that positions up to 131,072 stay within the range seen in training. The engine must apply the same scaling, or quality drops beyond the original 8,192 tokens.
 
+The widget below rotates one query and one key from a 128-wide head with Llama 3's base of 500,000. It shows four of the head's 64 pairs, from the fastest, which turns once every 6.3 tokens, to the slowest, which turns once every 2.6 million. Try these moves:
+
+- Press "Shift both +1,000". Every arrow turns, but the angle between the query and the key in each dial stays the same, and so does the score.
+- Move only the key. The angles between the arrows change, and the score follows the curve below the dials.
+- Watch the slowest pair while you move the positions. It barely moves within a few thousand tokens, and it is the kind of pair that Llama 3.1's rope scaling stretches for long contexts.
+
+```widget
+rope-rotation
+```
+
 ## Lab: a decoder layer from scratch
 
-**Tier: [any].** Runs on a laptop CPU in seconds.
+**Tier: [any].** The lab runs on a laptop CPU in seconds.
 
-Task: write a Llama-style decoder in plain PyTorch tensor operations (`F.linear`, `einsum`, `softmax`; no `nn.MultiheadAttention`, no Hugging Face modules) that:
+Write a Llama-style decoder in plain PyTorch tensor operations (`F.linear`, `einsum` and `softmax`, with no `nn.MultiheadAttention` and no Hugging Face modules) that does the following:
 
 1. builds a tiny random `LlamaForCausalLM` from `transformers` (2 layers, d = 256, 8 query heads and 2 KV heads of 32, vocabulary 1,000) and borrows its weights;
 2. runs a 128-token prompt (prefill) and then one more token using a KV cache (decode);
 3. matches Hugging Face's logits to within 1e-4 in both phases;
 4. counts FLOPs with `torch.utils.flop_counter.FlopCounterMode` and matches them to a formula you write: 2 × matmul parameters per token, plus attention.
 
-Done when both errors are below 1e-4 and both FLOP counts match your formula exactly.
+The lab is done when both errors are below 1e-4 and both FLOP counts match your formula exactly.
 
-Hints: RMSNorm is x × rsqrt(mean(x²) + ε) × weight. RoPE in Hugging Face's layout rotates the first half of each head against the second half. Grouped-query attention can be written by repeating each KV head H ÷ KV times. The decode step's query sits at position 128, so the causal mask compares positions, not indexes.
+Four hints will help. RMSNorm is x × rsqrt(mean(x²) + ε) × weight. RoPE in Hugging Face's layout rotates the first half of each head against the second half. Grouped-query attention can be written by repeating each KV head H ÷ KV times. The decode step's query sits at position 128, so the causal mask compares positions, not indexes.
+
+When you have tried the lab, you can download the reference solution as [decoder_from_scratch.py](/labs/infra/decoder_from_scratch.py). It needs `torch` and `transformers` and runs in a few seconds on a CPU.
 
 <details>
 <summary>Reference solution</summary>
@@ -297,7 +330,7 @@ print(f"prefill, 128 tokens:  counted {prefill / 1e6:6.2f} MFLOP, formula {predi
 print(f"decode, 1 token @129: counted {decode / 1e6:6.2f} MFLOP, formula {predicted(1, 129) / 1e6:6.2f}")
 ```
 
-Output with PyTorch 2.15 and transformers 5.22 on a laptop CPU:
+This is the output with PyTorch 2.15 and transformers 5.22 on a laptop CPU:
 
 ```text
 prefill max error vs HF: 1.04e-06
@@ -306,37 +339,37 @@ prefill, 128 tokens:  counted 453.51 MFLOP, formula 453.51
 decode, 1 token @129: counted   3.55 MFLOP, formula   3.55
 ```
 
-What to notice:
+Four things in the output are worth noticing:
 
 - Prefill costs 128 times the matmul FLOPs of decode, plus attention, but runs as a handful of large matmuls. Decode is the same matmuls with one row each.
 - The decode step with the cache gives the same logits as recomputing all 129 tokens. The cache is purely a way to skip work.
 - The naive attention computes the masked half of the prefill score square and throws it away. Fused kernels skip those blocks, which is one reason the prefill row in the table above uses half the square.
 - Errors of about 1e-6 are float32 rounding. In BF16 expect about 1e-2, which is why numerical tests for kernels compare against a reference with a tolerance chosen per precision.
 
-Extensions, in rising difficulty: run two sequences of different lengths in one batch with padding and a mask; replace the einsums with `F.scaled_dot_product_attention` and check the FLOP count; add Llama 3's `rope_scaling` and match a config that uses it.
+Three extensions follow, in rising difficulty. First, run two sequences of different lengths in one batch with padding and a mask. Second, replace the einsums with `F.scaled_dot_product_attention` and check the FLOP count. Third, add Llama 3's `rope_scaling` and match a config that uses it.
 
 </details>
 
 ## Interview angle
 
-- **"Walk me through a forward pass of a decoder on a GPU."** Embedding lookup; per layer: RMSNorm, fused QKV matmul, RoPE, attention over the KV cache, output matmul and residual add, RMSNorm, gate and up matmuls, SiLU and multiply, down matmul and residual add; final norm and LM head; sampling. Then say what limits each phase: in decode, reading weights and KV cache; in prefill, the matmuls' arithmetic.
+- **"Walk me through a forward pass of a decoder on a GPU."** Start with the embedding lookup. Each layer then runs RMSNorm, the fused QKV matmul, RoPE, attention over the KV cache, the output matmul and residual add, a second RMSNorm, the gate and up matmuls, SiLU and the multiply, and the down matmul and residual add. A final norm and the LM head produce the logits, and sampling picks the next token. Then say what limits each phase: reading weights and KV cache in decode, and the matmuls' arithmetic in prefill.
 - **"Why does batching help decode throughput so much?"** Each step reads every weight once, whatever the batch size, so more sequences share the same read. The KV cache is the exception: each sequence reads its own, so batching does nothing for attention's intensity.
-- **"What does GQA buy you in serving?"** A KV cache smaller by the group size, so more concurrent sequences, and fewer bytes per decode step. Its decode attention intensity equals the group size.
-- **"Which operations would you fuse first, and why?"** The element-wise ones next to matmuls or each other: residual add with RMSNorm, SiLU with the multiply, RoPE with the QKV output. They do almost no arithmetic but each reads and writes the full activation.
+- **"What does GQA buy you in serving?"** It shrinks the KV cache by the group size, so more sequences fit at once and each decode step reads fewer bytes. Its decode attention intensity equals the group size.
+- **"Which operations would you fuse first, and why?"** Fuse the element-wise operations that sit next to matmuls or to each other first: the residual add with RMSNorm, SiLU with the multiply, and RoPE with the QKV output. They do almost no arithmetic, but each one reads and writes the full activation.
 
 ## Check yourself
 
 <details>
 <summary>At batch 1, roughly what share of Llama 3.1 8B's decode step goes to the MLP, and why?</summary>
 
-About 80%. At batch 1 every matmul is memory-bound, so time follows bytes read, which follows weight count. The MLP's three matrices hold 176M of each layer's 218M weights, about 81%.
+About 80% of the step goes to the MLP. At batch 1 every matmul is memory-bound, so time follows bytes read, which follows weight count. The MLP's three matrices hold 176M of each layer's 218M weights, about 81%.
 
 </details>
 
 <details>
 <summary>Why does attention's arithmetic intensity in decode stay at 4 FLOPs per byte for Llama 3.1 8B however large the batch?</summary>
 
-Each sequence reads its own keys and values; nothing is shared between sequences. Each cached number (2 bytes) is used by the 4 query heads that share its KV head, for 2 FLOPs each: 8 FLOPs per 2 bytes, or 4. The intensity equals query heads divided by KV heads.
+Each sequence reads its own keys and values; nothing is shared between sequences. Each cached number (2 bytes) is used by the 4 query heads that share its KV head, for 2 FLOPs each, which makes 8 FLOPs per 2 bytes, or 4 FLOPs per byte. The intensity equals query heads divided by KV heads.
 
 </details>
 
@@ -370,13 +403,13 @@ They are memory-bound at under 1 FLOP per byte: each reads and writes the whole 
 
 ## Further reading
 
-- [Attention is all you need](https://arxiv.org/abs/1706.03762): the original transformer and multi-head attention.
-- [Fast transformer decoding: one write-head is all you need](https://arxiv.org/abs/1911.02150): multi-query attention, motivated by decode's memory bandwidth.
-- [GQA](https://arxiv.org/abs/2305.13245): grouped-query attention and how to convert a multi-head checkpoint to it.
-- [DeepSeek-V2](https://arxiv.org/abs/2405.04434): multi-head latent attention and the 93.3% KV cache reduction.
-- [Mistral 7B](https://arxiv.org/abs/2310.06825) and the [Gemma 3 technical report](https://arxiv.org/abs/2503.19786): sliding-window attention, alone and interleaved with global layers.
-- [RoFormer](https://arxiv.org/abs/2104.09864): rotary position embedding.
-- [The Llama 3 paper](https://arxiv.org/abs/2407.21783): the architecture this chapter walks through.
-- [Hugging Face's Llama implementation](https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama/modeling_llama.py): the reference the lab checks against; short and readable.
-- [PyTorch FlopCounterMode](https://docs.pytorch.org/docs/stable/generated/torch.utils.flop_counter.FlopCounterMode.html): counting FLOPs of any PyTorch code.
-- [Making deep learning go brrrr from first principles](https://horace.io/brrr_intro.html) by Horace He: compute, memory and overhead as the three limits, with the case for fusion.
+- [Attention is all you need](https://arxiv.org/abs/1706.03762) introduced the transformer and multi-head attention.
+- [Fast transformer decoding: one write-head is all you need](https://arxiv.org/abs/1911.02150) introduced multi-query attention to ease decode's memory bandwidth limit.
+- [GQA](https://arxiv.org/abs/2305.13245) introduces grouped-query attention and shows how to convert a multi-head checkpoint to it.
+- [DeepSeek-V2](https://arxiv.org/abs/2405.04434) introduces multi-head latent attention and reports the 93.3% KV cache reduction.
+- [Mistral 7B](https://arxiv.org/abs/2310.06825) uses sliding-window attention on every layer, and the [Gemma 3 technical report](https://arxiv.org/abs/2503.19786) interleaves it with global layers.
+- [RoFormer](https://arxiv.org/abs/2104.09864) introduced rotary position embedding.
+- [The Llama 3 paper](https://arxiv.org/abs/2407.21783) describes the architecture this chapter walks through.
+- [Hugging Face's Llama implementation](https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama/modeling_llama.py) is the reference the lab checks against, and it is short and readable.
+- [PyTorch FlopCounterMode](https://docs.pytorch.org/docs/stable/generated/torch.utils.flop_counter.FlopCounterMode.html) counts the FLOPs of any PyTorch code.
+- [Making deep learning go brrrr from first principles](https://horace.io/brrr_intro.html) by Horace He treats compute, memory and overhead as the three limits and makes the case for fusion.

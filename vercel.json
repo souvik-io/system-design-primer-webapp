@@ -179,7 +179,7 @@
   ],
   "rewrites": [
     {
-      "source": "/:path((?!content/|assets/|learn/[^/]+\\.md$).*)",
+      "source": "/:path((?!content/|assets/|labs/|learn/[^/]+\\.md$).*)",
       "destination": "/app"
     }
   ]

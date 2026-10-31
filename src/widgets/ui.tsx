@@ -134,3 +134,48 @@ export function useReducedMotion() {
 
 /** Colors for up to six servers or series, defined in index.css for both themes. */
 export const SERIES = ['var(--w1)', 'var(--w2)', 'var(--w3)', 'var(--w4)', 'var(--w5)', 'var(--w6)']
+
+/** A slider over a list of preset values; `index` picks one and `text` shows it. */
+export function IndexSlider({
+  label,
+  index,
+  max,
+  onChange,
+  text,
+  disabled,
+}: {
+  label: string
+  index: number
+  max: number
+  onChange: (i: number) => void
+  text: string
+  disabled?: boolean
+}) {
+  return (
+    <label className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.8125rem] text-muted ${disabled ? 'opacity-50' : ''}`}>
+      {label}
+      <input
+        type="range"
+        min={0}
+        max={max}
+        step={1}
+        value={index}
+        disabled={disabled}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-36 accent-[var(--accent)]"
+        aria-valuetext={text}
+      />
+      <span className="text-ink tabular-nums">{text}</span>
+    </label>
+  )
+}
+
+/** A colour swatch with its label, for chart keys. */
+export function Key({ color, children }: { color: string; children: ReactNode }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <span className="size-2.5 rounded-sm" style={{ background: color }} />
+      {children}
+    </span>
+  )
+}

@@ -120,8 +120,11 @@ Start applying around week 26 to 28; interview prep (Part 10) runs alongside the
 | 0.2 | `models-and-machines.md` | Drafted 2026-10-31. Running example is now three models: Llama 3.2 1B for [Mac] labs (an 8 GB M2 cannot hold 8B), Llama 3.1 8B, Qwen3-30B-A3B |
 | 1.1 | `transformer-as-workload.md` | Drafted 2026-10-31 |
 | 1.2 | `inference-arithmetic.md` | Drafted 2026-10-31. Lab part B (vLLM on a rented GPU) has no measured reference output yet |
+| 1.3 | `mixture-of-experts.md` | Drafted 2026-10-31. Labs A and B measured on the M2 (Granite 3.1 1B-A400M as the real router); part C (vLLM on an H100) not yet run |
 
-All four are published at `/infra` (two parts in `PARTS` with `handbook: 'infra'`), pass `lint-diagrams` and `verify-content`. The `roofline-explorer` widget (`src/widgets/RooflineExplorer.tsx`) is built and sits in 1.2.
+Part 0 and Part 1 are complete and published at `/infra` (two parts in `PARTS` with `handbook: 'infra'`). The deck `infra-workload` covers both parts (32 cards). Widgets built so far: `roofline-explorer` (1.2 and 1.3, includes Qwen3-30B-A3B), `layer-explorer`, `attention-variants` and `rope-rotation` (1.1), and `expert-router` (1.3).
+
+Every lab script is a downloadable file in `public/labs/infra/` (served at `/labs/infra/`), with a README and `requirements.txt`. Scripts that need an NVIDIA GPU live in `public/labs/infra/gpu/`, and that folder's README lists what to run and what results to send back. Still waiting on a GPU session: `gpu/decode_sweep.py` (1.2 part B) and `gpu/moe_decode_sweep.py` (1.3 part C).
 
 ## Part 0: Orientation
 
@@ -455,8 +458,8 @@ Existing widgets to reuse: `kv-cache-calculator`, `batching-simulator`.
 
 | Widget | Chapter | Priority |
 | --- | --- | --- |
-| Roofline explorer | 1.2, 2.x | 1 |
-| Layer explorer (FLOPs/bytes per op) | 1.1 | 1 |
+| Roofline explorer, built | 1.2, 1.3, 2.x | 1 |
+| Layer explorer (FLOPs/bytes per op), built | 1.1 | 1 |
 | Tiling animator | 2.2 | 1 |
 | Online softmax stepper | 2.4 | 1 |
 | Quantization playground | 4.2 | 1 |
@@ -466,7 +469,9 @@ Existing widgets to reuse: `kv-cache-calculator`, `batching-simulator`.
 | Speculative decoding simulator | 5.4 | 2 |
 | Ring all-reduce | 6.1 | 2 |
 | Parallelism planner | 6.2 | 1 |
-| Expert router / EP traffic | 1.3, 6.3 | 2 |
+| Expert router, built for 1.3; EP traffic view still to do | 1.3, 6.3 | 2 |
+| Attention variants (KV heads), built | 1.1 | 1 |
+| RoPE rotation, built | 1.1 | 2 |
 | Disaggregation timeline | 6.4 | 2 |
 | LoRA rank explorer | 7.1 | 3 |
 | Autoscaler sim | 8.3 | 2 |

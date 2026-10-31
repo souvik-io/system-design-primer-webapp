@@ -44,6 +44,7 @@ function brokenReason(url) {
     const deck = pathname.split('/')[2]
     return deck && !deckIds.has(deck) ? `no deck "${deck}"` : null
   }
+  if (pathname.startsWith('/labs/')) return fs.existsSync(path.join(ROOT, 'public', decodeURIComponent(pathname))) ? null : 'file missing'
   if (pathname.startsWith('/diagrams/')) return fs.existsSync(path.join(ROOT, 'public', decodeURIComponent(pathname))) ? null : 'file missing'
   return 'unknown internal route'
 }

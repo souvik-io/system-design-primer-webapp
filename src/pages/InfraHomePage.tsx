@@ -37,7 +37,11 @@ export function InfraHomePage() {
           infrastructure roles. Every chapter ends with a lab you run yourself, with a reference solution to check against.
         </p>
         <p className="mt-3 text-[0.95rem] text-muted">
-          It builds on the{' '}
+          The lab code is in{' '}
+          <a href="/labs/infra/README.md" className="text-accent hover:underline">
+            one folder of Python files
+          </a>{' '}
+          you can download and run. It builds on the{' '}
           <Link to="/#ai-systems" className="text-accent hover:underline">
             AI systems
           </Link>{' '}
@@ -51,6 +55,9 @@ export function InfraHomePage() {
           >
             {resume ? `Continue with ${resume.title}` : 'Start the course'}
             <ArrowRight size={16} />
+          </Link>
+          <Link to="/flashcards" className="text-sm text-accent hover:underline">
+            Flashcards for this course
           </Link>
           <span className="flex items-center gap-2.5 text-sm text-muted">
             <ProgressRing ratio={overall.ratio} size={22} stroke={3} />

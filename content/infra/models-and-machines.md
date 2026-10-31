@@ -2,7 +2,7 @@
 
 Numbers only make sense against a fixed model and a fixed machine. This handbook uses three models and three machines throughout, so a figure in Part 5 can be checked against one in Part 1. This chapter introduces them, shows how to read a model's shape from its `config.json`, and derives the three numbers every later chapter needs: parameter count, weight bytes, and KV cache bytes per token.
 
-Prerequisites: [the KV cache](/learn/llm-inference#the-kv-cache) and [GPU memory](/learn/gpus-for-ai#gpu-memory).
+Before this chapter, read [the KV cache](/learn/llm-inference#the-kv-cache) and [GPU memory](/learn/gpus-for-ai#gpu-memory).
 
 ## The three models
 
@@ -38,7 +38,7 @@ Configs vary by family. Some omit `head_dim`, some name fields differently, and 
 
 ## Counting parameters
 
-A Llama-style layer has four attention matrices and three MLP matrices. With the 8B values:
+A Llama-style layer has four attention matrices and three MLP matrices. With the 8B values, they break down as follows:
 
 | Piece | Shape | Parameters |
 |---|---|---|
@@ -54,14 +54,14 @@ Thirty-two layers hold 6.98B parameters. The input embedding (V × d = 525.3M) a
 
 Two counts matter, and they differ:
 
-- **Stored parameters** decide memory: 8.03B.
-- **Parameters in matmuls per token** decide compute: 7.50B. The input embedding is a table lookup, which copies one row per token instead of multiplying, so it is left out.
+- **Stored parameters**, 8.03B for this model, decide memory.
+- **Parameters in matmuls per token**, 7.50B, decide compute. The input embedding is a table lookup, which copies one row per token instead of multiplying, so it is left out.
 
 Each matmul parameter costs one multiply and one add per token, so a token costs about 2 × 7.50B = 15.0 GFLOP, before attention scores (the next chapter adds those).
 
 **Tied embeddings.** Llama 3.2 1B sets `tie_word_embeddings` to true, so the LM head reuses the embedding matrix. The 262.7M-parameter table is stored once but used in a matmul at the output, so stored and per-token counts are both 1.24B.
 
-**Mixture of experts.** In Qwen3-30B-A3B each layer's MLP is 128 experts of 3 × 2,048 × 768 = 4.7M parameters, plus a 2,048 × 128 router that scores the experts. Stored: 48 layers × (18.9M attention + 604M experts + 0.26M router) plus embeddings = 30.53B. Per token, only 8 experts run: 3.04B parameters in matmuls. Qwen's model card says 3.3B activated; the gap is the 0.31B input embedding, which this chapter counts as a lookup. Memory is sized by the 30.5B, compute by the 3B. Part 1's MoE chapter returns to what that does to serving.
+**Mixture of experts.** In Qwen3-30B-A3B each layer's MLP is 128 experts of 3 × 2,048 × 768 = 4.7M parameters, plus a 2,048 × 128 router that scores the experts. The stored total is 48 layers × (18.9M attention + 604M experts + 0.26M router) plus embeddings, which comes to 30.53B. Per token, only 8 experts run, so 3.04B parameters take part in matmuls. Qwen's model card says 3.3B activated; the gap is the 0.31B input embedding, which this chapter counts as a lookup. Memory is sized by the 30.5B, compute by the 3B. Part 1's MoE chapter returns to what that does to serving.
 
 ## Weights in bytes
 
@@ -103,17 +103,17 @@ kv-cache-calculator
 | NVIDIA L4 | 24 GB GDDR6 | 300 GB/s | 121 TFLOPS | 403 FLOPs/byte | The cheap rental for most [1 GPU] labs |
 | Apple M2, 8-core GPU, 8 GB | 8 GB unified, 5.7 GB usable by the GPU | 100 GB/s | 2.5 TFLOPS FP16, measured | about 30 FLOPs/byte | The laptop for [Mac] labs |
 
-Sources and notes:
+The figures come from these sources:
 
 - The H100 figures and their sparsity footnote are explained in [GPUs and accelerators](/learn/gpus-for-ai#gpu-memory).
-- NVIDIA's L4 datasheet prints 242 BF16 teraFLOPS "with sparsity" and says dense figures are half, so 121 dense.
+- NVIDIA's L4 datasheet prints 242 BF16 teraFLOPS "with sparsity" and says dense figures are half of that, so the dense figure is 121 TFLOPS.
 - Apple gives the M2 100 GB/s of unified memory bandwidth. Apple does not publish an FP16 matmul figure for the 8-core GPU, so the 2.5 TFLOPS is measured with the probe in [the arithmetic of inference](/learn/inference-arithmetic#measuring-your-own-roofline), which also measured 84 GB/s for a large copy. The 5.7 GB is what `torch.mps.recommended_max_memory()` reported on that machine; macOS keeps the rest for itself.
 
 The ridge point is peak FLOPs divided by bandwidth: the arithmetic intensity at which an operation stops being limited by memory. [Compute versus memory bandwidth](/learn/gpus-for-ai#compute-versus-memory-bandwidth) explains it, and Part 1 uses it constantly. Note the L4: it has less bandwidth per FLOP than an H100, so decode, which is bandwidth-bound, is relatively slower on it.
 
 ## What fits where
 
-Usable memory is 90% of GPU memory, keeping 10% for activations and the runtime, as the system design chapters do, and 5.7 GB on the M2. KV cache gets what the weights leave.
+The table takes usable memory as 90% of GPU memory, keeping 10% for activations and the runtime as the system design chapters do. On the M2 it uses the 5.7 GB the GPU can address. The KV cache gets whatever the weights leave.
 
 | Model and format | M2 (5.7 GB) | L4 (21.6 GB) | H100 (72 GB) |
 |---|---|---|---|
@@ -125,7 +125,7 @@ Usable memory is 90% of GPU memory, keeping 10% for activations and the runtime,
 | 30B-A3B, FP8 (30.5 GB) | no | no | fits, about 422K tokens |
 | 30B-A3B, INT4 (15.3 GB and up) | no | fits, about 64K tokens | fits |
 
-Three things to take from the table:
+Three lessons come out of the table:
 
 - **Cache room, not weights, decides how many users fit.** The 8B model fits an L4 in BF16, but 42K tokens of cache is about 20 conversations of 2,000 tokens.
 - **Quantizing weights buys cache.** FP8 weights on the L4 leave room for about 2.5 times as many cached tokens as BF16.
@@ -133,9 +133,9 @@ Three things to take from the table:
 
 ## Lab: a model calculator
 
-**Tier: [any].** Write the tool that later labs use to size models.
+**Tier: [any].** This lab runs on any machine. You write the tool that later labs use to size models.
 
-Task: write `labs/model_stats.py`. Given one or more paths to `config.json` files, print for each model:
+Write `labs/model_stats.py`. Given one or more paths to `config.json` files, it should print the following for each model:
 
 1. layers, hidden size, query heads, KV heads and head dimension;
 2. stored parameters and parameters in matmuls per token;
@@ -145,9 +145,11 @@ Task: write `labs/model_stats.py`. Given one or more paths to `config.json` file
 
 Download the configs with `curl -L https://huggingface.co/<repo>/raw/main/config.json`. Meta's own Llama repositories need you to accept a licence first; mirrors such as `unsloth/Llama-3.2-1B-Instruct` and `unsloth/Meta-Llama-3.1-8B-Instruct` publish the same configs. Qwen's is at `Qwen/Qwen3-30B-A3B`.
 
-Done when your parameter counts are within 1% of the model cards (1.23B, 8.03B, 30.5B total) and the KV numbers match the table above.
+The lab is done when your parameter counts are within 1% of the model cards (1.23B, 8.03B, 30.5B total) and the KV numbers match the table above.
 
-Stretch: run it on `deepseek-ai/DeepSeek-V3`'s config. Its KV numbers will come out wrong, because DeepSeek's multi-head latent attention caches a compressed vector instead of per-head keys and values. Read the config fields `kv_lora_rank` and `qk_rope_head_dim` and work out what it really caches per token per layer; [the next chapter](/learn/transformer-as-workload#attention-variants) describes the scheme.
+As a stretch goal, run it on `deepseek-ai/DeepSeek-V3`'s config. Its KV numbers will come out wrong, because DeepSeek's multi-head latent attention caches a compressed vector instead of per-head keys and values. Read the config fields `kv_lora_rank` and `qk_rope_head_dim` and work out what it really caches per token per layer; [the next chapter](/learn/transformer-as-workload#attention-variants) describes the scheme.
+
+The reference solution can be downloaded as [model_stats.py](/labs/infra/model_stats.py), together with the three configs it was tested on: [Llama 3.2 1B](/labs/infra/configs/Llama-3.2-1B-Instruct.json), [Llama 3.1 8B](/labs/infra/configs/Meta-Llama-3.1-8B-Instruct.json) and [Qwen3-30B-A3B](/labs/infra/configs/Qwen3-30B-A3B.json). Run it as `python model_stats.py *.json` in the folder that holds them.
 
 <details>
 <summary>Reference solution</summary>
@@ -232,13 +234,13 @@ Qwen3-30B-A3B.json: 48 layers, d=2048, 32 heads / 4 KV heads of 128
   KV cache: 98,304 bytes per token, 0.81 GB for one 8K-token sequence
 ```
 
-All three totals are within 1% of the model cards (Llama 3.2 1B's card says 1.23B, which rounds the same 1.236B down). Things the solution handles that are easy to miss: `head_dim` is not always d ÷ H (Qwen3-30B-A3B has d = 2,048 but 32 heads of 128), tied embeddings are stored once, and Qwen3 adds a small norm on each query and key head.
+All three totals are within 1% of the model cards (Llama 3.2 1B's card says 1.23B, which rounds the same 1.236B down). The solution handles three details that are easy to miss: `head_dim` is not always d ÷ H (Qwen3-30B-A3B has d = 2,048 but 32 heads of 128), tied embeddings are stored once, and Qwen3 adds a small norm on each query and key head.
 
 </details>
 
 ## Interview angle
 
-- **"How much GPU memory do you need to serve model X to N users at context C?"** Weights (parameters × bytes), plus KV cache (N × C × bytes per token, from the config), plus about 10% for activations and the runtime. Then divide by GPU memory and round up to a GPU count the parallelism allows. State the precision you assumed.
+- **"How much GPU memory do you need to serve model X to N users at context C?"** Add the weights (parameters × bytes), the KV cache (N × C × bytes per token, from the config) and about 10% for activations and the runtime. Then divide by GPU memory and round up to a GPU count the parallelism allows. State the precision you assumed.
 - **"Why does this MoE model need more GPUs than a dense model with the same per-token compute?"** Memory holds every expert, even though each token uses a few. Compute follows active parameters, memory follows total parameters.
 - **"Why do newer models have so few KV heads?"** Grouped-query attention shares each key and value head across several query heads. It shrinks the cache, and the bytes decode reads per sequence, by the group size, with little quality loss according to the GQA paper.
 
@@ -275,15 +277,15 @@ Four-bit formats store extra numbers: a scale, sometimes a zero point, per small
 <details>
 <summary>Which is relatively worse for decode compared with prefill, the L4 or the H100? Use the ridge points.</summary>
 
-The L4. Its ridge point is about 403 FLOPs per byte against the H100's 295, so it has less bandwidth for each FLOP it can do. Decode is limited by bandwidth: the L4 has 9% of the H100's bandwidth but 12% of its compute, so decode suffers more than prefill on it.
+The L4 is relatively worse. Its ridge point is about 403 FLOPs per byte against the H100's 295, so it has less bandwidth for each FLOP it can do. Decode is limited by bandwidth: the L4 has 9% of the H100's bandwidth but 12% of its compute, so decode suffers more than prefill on it.
 
 </details>
 
 ## Further reading
 
-- Model configs and cards on Hugging Face: [Llama 3.2 1B Instruct (mirror)](https://huggingface.co/unsloth/Llama-3.2-1B-Instruct/blob/main/config.json), [Llama 3.1 8B Instruct (mirror)](https://huggingface.co/unsloth/Meta-Llama-3.1-8B-Instruct/blob/main/config.json), [Meta's Llama 3.2 1B card](https://huggingface.co/meta-llama/Llama-3.2-1B) and [Qwen3-30B-A3B](https://huggingface.co/Qwen/Qwen3-30B-A3B): the shapes used here and the published parameter counts.
-- [The Llama 3 paper](https://arxiv.org/abs/2407.21783): the architecture and why grouped-query attention was used.
-- [GQA: training generalized multi-query transformer models](https://arxiv.org/abs/2305.13245): grouped-query attention and its quality compared with multi-head attention.
-- [NVIDIA L4](https://www.nvidia.com/en-us/data-center/l4/) and [NVIDIA H100](https://www.nvidia.com/en-us/data-center/h100/) product pages: memory, bandwidth and the sparsity footnotes.
-- [Apple's M2 announcement](https://www.apple.com/newsroom/2022/06/apple-unveils-m2-with-breakthrough-performance-and-capabilities/): the 100 GB/s unified memory bandwidth.
-- [PyTorch MPS backend](https://docs.pytorch.org/docs/stable/mps.html): `recommended_max_memory` and the other MPS memory functions.
+- The model configs and cards on Hugging Face give the shapes used here and the published parameter counts: [Llama 3.2 1B Instruct (mirror)](https://huggingface.co/unsloth/Llama-3.2-1B-Instruct/blob/main/config.json), [Llama 3.1 8B Instruct (mirror)](https://huggingface.co/unsloth/Meta-Llama-3.1-8B-Instruct/blob/main/config.json), [Meta's Llama 3.2 1B card](https://huggingface.co/meta-llama/Llama-3.2-1B) and [Qwen3-30B-A3B](https://huggingface.co/Qwen/Qwen3-30B-A3B).
+- [The Llama 3 paper](https://arxiv.org/abs/2407.21783) describes the architecture and explains why it uses grouped-query attention.
+- [GQA: training generalized multi-query transformer models](https://arxiv.org/abs/2305.13245) introduces grouped-query attention and compares its quality with multi-head attention.
+- NVIDIA's [L4](https://www.nvidia.com/en-us/data-center/l4/) and [H100](https://www.nvidia.com/en-us/data-center/h100/) product pages list memory, bandwidth and the sparsity footnotes.
+- [Apple's M2 announcement](https://www.apple.com/newsroom/2022/06/apple-unveils-m2-with-breakthrough-performance-and-capabilities/) gives the 100 GB/s unified memory bandwidth.
+- The [PyTorch MPS backend](https://docs.pytorch.org/docs/stable/mps.html) documentation covers `recommended_max_memory` and the other MPS memory functions.

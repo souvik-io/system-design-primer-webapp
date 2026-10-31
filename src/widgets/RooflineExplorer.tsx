@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { Narration, Segmented, Stat, WidgetFrame } from './ui'
+import { IndexSlider as Slider, Key, Narration, Segmented, Stat, WidgetFrame } from './ui'
 
 // A roofline for one GPU with a model's decode step or prefill placed on it. The step is split into its
 // two parts, the weight matmuls and attention, because batching shares the weights across sequences but
@@ -12,7 +12,7 @@ import { Narration, Segmented, Stat, WidgetFrame } from './ui'
 // Model shapes: Llama 3 paper and the models' config.json files. Decimal units: 1 GB = 10^9 bytes.
 
 type HwId = 'm2' | 'l4' | 'a100' | 'h100' | 'h200' | 'b200'
-type ModelId = '1b' | '8b' | '70b'
+type ModelId = '1b' | '8b' | '70b' | 'moe'
 type Phase = 'decode' | 'prefill'
 
 const HARDWARE: Record<HwId, { name: string; bandwidth: number; bf16: number; fp8?: number; usable: number; note?: string }> = {
@@ -24,15 +24,66 @@ const HARDWARE: Record<HwId, { name: string; bandwidth: number; bf16: number; fp
   b200: { name: 'B200', bandwidth: 8e12, bf16: 2250e12, fp8: 4500e12, usable: 180e9 * 0.9 },
 }
 
+type Moe = { always: number; expert: number; experts: number; topK: number }
+
 const MODELS: Record<
   ModelId,
-  { name: string; matmul: number; stored: number; layers: number; qWidth: number; kvPerToken: number; attnPerCtx: number; group: number }
+  { name: string; short: string; matmul: number; stored: number; layers: number; qWidth: number; kvPerToken: number; attnPerCtx: number; moe?: Moe }
 > = {
   // matmul: parameters one token multiplies through; stored: all parameters, which set memory.
   // kvPerToken: BF16 bytes, 2 x layers x KV heads x head dim x 2. attnPerCtx: 4 x layers x query heads x head dim.
-  '1b': { name: 'Llama 3.2 1B', matmul: 1.236e9, stored: 1.236e9, layers: 16, qWidth: 2048, kvPerToken: 32_768, attnPerCtx: 4 * 16 * 2048, group: 4 },
-  '8b': { name: 'Llama 3.1 8B', matmul: 7.5e9, stored: 8.03e9, layers: 32, qWidth: 4096, kvPerToken: 131_072, attnPerCtx: 4 * 32 * 4096, group: 4 },
-  '70b': { name: 'Llama 3.1 70B', matmul: 70e9, stored: 70e9, layers: 80, qWidth: 8192, kvPerToken: 327_680, attnPerCtx: 4 * 80 * 8192, group: 8 },
+  '1b': {
+    name: 'Llama 3.2 1B',
+    short: '1B',
+    matmul: 1.236e9,
+    stored: 1.236e9,
+    layers: 16,
+    qWidth: 2048,
+    kvPerToken: 32_768,
+    attnPerCtx: 4 * 16 * 2048,
+  },
+  '8b': {
+    name: 'Llama 3.1 8B',
+    short: '8B',
+    matmul: 7.5e9,
+    stored: 8.03e9,
+    layers: 32,
+    qWidth: 4096,
+    kvPerToken: 131_072,
+    attnPerCtx: 4 * 32 * 4096,
+  },
+  '70b': {
+    name: 'Llama 3.1 70B',
+    short: '70B',
+    matmul: 70e9,
+    stored: 70e9,
+    layers: 80,
+    qWidth: 8192,
+    kvPerToken: 327_680,
+    attnPerCtx: 4 * 80 * 8192,
+  },
+  // Qwen3-30B-A3B (config.json): 48 layers, 32 query and 4 KV heads of 128, 128 experts of 3 x 2048 x 768, top 8.
+  // `always` is what every step reads: attention, routers and the LM head. Experts are read only if chosen.
+  moe: {
+    name: 'Qwen3-30B-A3B',
+    short: '30B-A3B',
+    matmul: 3.04e9,
+    stored: 30.53e9,
+    layers: 48,
+    qWidth: 4096,
+    kvPerToken: 98_304,
+    attnPerCtx: 4 * 48 * 4096,
+    moe: { always: 48 * (18_874_368 + 262_144) + 151_936 * 2048, expert: 48 * 3 * 2048 * 768, experts: 128, topK: 8 },
+  },
+}
+
+/** Weight parameters one step reads. An MoE layer reads each expert that at least one of `tokens` chose;
+ * with even routing that is E x (1 - (1 - k/E)^tokens) experts per layer. */
+function weightsRead(model: (typeof MODELS)[ModelId], tokens: number) {
+  if (!model.moe) return { params: model.matmul, touched: undefined }
+  const { always, expert, experts, topK } = model.moe
+  const touched = experts * (1 - (1 - topK / experts) ** tokens)
+  return { params: always + touched * expert, touched }
 }
 
 const BATCHES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
@@ -81,16 +132,17 @@ export default function RooflineExplorer() {
   const fp8Compute = weightBytes === 1 && hw.fp8 !== undefined
   const weightPeak = fp8Compute ? hw.fp8! : hw.bf16
   const kvPerToken = (model.kvPerToken * kvBytes) / 2
+  const read = weightsRead(model, phase === 'decode' ? batch : context)
 
   let weights: PartResult
   let attention: PartResult
   if (phase === 'decode') {
-    weights = part(batch * 2 * model.matmul, model.matmul * weightBytes, weightPeak, hw.bandwidth)
+    weights = part(batch * 2 * model.matmul, read.params * weightBytes, weightPeak, hw.bandwidth)
     attention = part(batch * context * model.attnPerCtx, batch * context * kvPerToken, hw.bf16, hw.bandwidth)
   } else {
     // One prompt of `context` tokens. A fused attention kernel scores about half the prompt x prompt square
     // (the causal mask), writes K and V once, and reads Q and writes the output once per layer.
-    weights = part(2 * context * model.matmul, model.matmul * weightBytes, weightPeak, hw.bandwidth)
+    weights = part(2 * context * model.matmul, read.params * weightBytes, weightPeak, hw.bandwidth)
     attention = part(
       (model.attnPerCtx * context * context) / 2,
       context * kvPerToken + model.layers * context * model.qWidth * 2 * 2,
@@ -124,9 +176,15 @@ export default function RooflineExplorer() {
       `${weights.memoryBound ? 'still below' : 'past'} the ridge point of ${num(ridge)}. Attention's share is ${Math.round((attention.seconds / step) * 100)}% and grows with the square of the prompt. ` +
       `At 100% of peak the first token waits ${time(step)}; a real kernel at half of peak takes twice that.`
   } else {
-    const wb = weights.memoryBound
-      ? `The weight matmuls are memory-bound (${num(weights.intensity)} FLOPs per byte, ridge ${num(ridge)}): the step reads all ${gb(weights.bytes)} of weights however many sequences share it, so a bigger batch is nearly free.`
-      : `The weight matmuls have passed the ridge point (${num(weights.intensity)} against ${num(ridge)}) and are compute-bound: a bigger batch now costs time in proportion.`
+    const moe = model.moe
+    const wb = moe
+      ? `This batch touches about ${num(read.touched!)} of the ${moe.experts} experts in each layer, so the step reads ${gb(weights.bytes)} of weights. ` +
+        (read.touched! < moe.experts * 0.95
+          ? `A bigger batch touches more experts, so unlike a dense model the weight reads grow with the batch until every expert is hit.`
+          : `Every expert is now hit, so the weight reads stop growing; the matmuls are at ${num(weights.intensity)} FLOPs per byte against a ridge of ${num(ridge)}.`)
+      : weights.memoryBound
+        ? `The weight matmuls are memory-bound (${num(weights.intensity)} FLOPs per byte, ridge ${num(ridge)}): the step reads all ${gb(weights.bytes)} of weights however many sequences share it, so a bigger batch is nearly free.`
+        : `The weight matmuls have passed the ridge point (${num(weights.intensity)} against ${num(ridge)}) and are compute-bound: a bigger batch now costs time in proportion.`
     const ab =
       batch * context * kvPerToken > weights.bytes
         ? ` Attention now reads more bytes than the weights do: its intensity stays at ${num(attention.intensity)} at any batch, because every sequence reads its own cache.`
@@ -152,7 +210,7 @@ export default function RooflineExplorer() {
           <Segmented
             label="Model"
             value={modelId}
-            options={(Object.keys(MODELS) as ModelId[]).map((id) => ({ value: id, label: id.toUpperCase() }))}
+            options={(Object.keys(MODELS) as ModelId[]).map((id) => ({ value: id, label: MODELS[id].short }))}
             onChange={setModelId}
           />
         </div>
@@ -324,48 +382,5 @@ function Point({ x, y, color, label, below }: { x: number; y: number; color: str
         {label}
       </text>
     </g>
-  )
-}
-
-function Slider({
-  label,
-  index,
-  max,
-  onChange,
-  text,
-  disabled,
-}: {
-  label: string
-  index: number
-  max: number
-  onChange: (i: number) => void
-  text: string
-  disabled?: boolean
-}) {
-  return (
-    <label className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.8125rem] text-muted ${disabled ? 'opacity-50' : ''}`}>
-      {label}
-      <input
-        type="range"
-        min={0}
-        max={max}
-        step={1}
-        value={index}
-        disabled={disabled}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-36 accent-[var(--accent)]"
-        aria-valuetext={text}
-      />
-      <span className="text-ink tabular-nums">{text}</span>
-    </label>
-  )
-}
-
-function Key({ color, children }: { color: string; children: ReactNode }) {
-  return (
-    <span className="flex items-center gap-1.5">
-      <span className="size-2.5 rounded-sm" style={{ background: color }} />
-      {children}
-    </span>
   )
 }

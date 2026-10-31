@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
-import { decks, type DeckMeta } from '../lib/content'
+import { decks, HANDBOOKS, type DeckMeta, type HandbookId } from '../lib/content'
 import { formatWait, useDeckStats, useFlashcards } from '../lib/flashcards'
 import { useAccount } from '../lib/account'
 
@@ -24,11 +24,20 @@ export function FlashcardsPage() {
         sooner, and each one links to the section that teaches its answer.
       </p>
 
-      <ul className="mt-8 divide-y divide-rule overflow-hidden rounded-xl border border-rule bg-surface">
-        {decks.map((d) => (
-          <DeckRow key={d.id} deck={d} />
-        ))}
-      </ul>
+      {(Object.keys(HANDBOOKS) as HandbookId[]).map((h) => {
+        const own = decks.filter((d) => d.handbook === h)
+        if (!own.length) return null
+        return (
+          <section key={h} className="mt-8">
+            <h2 className="text-sm font-semibold tracking-wide text-muted uppercase">{HANDBOOKS[h].title}</h2>
+            <ul className="mt-3 divide-y divide-rule overflow-hidden rounded-xl border border-rule bg-surface">
+              {own.map((d) => (
+                <DeckRow key={d.id} deck={d} />
+              ))}
+            </ul>
+          </section>
+        )
+      })}
 
       <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-muted">
         <label htmlFor="new-per-day">New cards per deck each day</label>

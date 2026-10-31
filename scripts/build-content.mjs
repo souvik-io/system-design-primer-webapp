@@ -181,8 +181,9 @@ const PARTS = [
     handbook: 'infra',
     dir: 'infra',
     title: 'The model as a workload',
-    description: 'Where the FLOPs and bytes of a transformer go, and the arithmetic that predicts speed, latency and cost.',
-    chapters: ['transformer-as-workload', 'inference-arithmetic'],
+    description:
+      'Where the FLOPs and bytes of a transformer go, the arithmetic that predicts speed, latency and cost, and what mixture-of-experts models change.',
+    chapters: ['transformer-as-workload', 'inference-arithmetic', 'mixture-of-experts'],
   },
 ]
 
@@ -241,6 +242,13 @@ const DECKS = [
     title: 'AI design questions',
     description: 'The key choices and numbers inside the eight AI designs, plus a four-step walkthrough of each.',
   },
+  // Decks for the AI Infrastructure Engineer Handbook, one per part; the flashcards page lists them under it.
+  {
+    id: 'infra-workload',
+    handbook: 'infra',
+    title: 'Orientation and the model as a workload',
+    description: 'The inference role, model and hardware numbers, FLOPs and bytes per layer, attention variants, RoPE, the roofline, and MoE.',
+  },
 ]
 
 // Sections too small to track on their own; they're folded into the preceding section.
@@ -256,6 +264,10 @@ const WIDGET_NAMES = new Set([
   'kv-cache-calculator',
   'batching-simulator',
   'roofline-explorer',
+  'layer-explorer',
+  'attention-variants',
+  'rope-rotation',
+  'expert-router',
 ])
 
 function widgetNode(name, where) {
@@ -498,7 +510,7 @@ for (const part of PARTS) {
 for (const deck of DECKS) {
   const cards = await deckCards(deck.id, `content/flashcards/${deck.id}.md`)
   fs.writeFileSync(path.join(OUT_CONTENT, 'flashcards', `${deck.id}.json`), JSON.stringify({ id: deck.id, title: deck.title, cards }))
-  manifest.decks.push({ ...deck, cardIds: cards.map((c) => c.id) })
+  manifest.decks.push({ ...deck, handbook: deck.handbook ?? 'system-design', cardIds: cards.map((c) => c.id) })
 }
 
 // Old URLs, for the app to send readers on. "sections" maps an old section ("chapter/section", the key

@@ -33,13 +33,13 @@ kern -> hbm : read every step
 - The **kernels** do the arithmetic. Matrix multiplies (GEMMs) and attention take nearly all of the time.
 - **GPU memory** holds the weights and the KV cache. Reading it is what limits most decode steps, as Part 1 shows.
 
-The work is measured by a handful of numbers. Time to first token (TTFT) is how long a user waits before anything appears. Inter-token latency (ITL) is the gap between streamed tokens. Throughput is tokens per second per GPU, and cost is dollars per million tokens. [The latency metrics section](/learn/llm-inference#latency-and-throughput-metrics) defines them. A typical week might include:
+The work is measured by a handful of numbers. Time to first token (TTFT) is how long a user waits before anything appears. Inter-token latency (ITL) is the gap between streamed tokens. Throughput is tokens per second per GPU, and cost is dollars per million tokens. [The latency metrics section](/learn/llm-inference#latency-and-throughput-metrics) defines them. In a typical week, the work might look like this:
 
-- bringing up a new model in vLLM or SGLang and finding a configuration that meets the latency target;
-- quantizing it to FP8 and proving the quality loss is acceptable;
-- profiling a p99 latency regression down to a scheduler change or a slow kernel;
-- writing a fused kernel for an operation the engine runs unfused;
-- planning how many GPUs next quarter's traffic needs, and what that costs.
+- You bring up a new model in vLLM or SGLang and find a configuration that meets its latency target.
+- You quantize the model to FP8 and show that the quality loss is acceptable.
+- You trace a p99 latency regression to a scheduler change or a slow kernel.
+- You write a fused kernel for an operation the engine runs unfused.
+- You plan how many GPUs next quarter's traffic needs, and what they will cost.
 
 ## Where the role sits
 
@@ -60,10 +60,10 @@ The inference engineer sits between the kernel engineer and the platform enginee
 
 In a sample of inference postings from October 2026 (Together AI, Nebius, Intel, Hedra and Uniphore, listed under Further reading), the same requirements came up again and again:
 
-- **A serving engine in production.** vLLM, SGLang or TensorRT-LLM by name. Together AI's posting asks for familiarity with at least one of TensorRT-LLM, vLLM, SGLang or TGI.
-- **GPU kernels.** Reading and debugging CUDA, with writing kernels in CUDA, Triton or CUTLASS as a plus. Hedra's posting describes tuning kernels when the existing ones leave performance unused.
-- **Inference techniques.** KV cache management, continuous batching, quantization and speculative decoding.
-- **Profiling and measured results.** Nsight or similar tools, roofline analysis, and speedups you can point to on real workloads.
+- **A serving engine in production.** Postings name vLLM, SGLang or TensorRT-LLM. Together AI's posting asks for familiarity with at least one of TensorRT-LLM, vLLM, SGLang or TGI.
+- **GPU kernels.** Postings expect you to read and debug CUDA, and treat writing kernels in CUDA, Triton or CUTLASS as a plus. Hedra's posting asks for building or optimizing GPU kernels when off-the-shelf implementations fall short.
+- **Inference techniques.** Postings list KV cache management, continuous batching, quantization and speculative decoding.
+- **Profiling and measured results.** Employers want experience with Nsight or similar profilers, the ability to find a workload's bottleneck, and speedups you can point to on real workloads.
 - **Open-source work.** Upstream contributions to vLLM or SGLang count in your favour, and Intel's posting makes upstreaming part of the job.
 
 Senior postings add distributed serving (tensor and expert parallelism, disaggregated prefill and decode) and multi-node operations. The handbook's parts follow this list:
@@ -85,11 +85,11 @@ Senior postings add distributed serving (tensor and expert parallelism, disaggre
 
 Loops differ by company, but most inference interviews draw on five kinds of round:
 
-1. **Coding.** Usually Python, sometimes C++. Expect general problems, plus inference-flavoured ones: implement attention with a KV cache, a top-p sampler, a block allocator, or one step of a batching scheduler. Some companies ask for a small CUDA or Triton kernel.
-2. **ML systems deep dive.** Questions such as "why is decode memory-bound?", "how much KV cache does this model need at 32K context?", or "when does speculative decoding make things slower?" You are expected to work out numbers live.
-3. **System design.** Serve a model to a given load within a latency target. The [AI system design questions](/learn/design-inference-platform) on this site are the practice set for this round.
+1. **Coding.** The language is usually Python and sometimes C++. Expect general problems, plus inference-flavoured ones: implement attention with a KV cache, a top-p sampler, a block allocator, or one step of a batching scheduler. Some companies ask for a small CUDA or Triton kernel.
+2. **ML systems deep dive.** You get questions such as "why is decode memory-bound?", "how much KV cache does this model need at 32K context?", or "when does speculative decoding make things slower?" You are expected to work out numbers live.
+3. **System design.** You design a service that serves a model to a given load within a latency target. The [AI system design questions](/learn/design-inference-platform) on this site are the practice set for this round.
 4. **Past-project deep dive.** You explain something you built or sped up. Interviewers probe the baseline, how you measured, what you changed and what it cost. Projects with numbers beat projects without.
-5. **Take-home (some companies).** Make a kernel or a serving configuration faster and write up what you did.
+5. **Take-home.** Some companies ask you to make a kernel or a serving configuration faster and to write up what you did.
 
 The labs in this handbook produce material for rounds 1, 2 and 4: working code you wrote, numbers you measured, and write-ups you can talk through.
 
@@ -97,11 +97,11 @@ The labs in this handbook produce material for rounds 1, 2 and 4: working code y
 
 Every chapter has the same parts:
 
-- **Prerequisites** at the top, linking to the system design chapters it builds on.
-- **Concept sections** with worked numbers. The numbers come from code you can run, and every printed output in a chapter is real output from that code.
-- **A lab**, tagged by the hardware it needs, with a task, a definition of done, and a reference solution folded under "Reference solution". Try the lab before opening it.
-- **An interview angle**: questions the chapter prepares you for, and what a strong answer contains.
-- **Check yourself** and **Further reading**, as in the rest of the site.
+- **Prerequisites** at the top name the system design chapters to read first.
+- **Concept sections** work through the ideas with numbers. The numbers come from code you can run, and every printed output in a chapter is real output from that code.
+- **A lab** is tagged by the hardware it needs and has a task, a definition of done, and a reference solution folded under "Reference solution". Try the lab before opening the solution.
+- **An interview angle** lists questions the chapter prepares you for and what a strong answer contains.
+- **Check yourself** and **Further reading** close the chapter, as in the rest of the site.
 
 Labs use three hardware tiers:
 
@@ -115,24 +115,26 @@ Batch the GPU labs so one rental covers several, and log what each session cost.
 
 ## Lab: set up your lab
 
-**Tier: [any].** Build the workspace every later lab uses.
+**Tier: [any].** This lab runs on any laptop and builds the workspace every later lab uses.
 
-Tasks:
+Complete these tasks:
 
 1. Create a git repository, `inference-lab`, with folders `bench/`, `labs/`, `notes/` and `results/`.
 2. Create a Python 3.12 environment with [uv](https://docs.astral.sh/uv/) and install `torch`, `transformers` and `numpy`.
 3. Check that PyTorch sees an accelerator: `cuda` on NVIDIA, `mps` on Apple silicon.
-4. Write `bench/record.py`: a function `record(name, result)` that appends one JSON line to `results/results.jsonl`, holding the benchmark name, a UTC timestamp, the result, and the environment it ran in (Python, PyTorch, device name, CUDA and driver versions when present, and the git commit).
+4. Write `bench/record.py` with a function `record(name, result)` that appends one JSON line to `results/results.jsonl`, holding the benchmark name, a UTC timestamp, the result, and the environment it ran in (Python, PyTorch, device name, CUDA and driver versions when present, and the git commit).
 5. Open an account with one GPU rental provider and note its hourly price for an L4 and an H100.
 
-Done when `python bench/record.py` appends a line naming your device, and `results.jsonl` is committed.
+The lab is done when `python bench/record.py` appends a line naming your device and `results.jsonl` is committed.
 
-Why the recorder matters: benchmark numbers without the versions and hardware they came from cannot be compared later. A one-line change in vLLM or the driver can move results by 20%.
+The recorder matters because benchmark numbers without the versions and hardware they came from cannot be compared later. A software upgrade alone can move results a long way: [vLLM reported](https://vllm.ai/blog/2024-09-05-perf-update) 2.7 times the throughput for version 0.6.0 over 0.5.3, on Llama 3 8B on one H100.
+
+The reference recorder is also available as a file, [record.py](/labs/infra/record.py), to save into your lab repository as `bench/record.py`. Every Python file the handbook's labs use is in the site's repository under `public/labs/infra/`, and the scripts that need an NVIDIA GPU are kept apart in `public/labs/infra/gpu/`.
 
 <details>
 <summary>Reference solution</summary>
 
-Setup:
+Set up the repository and the environment:
 
 ```bash
 mkdir inference-lab && cd inference-lab && git init
@@ -142,7 +144,7 @@ uv pip install torch transformers numpy
 python -c "import torch; print(torch.cuda.is_available(), torch.backends.mps.is_available())"
 ```
 
-`bench/record.py`:
+Then write `bench/record.py`:
 
 ```python
 # bench/record.py: append one benchmark result, with the machine and software it ran on, to a log.
@@ -196,7 +198,7 @@ if __name__ == "__main__":
     print(json.dumps(row, indent=2))
 ```
 
-Output on an Apple M2 laptop, before the first commit (so no `git_commit` yet):
+This is the output on an Apple M2 laptop before the first commit, so there is no `git_commit` yet:
 
 ```text
 {
@@ -223,7 +225,7 @@ On a rented NVIDIA machine the same script adds `device` (for example "NVIDIA L4
 ## Interview angle
 
 - **"Tell me about a performance improvement you made."** A strong answer has five parts: the baseline and how it was measured, the bottleneck and how you found it, the change, the result with the same measurement, and the cost or risk of the change. The labs are built to give you stories in this shape.
-- **"What does an inference engineer optimize for?"** Latency (TTFT and ITL at a percentile), throughput per GPU, cost per token, and quality held constant. A strong answer adds that these trade against each other through batch size, and that the right point depends on the product's latency target.
+- **"What does an inference engineer optimize for?"** The job optimizes latency (TTFT and ITL at a percentile), throughput per GPU and cost per token, while holding quality constant. A strong answer adds that these trade against each other through batch size, and that the right point depends on the product's latency target.
 - **"How is serving different from training?"** Training is one long throughput job with all data known in advance. Serving is many short, unpredictable requests with latency targets, where memory for the KV cache, not compute, usually limits how many users fit. [Training and fine-tuning infrastructure](/learn/training-infrastructure#training-compared-with-inference) compares them in detail.
 
 ## Check yourself
@@ -252,13 +254,14 @@ Serving performance depends on the engine version, PyTorch, CUDA, the driver and
 <details>
 <summary>An interviewer asks how you would show that an optimization helped. What do you describe?</summary>
 
-A fixed workload (prompt and output lengths, request rate), a baseline measured with warmup and several runs, the metric that matters (for example p99 ITL at a given throughput), the change made alone, the same measurement afterwards, and a quality check if the change could affect outputs. Report the spread, not only the best run.
+Describe a fixed workload (prompt and output lengths, request rate), a baseline measured with warmup and several runs, and the metric that matters, for example p99 ITL at a given throughput. Then describe the change made on its own, the same measurement repeated afterwards, and a quality check if the change could affect outputs. Report the spread, not only the best run.
 
 </details>
 
 ## Further reading
 
-- Job postings sampled for this chapter (October 2026; postings change or close): [Together AI, LLM inference frameworks and optimization engineer](https://jobs.generalcatalyst.com/companies/together-ai-2/jobs/72517179-llm-inference-frameworks-and-optimization-engineer), [Uniphore, senior inference engineer](https://www.dice.com/job-detail/736b5e4b-8610-411b-88bc-5b79f3d5607c), [Hedra, inference optimization engineer](https://builtin.com/job/inference-optimization-engineer/11572766), [Nebius, LLM inference optimization](https://jobpilot.suxrobgm.net/jobs/senior-machine-learning-engineer-llm-inference-optimization-at-nebius-group-05fe1a) and [Intel, AI infrastructure engineer](https://intel.wd1.myworkdayjobs.com/en-US/External/job/AI-Infrastructure-Engineer_JR0286233).
-- [AI inference infrastructure interview prep](https://www.techinterview.org/post/3233475331/ai-inference-infrastructure-interview-prep-2026-vllm-triton/) and [InterviewCoder's LLM engineer questions](https://www.interviewcoder.co/blog/llm-engineer-interview-questions): community question banks; useful for the shape of questions, not as authorities.
-- [vLLM documentation](https://docs.vllm.ai/) and [SGLang documentation](https://docs.sglang.ai/): the two open engines most postings name.
-- [uv](https://docs.astral.sh/uv/): the Python package and environment manager the labs use.
+- The job postings sampled for this chapter in October 2026 were [Together AI, LLM inference frameworks and optimization engineer](https://jobs.generalcatalyst.com/companies/together-ai-2/jobs/72517179-llm-inference-frameworks-and-optimization-engineer), [Uniphore, senior inference engineer](https://www.dice.com/job-detail/736b5e4b-8610-411b-88bc-5b79f3d5607c), [Hedra, inference optimization engineer](https://builtin.com/job/inference-optimization-engineer/11572766), [Nebius, LLM inference optimization](https://jobpilot.suxrobgm.net/jobs/senior-machine-learning-engineer-llm-inference-optimization-at-nebius-group-05fe1a) and [Intel, AI infrastructure engineer](https://intel.wd1.myworkdayjobs.com/en-US/External/job/AI-Infrastructure-Engineer_JR0286233). Postings change or close, so some of these links may stop working.
+- [AI inference infrastructure interview prep](https://www.techinterview.org/post/3233475331/ai-inference-infrastructure-interview-prep-2026-vllm-triton/) and [InterviewCoder's LLM engineer questions](https://www.interviewcoder.co/blog/llm-engineer-interview-questions) are community question banks. They are useful for the shape of the questions, not as authorities.
+- The [vLLM documentation](https://docs.vllm.ai/) and the [SGLang documentation](https://docs.sglang.io/) cover the two open engines that most postings name.
+- [vLLM v0.6.0: 2.7x throughput improvement and 5x latency reduction](https://vllm.ai/blog/2024-09-05-perf-update) is the vLLM team's report of how much one release changed performance on the same hardware.
+- [uv](https://docs.astral.sh/uv/) is the Python package and environment manager the labs use.
