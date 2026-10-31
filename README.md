@@ -1,6 +1,6 @@
 # System Design Handbook
 
-A free, open-source course in system design: how large systems are built, and how to answer the system design interview. It's a React app with chapters split into sections, progress tracking, study plans with a daily goal, notes and bookmarks, interactive diagrams, spaced-repetition flashcards, search, and dark mode.
+A free, open-source course in system design: how large systems are built, and how to answer the system design interview. A part on AI systems covers serving and building with language models, with eight AI design questions worked the same way. It's a React app with chapters split into sections, progress tracking, study plans with a daily goal, notes and bookmarks, interactive diagrams, spaced-repetition flashcards, search, and dark mode.
 
 Every chapter is written for this site, and each lists its sources under "Further reading". The syllabus started from [The System Design Primer](https://github.com/donnemartin/system-design-primer) by Donne Martin, and covers everything it teaches and more ([`content/COVERAGE.md`](content/COVERAGE.md) maps each of its topics to the section that covers it here).
 
@@ -45,14 +45,16 @@ The site used to present the primer's own text, with some chapters ending in "10
 
 ## Interactive diagrams
 
-Four topics have a diagram the reader can play with, in [`src/widgets/`](src/widgets/):
+Six topics have a diagram the reader can play with, in [`src/widgets/`](src/widgets/):
 
-| Diagram            | Chapter                                              | What it shows                                                                              |
-| ------------------ | ---------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `cache-strategies` | Caching, "When to update the cache"                  | Cache-aside, write-through and write-behind: hits, stale reads, write latency, lost writes |
-| `replication`      | Relational databases, "Synchronous, asynchronous..." | Replication lag, stale reads from replicas, and which writes a failover loses              |
-| `hash-ring`        | Consistent hashing, "Virtual nodes"                  | Which keys move when servers come and go, against hash mod N, and how points even out load |
-| `rate-limiter`     | Rate limiting, "The algorithms"                      | Fixed window, sliding log, sliding counter and token bucket on the same traffic            |
+| Diagram               | Chapter                                              | What it shows                                                                              |
+| --------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `cache-strategies`    | Caching, "When to update the cache"                  | Cache-aside, write-through and write-behind: hits, stale reads, write latency, lost writes |
+| `replication`         | Relational databases, "Synchronous, asynchronous..." | Replication lag, stale reads from replicas, and which writes a failover loses              |
+| `hash-ring`           | Consistent hashing, "Virtual nodes"                  | Which keys move when servers come and go, against hash mod N, and how points even out load |
+| `rate-limiter`        | Rate limiting, "The algorithms"                      | Fixed window, sliding log, sliding counter and token bucket on the same traffic            |
+| `kv-cache-calculator` | AI estimation, "Memory for the KV cache"             | GPU memory for a model's weights and KV cache, and how many requests fit at once           |
+| `batching-simulator`  | Inference engines, "Batching requests"               | Static against continuous batching: how many requests finish and how busy the slots stay   |
 
 The content build leaves an empty placeholder where each goes and the chapter page renders the component into it. A chapter places one with a fenced `widget` block. Each diagram's code loads only with its chapter. See [`content/README.md`](content/README.md) to add one.
 
@@ -60,10 +62,10 @@ The content build leaves an empty placeholder where each goes and the chapter pa
 
 Everything a reader does is stored in `localStorage`: reading progress (`sdp-progress`), flashcard history (`sdp-flashcards`), notes and bookmarks (`sdp-notes`) and the study plan (`sdp-plan`). Without an account it stays in that browser. Signing in (optional, see below) syncs all of it across devices.
 
-- **Study plans** follow "How to use this handbook": short, medium or long. Each covers every topic chapter plus some, many or all of the design questions; the medium and long plans add the deeper concepts. The lengths (2, 5 and 10 weeks) and the question choices are this site's suggestions ([`src/lib/plans.ts`](src/lib/plans.ts)). Today's goal is what was left this morning divided by the days left, so it doesn't move while you read.
+- **Study plans** follow "How to use this handbook": short, medium or long. Each covers every topic chapter plus some, many or all of the design questions; the medium and long plans add the deeper concepts, and the long plan adds the AI systems chapters and AI design questions. The lengths (2, 5 and 10 weeks) and the question choices are this site's suggestions ([`src/lib/plans.ts`](src/lib/plans.ts)). Today's goal is what was left this morning divided by the days left, so it doesn't move while you read.
 - **Notes and bookmarks** are per section, added from the buttons at the end of each one. The Notes and bookmarks page lists them in course order and downloads the notes as Markdown.
 
-Eight flashcard decks in [`content/flashcards/`](content/flashcards/) cover the course: one card per topic, specific questions on every chapter and design, design walkthroughs, and object-oriented designs. Each answer is drawn from the chapter it links to.
+Ten flashcard decks in [`content/flashcards/`](content/flashcards/) cover the course: one card per topic, specific questions on every chapter and design, design walkthroughs, object-oriented designs, and two decks for the AI systems chapters and the AI design questions. Each answer is drawn from the chapter it links to.
 
 Flashcards use an SM-2 style schedule like Anki's: Again (1 minute), Hard, Good and Easy, with intervals growing by each card's ease. New cards are limited per deck per day, 10 by default.
 

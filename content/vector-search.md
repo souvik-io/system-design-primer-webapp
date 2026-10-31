@@ -297,7 +297,7 @@ Three kinds of system store vectors in production. Your existing stack usually d
 
 **Search engines with vector support**, such as Elasticsearch. Elasticsearch stores each segment's dense vectors as an HNSW graph, and one request can combine a kNN clause with a keyword query. This fits a team that already runs search and wants keyword and vector results in one ranking.
 
-FAISS is a library. It gives you the indexes, and you build persistence, replication, filters and updates around them. Choose by what you already run.
+FAISS is a library. It gives you the indexes, and you build persistence, replication, filters and updates around them. Choose by what you already run. The [vector database design question](/learn/design-vector-database) shows what a managed service builds around those indexes.
 
 ## Changing the embedding model
 

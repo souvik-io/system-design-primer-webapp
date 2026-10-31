@@ -135,22 +135,21 @@ const PARTS = [
       'training-infrastructure',
     ],
   },
-  // TODO: AI system design questions, still being written. Restore this part once the chapters exist.
-  // {
-  //   id: 'ai-design',
-  //   title: 'AI system design questions',
-  //   description: 'Worked designs for products built on language and image models, in the same four steps.',
-  //   chapters: [
-  //     'design-chat-assistant',
-  //     'design-inference-platform',
-  //     'design-llm-gateway',
-  //     'design-rag-qa',
-  //     'design-coding-assistant',
-  //     'design-agent-platform',
-  //     'design-vector-database',
-  //     'design-image-generation',
-  //   ],
-  // },
+  {
+    id: 'ai-design',
+    title: 'AI system design questions',
+    description: 'Worked designs for products built on language and image models, in the same four steps.',
+    chapters: [
+      'design-chat-assistant',
+      'design-inference-platform',
+      'design-llm-gateway',
+      'design-rag-qa',
+      'design-coding-assistant',
+      'design-agent-platform',
+      'design-vector-database',
+      'design-image-generation',
+    ],
+  },
   {
     id: 'reference',
     title: 'Reference',
@@ -208,6 +207,16 @@ const DECKS = [
     id: 'object-oriented',
     title: 'Object-oriented design',
     description: 'Sketch the classes for each object-oriented question, then compare with the design in its chapter.',
+  },
+  {
+    id: 'ai-concepts',
+    title: 'AI systems',
+    description: 'Inference, GPUs, serving engines, estimation, fleets, gateways, retrieval, agents, evaluation, security and training.',
+  },
+  {
+    id: 'ai-designs',
+    title: 'AI design questions',
+    description: 'The key choices and numbers inside the eight AI designs, plus a four-step walkthrough of each.',
   },
 ]
 

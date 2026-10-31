@@ -11,7 +11,7 @@ Here is one way to practise a question, say "Design a chat app like WhatsApp":
 
 The chapter has four parts:
 
-- **Worked designs in this handbook** lists every question the handbook answers in full, with what each one teaches. Start there: you can check your answer against a complete design laid out in the same four steps.
+- **Worked designs in this handbook** lists every question the handbook answers in full, with what each one teaches, including eight questions about products built on AI models. Start there: you can check your answer against a complete design laid out in the same four steps.
 - **More system design questions** groups further questions by theme. For each one you'll find what makes it hard, which chapters help, and references that are still online.
 - **More object-oriented design questions** covers class-design questions, where you write the classes and methods for one program instead of drawing a distributed system.
 - **How to practise with these** gives a simple plan, a checklist for reviewing your own answers, and tips for practising with a partner.
@@ -45,6 +45,21 @@ These chapters each take one question from requirements to a scaled design. The 
 | [Design search autocomplete (typeahead)](/learn/design-autocomplete) | Separating an offline pipeline that builds suggestions from an online lookup that answers in milliseconds, and caching almost everything. |
 | [Design a video streaming platform](/learn/design-video-streaming) | Uploading very large files reliably, transcoding in parallel, adaptive bitrate streaming, and why bandwidth cost shapes the design. |
 | [Design a file sync service (like Dropbox or Google Drive)](/learn/design-file-sync) | Keeping strongly consistent file metadata apart from file content, splitting files into blocks, and handling conflicts from offline edits. |
+
+### AI system design questions
+
+These follow the same four steps, with GPUs and tokens in the estimates. Read the [AI systems](/learn/llm-inference) chapters first: each design builds on them.
+
+| Question | What it teaches |
+| --- | --- |
+| [Design a chat assistant (like ChatGPT or Claude.ai)](/learn/design-chat-assistant) | Streaming replies token by token, fitting long conversations into a context window, and deciding who waits when GPUs are the scarce resource at peak. |
+| [Design a model inference platform](/learn/design-inference-platform) | Sizing a model replica from prefill and decode, routing requests to replicas that already hold a prompt's prefix, packing many models onto GPUs, and cold starts. |
+| [Design an LLM gateway](/learn/design-llm-gateway) | One API in front of many providers: budgets enforced across many instances, retries and fallbacks, when a streamed reply can still move to another provider, and charging each team for what it used. |
+| [Design a question-answering system over company documents (RAG)](/learn/design-rag-qa) | Ingesting documents that change every minute, hybrid retrieval and reranking, answering only from sources the user may open, and saying "I don't know". |
+| [Design an AI coding assistant](/learn/design-coding-assistant) | Inline completions inside a tight latency budget, building a fill-in-the-middle prompt from the editor, and an agent mode that runs tests in a sandbox. |
+| [Design a platform for running AI agents](/learn/design-agent-platform) | Running long, tool-using tasks as durable workflows, sandboxing tool calls, pausing for human approval, and stopping runaway loops before they cost too much. |
+| [Design a vector database](/learn/design-vector-database) | Storing embeddings in a log and immutable segments, filtered nearest-neighbour search, separating storage from compute, and measuring recall in production. |
+| [Design an image generation service (like Midjourney)](/learn/design-image-generation) | A job queue in front of GPU workers, batching diffusion jobs of the same shape, tiered queues with spot GPUs, and a safety pipeline for prompts and images. |
 
 ### Object-oriented design questions
 
@@ -223,6 +238,10 @@ These questions come up often in interviews today. They have no references here,
 | Design a metrics and monitoring system | Storing a flood of small time-stamped numbers cheaply and answering queries over them quickly. | [Observability](/learn/observability), [Event streaming](/learn/event-streaming), [NoSQL databases](/learn/nosql-databases) |
 | Design a distributed message queue | Keeping messages durable and in order while many producers and consumers come and go. | [Queues and async work](/learn/queues-and-async), [Event streaming](/learn/event-streaming), [Consensus](/learn/consensus) |
 | Design an ad click counter | Counting billions of clicks accurately enough to bill for them, without counting any click twice. | [Event streaming](/learn/event-streaming), [Batch processing](/learn/batch-processing), [Design Amazon's sales rank by category](/learn/design-sales-rank) |
+| Design a support bot that answers customers and hands off to a person | Answering only from help articles, knowing when not to answer, and handing the conversation to a person with its context. | [Retrieval-augmented generation](/learn/rag), [AI agents](/learn/ai-agents), [Design a question-answering system over company documents](/learn/design-rag-qa) |
+| Design semantic search for an online store's catalog | Mixing keyword and vector matches, filtering by price and stock, and keeping the index fresh as products change. | [Embeddings and vector search](/learn/vector-search), [Design a vector database](/learn/design-vector-database), [Design a web search engine](/learn/design-search-engine) |
+| Design an evaluation platform for LLM apps | Grading open-ended answers in a way you can trust, catching regressions before a release, and tracing calls in production. | [Evaluating and observing AI systems](/learn/ai-evals-and-observability), [Design an LLM gateway](/learn/design-llm-gateway) |
+| Design a fine-tuning service | Scheduling GPU jobs that run for hours, checkpointing so a failure loses little work, and serving many customers' adapters on one base model. | [Training and fine-tuning infrastructure](/learn/training-infrastructure), [Design a model inference platform](/learn/design-inference-platform) |
 
 ## More object-oriented design questions
 
