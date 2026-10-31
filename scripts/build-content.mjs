@@ -208,6 +208,16 @@ const DECKS = [
     title: 'Object-oriented design',
     description: 'Sketch the classes for each object-oriented question, then compare with the design in its chapter.',
   },
+  {
+    id: 'ai-concepts',
+    title: 'AI systems',
+    description: 'Inference, GPUs, serving engines, estimation, fleets, gateways, retrieval, agents, evaluation, security and training.',
+  },
+  {
+    id: 'ai-designs',
+    title: 'AI design questions',
+    description: 'The key choices and numbers inside the eight AI designs, plus a four-step walkthrough of each.',
+  },
 ]
 
 // Sections too small to track on their own; they're folded into the preceding section.
