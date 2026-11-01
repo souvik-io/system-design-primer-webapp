@@ -23,6 +23,10 @@ const WIDGETS: Record<string, ComponentType> = {
   'warp-reduce': lazy(() => import('./WarpReduce')),
   'online-softmax': lazy(() => import('./OnlineSoftmax')),
   'decode-timeline': lazy(() => import('./DecodeTimeline')),
+  'launch-overhead': lazy(() => import('./LaunchOverhead')),
+  'graph-padding': lazy(() => import('./GraphPadding')),
+  'caching-allocator': lazy(() => import('./CachingAllocator')),
+  'gil-threads': lazy(() => import('./GilThreads')),
 }
 
 export function Widgets({ root, chapter }: { root: RefObject<HTMLElement | null>; chapter: unknown }) {

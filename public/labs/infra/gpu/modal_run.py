@@ -4,6 +4,11 @@
 #   modal run modal_run.py --script gpu_probe.py --gpu A10
 #   modal run modal_run.py --script gpu_probe.py --gpu H100
 #   modal run modal_run.py --script cuda_rmsnorm.py --gpu H100 --toolkit   # needs nvcc to compile CUDA
+#   modal run modal_run.py --script decode_runtime.py --gpu H100 --cpu 4   # reserve 4 CPU cores
+#
+# A container is guaranteed only 0.125 CPU cores by default and borrows more when the host has spare capacity
+# (https://modal.com/docs/guide/resources). Anything limited by kernel launches, such as a batch-1 decode step,
+# then depends on how busy the host is; --cpu reserves cores for the run (a few tenths of a cent more per minute).
 #
 # The scripts themselves are plain Python and also run unchanged on any machine with an NVIDIA GPU:
 #   python gpu_probe.py
@@ -59,13 +64,14 @@ def run_with_toolkit(script: str, args: list[str]) -> float:
 
 
 @app.local_entrypoint()
-def main(script: str, gpu: str = "A10", args: str = "", toolkit: bool = False) -> None:
+def main(script: str, gpu: str = "A10", args: str = "", toolkit: bool = False, cpu: float = 0.0) -> None:
     fn = run_with_toolkit if toolkit else run
-    seconds = fn.with_options(gpu=gpu).remote(script, args.split())
+    options = {"gpu": gpu, **({"cpu": cpu} if cpu else {})}
+    seconds = fn.with_options(**options).remote(script, args.split())
     price = PRICE.get(gpu.split(":")[0].rstrip("!"))
     cost = seconds * price if price else None
     estimate = f"about ${cost:.3f} (GPU only)" if cost is not None else "price unknown; add it to PRICE"
     print(f"\n[modal_run] {script} on {gpu}: {seconds:.0f} s of GPU time, {estimate}")
     with open(HERE / "modal_costs.jsonl", "a") as f:
         f.write(json.dumps({"time": time.strftime("%Y-%m-%dT%H:%M:%S"), "script": script, "gpu": gpu,
-                            "seconds": round(seconds, 1), "usd": round(cost, 4) if cost is not None else None}) + "\n")
+                            **({"cpu": cpu} if cpu else {}), "seconds": round(seconds, 1), "usd": round(cost, 4) if cost is not None else None}) + "\n")

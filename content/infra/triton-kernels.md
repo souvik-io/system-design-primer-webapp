@@ -156,7 +156,7 @@ On the A10, about 45 lines of Triton match cuBLAS. On the H100, the Triton kerne
 
 Writing a kernel is worth it when an operation is memory-bound and runs as several separate kernels, as RMSNorm did, or when no library offers the operation in the shape you need, as with the MoE grouped matmul of [chapter 1.3](/learn/mixture-of-experts#how-engines-run-an-moe-layer). It is rarely worth it for a large, plain matmul, where cuBLAS and CUTLASS are already close to the hardware's limit.
 
-Often you do not have to write the kernel by hand. PyTorch's compiler, `torch.compile`, generates Triton kernels for chains of element-wise and reduction operations, fusing them as this chapter did by hand, and Part 3 shows how far that goes. Hand-written Triton remains common where the compiler cannot see the whole pattern: vLLM's fused MoE kernel, its attention kernels for some backends, and libraries such as Liger Kernel, which provides fused Triton kernels for LLM training.
+Often you do not have to write the kernel by hand. PyTorch's compiler, `torch.compile`, generates Triton kernels for chains of element-wise and reduction operations, fusing them as this chapter did by hand, and [Part 3](/learn/pytorch-execution#torchcompile-dynamo-aotautograd-and-inductor) shows how far that goes. Hand-written Triton remains common where the compiler cannot see the whole pattern: vLLM's fused MoE kernel, its attention kernels for some backends, and libraries such as Liger Kernel, which provides fused Triton kernels for LLM training.
 
 ## Lab: four kernels against PyTorch
 

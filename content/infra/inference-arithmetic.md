@@ -255,7 +255,7 @@ An example with made-up numbers: if an engine serves Llama 3.1 8B at batch 1 on 
 When a measurement lands below the model, these are the usual reasons, roughly in order of how often they matter for decode:
 
 - **Achievable bandwidth is below the spec.** The probe's copy reached 84% of the M2's spec. Expect a similar gap on data-center GPUs.
-- **Overhead between kernels.** A decode step launches hundreds of small kernels. At batch 1 on a fast GPU, the CPU work of launching them and running the Python scheduler can rival the GPU time. CUDA graphs and compiled models exist to remove it (Part 3).
+- **Overhead between kernels.** A decode step launches hundreds of small kernels. At batch 1 on a fast GPU, the CPU work of launching them and running the Python scheduler can rival the GPU time. CUDA graphs and compiled models exist to remove it ([Part 3](/learn/pytorch-execution)).
 - **Kernel efficiency on awkward shapes.** A matmul with 1 to 16 rows, or attention over very short or very uneven contexts, reaches a smaller share of the hardware's limits than the large shapes on spec sheets.
 - **Work the model leaves out.** The model ignores sampling, the LM head's large output (128,256 values per token), detokenization, streaming and the element-wise operations.
 - **The workload is not the one modeled.** Real batches mix prefill and decode, contexts vary, and the batch is rarely full.

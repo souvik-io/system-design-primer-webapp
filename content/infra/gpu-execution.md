@@ -83,7 +83,7 @@ The lab measured how copy bandwidth changes as the working set grows past the L2
    2048 MiB working set:     3021 GB/s   (beyond L2)
 ```
 
-Three things stand out. The 16 and 32 MiB copies, which fit in L2, run faster than any copy from HBM, at about 3.7 TB/s. Copies far larger than L2 settle at 3.0 TB/s, 90% of the 3.35 TB/s on the spec sheet, which is the realistic ceiling for a memory-bound kernel on this GPU. The smallest copies are slow for a different reason: a 2 MiB copy at L2 speed finishes in about half a microsecond, which is shorter than the fixed cost of launching a kernel, so launch overhead dominates. The measurements show it: the 2 MiB and 8 MiB copies both take about 4.4 µs each, although one moves four times as much data. Part 3 returns to that overhead, because a decode step at batch 1 is made of many small kernels.
+Three things stand out. The 16 and 32 MiB copies, which fit in L2, run faster than any copy from HBM, at about 3.7 TB/s. Copies far larger than L2 settle at 3.0 TB/s, 90% of the 3.35 TB/s on the spec sheet, which is the realistic ceiling for a memory-bound kernel on this GPU. The smallest copies are slow for a different reason: a 2 MiB copy at L2 speed finishes in about half a microsecond, which is shorter than the fixed cost of launching a kernel, so launch overhead dominates. The measurements show it: the 2 MiB and 8 MiB copies both take about 4.4 µs each, although one moves four times as much data. [Part 3](/learn/pytorch-execution#what-eager-mode-costs) returns to that overhead, because a decode step at batch 1 is made of many small kernels.
 
 ## Coalescing: how a warp reads memory
 

@@ -64,7 +64,7 @@ The widget below draws the recorded trace. The top row is the CPU's launch calls
 decode-timeline
 ```
 
-The diagnosis is that this step is limited by launch overhead, not by the GPU's memory or arithmetic. The fixes are the subject of Part 3: CUDA graphs record the whole sequence of kernels once and replay it with a single launch, and `torch.compile` fuses the small element-wise kernels into fewer, larger ones. Serving engines such as vLLM do both, which is why they decode far faster than a plain Hugging Face forward pass on the same GPU.
+The diagnosis is that this step is limited by launch overhead, not by the GPU's memory or arithmetic. The fixes are the subject of [Part 3](/learn/pytorch-execution): CUDA graphs record the whole sequence of kernels once and replay it with a single launch, and `torch.compile` fuses the small element-wise kernels into fewer, larger ones. Serving engines such as vLLM do both, which is why they decode far faster than a plain Hugging Face forward pass on the same GPU.
 
 ## Nsight Systems: the whole timeline
 
@@ -135,7 +135,7 @@ Parts A and B are the measurements printed in this chapter. A memo for Part C, w
 
 *Diagnosis.* The step is limited by kernel launch overhead on the CPU. It is not limited by the GPU's memory bandwidth or its arithmetic.
 
-*What to try first.* First switch to a static KV cache (in transformers, `cache_implementation="static"`), which preallocates the cache and writes each new token in place, so every decode step has the same shapes. Then capture the step in a CUDA graph, for example with `torch.compile(mode="reduce-overhead")`, which replays all kernels with one launch. That should bring the step close to the GPU's 2.21 ms of work, about three times faster. Fusing the element-wise kernels, which `torch.compile` also does, should then cut the GPU time itself towards the 0.74 ms floor. Part 3's lab measures these steps.
+*What to try first.* First switch to a static KV cache (in transformers, `cache_implementation="static"`), which preallocates the cache and writes each new token in place, so every decode step has the same shapes. Then capture the step in a CUDA graph, for example with `torch.compile(mode="reduce-overhead")`, which replays all kernels with one launch. That should bring the step close to the GPU's 2.21 ms of work, about three times faster. Fusing the element-wise kernels, which `torch.compile` also does, should then cut the GPU time itself towards the 0.74 ms floor. [Chapter 3.1's lab](/learn/pytorch-execution#lab-speed-up-the-decode-step) measures these steps.
 
 </details>
 

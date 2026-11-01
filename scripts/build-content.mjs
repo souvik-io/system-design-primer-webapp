@@ -193,6 +193,15 @@ const PARTS = [
     description: 'How a GPU runs threads and moves memory, how to write kernels in Triton and read them in CUDA, FlashAttention, and profiling.',
     chapters: ['gpu-execution', 'triton-kernels', 'cuda-basics', 'flash-attention', 'profiling'],
   },
+  {
+    id: 'infra-runtime',
+    handbook: 'infra',
+    dir: 'infra',
+    title: 'The runtime layer',
+    description:
+      'What eager PyTorch costs, CUDA graphs, torch.compile and the caching allocator; C++ bindings and the GIL; and ahead-of-time compilers and runtimes.',
+    chapters: ['pytorch-execution', 'native-code', 'graph-runtimes'],
+  },
 ]
 
 /** Folders under content/ that hold a handbook's chapters, besides content/ itself. */
@@ -263,6 +272,12 @@ const DECKS = [
     title: 'GPUs and kernels',
     description: 'Warps, occupancy, coalescing and banks, tensor-core peaks, Triton and CUDA kernels, FlashAttention, and profiling.',
   },
+  {
+    id: 'infra-runtime',
+    handbook: 'infra',
+    title: 'The runtime layer',
+    description: 'Launch overhead, CUDA graphs, torch.compile and the caching allocator; bindings, zero copy and the GIL; and export, ONNX and TensorRT.',
+  },
 ]
 
 // Sections too small to track on their own; they're folded into the preceding section.
@@ -288,6 +303,10 @@ const WIDGET_NAMES = new Set([
   'warp-reduce',
   'online-softmax',
   'decode-timeline',
+  'launch-overhead',
+  'graph-padding',
+  'caching-allocator',
+  'gil-threads',
 ])
 
 function widgetNode(name, where) {
