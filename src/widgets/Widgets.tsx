@@ -12,6 +12,21 @@ const WIDGETS: Record<string, ComponentType> = {
   'rate-limiter': lazy(() => import('./RateLimiter')),
   'kv-cache-calculator': lazy(() => import('./KvCacheCalculator')),
   'batching-simulator': lazy(() => import('./BatchingSimulator')),
+  'roofline-explorer': lazy(() => import('./RooflineExplorer')),
+  'layer-explorer': lazy(() => import('./LayerExplorer')),
+  'attention-variants': lazy(() => import('./AttentionVariants')),
+  'rope-rotation': lazy(() => import('./RopeRotation')),
+  'expert-router': lazy(() => import('./ExpertRouter')),
+  'warp-access': lazy(() => import('./WarpAccess')),
+  occupancy: lazy(() => import('./Occupancy')),
+  'matmul-tiling': lazy(() => import('./MatmulTiling')),
+  'warp-reduce': lazy(() => import('./WarpReduce')),
+  'online-softmax': lazy(() => import('./OnlineSoftmax')),
+  'decode-timeline': lazy(() => import('./DecodeTimeline')),
+  'launch-overhead': lazy(() => import('./LaunchOverhead')),
+  'graph-padding': lazy(() => import('./GraphPadding')),
+  'caching-allocator': lazy(() => import('./CachingAllocator')),
+  'gil-threads': lazy(() => import('./GilThreads')),
 }
 
 export function Widgets({ root, chapter }: { root: RefObject<HTMLElement | null>; chapter: unknown }) {

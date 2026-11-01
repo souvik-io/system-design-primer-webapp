@@ -2,7 +2,19 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import clsx from 'clsx'
 import { ArrowRight, Info } from 'lucide-react'
-import { chapterById, chapters, decks, parts, sectionHref, sectionKey, type ChapterMeta, type DeckMeta, type Part } from '../lib/content'
+import {
+  chapterById,
+  chapters,
+  chaptersOf,
+  decks,
+  HANDBOOKS,
+  partsOf,
+  sectionHref,
+  sectionKey,
+  type ChapterMeta,
+  type DeckMeta,
+  type Part,
+} from '../lib/content'
 import { useDeckStats } from '../lib/flashcards'
 import { useChapterProgress, useOverallProgress, useProgress } from '../lib/progress'
 import { useAccount } from '../lib/account'
@@ -23,7 +35,8 @@ export function HomePage() {
     else window.scrollTo(0, 0)
   }, [location.key, location.hash])
 
-  const resume = lastVisited && chapterById.get(lastVisited.chapterId)
+  const last = lastVisited && chapterById.get(lastVisited.chapterId)
+  const resume = last?.part.handbook === 'system-design' ? last : undefined
   const resumeSection = resume?.sections.find((s) => s.id === lastVisited?.sectionId)
 
   return (
@@ -46,7 +59,7 @@ export function HomePage() {
             </Link>
           ) : (
             <Link
-              to={`/learn/${chapters[0].id}`}
+              to={`/learn/${chaptersOf('system-design')[0].id}`}
               className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-on-accent hover:opacity-90"
             >
               Start the course
@@ -63,6 +76,17 @@ export function HomePage() {
       </section>
 
       <MovedNotice />
+
+      <Link
+        to={HANDBOOKS.infra.home}
+        className="group mt-10 flex items-center gap-4 rounded-2xl border border-rule bg-surface px-5 py-4 hover:border-accent"
+      >
+        <span className="min-w-0 flex-1">
+          <span className="block font-medium text-ink group-hover:text-accent">{HANDBOOKS.infra.title}</span>
+          <span className="mt-0.5 block text-sm text-muted">{HANDBOOKS.infra.description}</span>
+        </span>
+        <ArrowRight size={18} className="shrink-0 text-muted group-hover:text-accent" />
+      </Link>
 
       <StudyPlan />
 
@@ -95,7 +119,7 @@ export function HomePage() {
       </section>
 
       <div className="mt-16 space-y-14">
-        {parts.map((part) => (
+        {partsOf('system-design').map((part) => (
           <PartSection key={part.id} part={part} />
         ))}
       </div>
@@ -105,7 +129,7 @@ export function HomePage() {
   )
 }
 
-function PartSection({ part }: { part: Part }) {
+export function PartSection({ part }: { part: Part }) {
   return (
     <section id={part.id} className="scroll-mt-20">
       <div className="max-w-2xl">

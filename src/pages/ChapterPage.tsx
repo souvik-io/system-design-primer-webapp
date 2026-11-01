@@ -2,7 +2,18 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router'
 import clsx from 'clsx'
 import { ArrowLeft, ArrowRight, Bookmark, Check, Clock } from 'lucide-react'
-import { chapterById, chapters, loadChapter, redirects, sectionHref, sectionKey, type Chapter, type ChapterMeta } from '../lib/content'
+import {
+  chapterById,
+  chaptersOf,
+  HANDBOOKS,
+  loadChapter,
+  redirects,
+  sectionHref,
+  sectionKey,
+  type Chapter,
+  type ChapterMeta,
+  type Part,
+} from '../lib/content'
 import { movedChapterUrl } from '../lib/legacy'
 import { useChapterProgress, useProgress } from '../lib/progress'
 import { useNotes } from '../lib/notes'
@@ -24,7 +35,7 @@ export function ChapterPage() {
   return <ChapterView key={meta.id} meta={meta} />
 }
 
-function ChapterView({ meta }: { meta: ChapterMeta & { part: { id: string; title: string } } }) {
+function ChapterView({ meta }: { meta: ChapterMeta & { part: Part } }) {
   const [chapter, setChapter] = useState<Chapter | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [activeSection, setActiveSection] = useState<string | null>(null)
@@ -38,7 +49,7 @@ function ChapterView({ meta }: { meta: ChapterMeta & { part: { id: string; title
   const progress = useChapterProgress(meta)
 
   useEffect(() => {
-    document.title = `${meta.title} | System Design Handbook`
+    document.title = `${meta.title} | ${HANDBOOKS[meta.part.handbook].title}`
     loadChapter(meta.id).then(setChapter, (e: Error) => setError(e.message))
   }, [meta])
 
@@ -110,16 +121,19 @@ function ChapterView({ meta }: { meta: ChapterMeta & { part: { id: string; title
     if (activeSection && tracked) visit(meta.id, activeSection)
   }, [activeSection, meta.id, visit, tracked])
 
-  const index = chapters.findIndex((c) => c.id === meta.id)
-  const prev = chapters[index - 1]
-  const next = chapters[index + 1]
+  // Previous and next stay inside the chapter's own handbook.
+  const handbook = HANDBOOKS[meta.part.handbook]
+  const siblings = chaptersOf(meta.part.handbook)
+  const index = siblings.findIndex((c) => c.id === meta.id)
+  const prev = siblings[index - 1]
+  const next = siblings[index + 1]
   const allDone = progress.done === progress.total
 
   return (
     <div className="flex justify-center gap-12 px-4 pt-8 pb-16 sm:px-8 lg:px-12 lg:pt-12">
       <div className="w-full max-w-[70ch] min-w-0">
         <header className="mb-10">
-          <Link to={`/#${meta.part.id}`} className="text-sm text-muted hover:text-ink">
+          <Link to={`${handbook.home}#${meta.part.id}`} className="text-sm text-muted hover:text-ink">
             {meta.part.title}
           </Link>
           <h1 id={meta.id} className="mt-2 text-[2rem] leading-tight font-semibold tracking-tight text-ink sm:text-[2.5rem]">

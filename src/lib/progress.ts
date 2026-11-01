@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { redirects, sectionKey, totalSections, trackedChapters, type ChapterMeta } from './content'
+import { redirects, sectionKey, trackedChaptersOf, type ChapterMeta, type HandbookId } from './content'
 import { DATA_VERSION, migrateProgress } from './legacy'
 
 type LastVisited = { chapterId: string; sectionId: string; at: number }
@@ -73,12 +73,16 @@ export function useChapterProgress(chapter: ChapterMeta) {
   return { done, total: chapter.sections.length, ratio: done / chapter.sections.length }
 }
 
-/** Progress across every chapter that counts. */
-export function useOverallProgress() {
+/** Progress across every chapter of one handbook that counts. */
+export function useOverallProgress(handbook: HandbookId = 'system-design') {
   const completed = useProgress((s) => s.completed)
   let done = 0
-  for (const c of trackedChapters) for (const sec of c.sections) if (completed[sectionKey(c.id, sec.id)]) done++
-  return { done, total: totalSections, ratio: done / totalSections }
+  let total = 0
+  for (const c of trackedChaptersOf(handbook)) {
+    total += c.sections.length
+    for (const sec of c.sections) if (completed[sectionKey(c.id, sec.id)]) done++
+  }
+  return { done, total, ratio: total ? done / total : 0 }
 }
 
 export function useIsSectionDone(chapterId: string, sectionId: string) {

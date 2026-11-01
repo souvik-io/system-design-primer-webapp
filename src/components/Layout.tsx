@@ -3,6 +3,8 @@ import { Link, Outlet, useLocation } from 'react-router'
 import { Menu, Moon, Search, Sun, X } from 'lucide-react'
 import { useTheme } from '../lib/theme'
 import { useOverallProgress } from '../lib/progress'
+import { HANDBOOKS } from '../lib/content'
+import { useHandbook } from '../lib/handbook'
 import { ProgressRing } from './ProgressRing'
 import { Sidebar } from './Sidebar'
 import { SearchDialog } from './SearchDialog'
@@ -12,7 +14,9 @@ export function Layout() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const { isDark, toggle } = useTheme()
-  const overall = useOverallProgress()
+  const handbookId = useHandbook()
+  const handbook = HANDBOOKS[handbookId]
+  const overall = useOverallProgress(handbookId)
   const location = useLocation()
 
   useEffect(() => {
@@ -45,9 +49,9 @@ export function Layout() {
             <Menu size={20} />
           </button>
 
-          <Link to="/" className="flex items-center gap-2.5 font-semibold tracking-tight text-ink">
+          <Link to={handbook.home} className="flex items-center gap-2.5 font-semibold tracking-tight text-ink">
             <img src="/favicon.svg" alt="" className="size-7" />
-            <span className="hidden sm:inline">System Design Handbook</span>
+            <span className="hidden sm:inline">{handbook.title}</span>
           </Link>
 
           <button
@@ -62,7 +66,7 @@ export function Layout() {
           </button>
 
           <Link
-            to="/"
+            to={handbook.home}
             className="hidden items-center gap-2 rounded-lg px-2 py-1 text-sm text-ink-2 hover:bg-rule/50 md:flex"
             title={`${overall.done} of ${overall.total} sections done`}
           >

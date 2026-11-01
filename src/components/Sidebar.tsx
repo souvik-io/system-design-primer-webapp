@@ -1,7 +1,8 @@
 import { Link, NavLink, useParams } from 'react-router'
 import clsx from 'clsx'
-import { Bookmark, Check, Info, Layers } from 'lucide-react'
-import { decks, parts, sectionHref, sectionKey, type ChapterMeta } from '../lib/content'
+import { ArrowRightLeft, Bookmark, Check, Info, Layers } from 'lucide-react'
+import { decks, HANDBOOKS, partsOf, sectionHref, sectionKey, type ChapterMeta } from '../lib/content'
+import { useHandbook } from '../lib/handbook'
 import { useChapterProgress, useProgress } from '../lib/progress'
 import { useDueCount } from '../lib/flashcards'
 import { useNotes, useNotesCount } from '../lib/notes'
@@ -11,11 +12,13 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { chapterId } = useParams()
   const due = useDueCount(decks)
   const notesCount = useNotesCount()
+  const handbook = useHandbook()
+  const other = handbook === 'infra' ? 'system-design' : 'infra'
 
   return (
     <nav aria-label="Chapters" className="px-3 py-5 text-[0.875rem]">
       <NavLink
-        to="/"
+        to={HANDBOOKS[handbook].home}
         end
         onClick={onNavigate}
         className={({ isActive }) =>
@@ -60,7 +63,16 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         {notesCount > 0 && <span className="ml-auto text-[0.75rem] text-muted tabular-nums">{notesCount}</span>}
       </NavLink>
 
-      {parts.map((part) => (
+      <Link
+        to={HANDBOOKS[other].home}
+        onClick={onNavigate}
+        className="-mt-3 mb-5 flex items-center gap-2 rounded-md px-3 py-1.5 text-ink-2 hover:bg-rule/50 hover:text-ink"
+      >
+        <ArrowRightLeft size={15} />
+        {HANDBOOKS[other].title}
+      </Link>
+
+      {partsOf(handbook).map((part) => (
         <div key={part.id} className="mb-5">
           <h2 className="px-3 pb-1.5 text-[0.8rem] font-semibold text-muted">{part.title}</h2>
           <ul>

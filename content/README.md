@@ -5,6 +5,7 @@ Every chapter and flashcard deck on the site lives in this folder as markdown. T
 - `<chapter-id>.md`: one chapter each. The curriculum order lives in the `PARTS` array in `scripts/build-content.mjs`; a chapter that isn't listed there isn't published.
 - `flashcards/<deck-id>.md`: one deck each, listed in `DECKS` in the same script.
 - `redirects.json`: chapters, headings and decks that were renamed or replaced, and where they went. Old links, notes and bookmarks follow it (see below).
+- `infra/`: the chapters of the second course on the site, the AI Infrastructure Engineer Handbook at `/infra`, and `infra/SYLLABUS.md`, its plan. Parts in `PARTS` with `handbook: 'infra'` and `dir: 'infra'` read their chapters from here, and get their own home page, sidebar, progress and previous/next order. Chapter ids share the `/learn/<id>` namespace, so they must not clash with the system design chapters. The labs' Python files live in `public/labs/infra/` and are linked from chapters as `/labs/infra/<file>`; `verify-content` checks that each linked file exists. A deck with `handbook: 'infra'` in `DECKS` is listed under that course on the flashcards page.
 - `COVERAGE.md`: every topic in The System Design Primer, which this handbook's syllabus started from, and the section that now covers it. `npm run coverage` checks that each target still exists, so a rename can't quietly drop a topic.
 
 ## Writing a chapter
@@ -80,7 +81,7 @@ hash-ring
 ```
 ````
 
-The diagrams are React components in `src/widgets/` (`hash-ring`, `cache-strategies`, `replication`, `rate-limiter`, `kv-cache-calculator`, `batching-simulator`). A new one needs a component there, an entry in `src/widgets/Widgets.tsx`, and its name added to `WIDGET_NAMES` in `scripts/build-content.mjs`.
+The diagrams are React components in `src/widgets/` (`hash-ring`, `cache-strategies`, `replication`, `rate-limiter`, `kv-cache-calculator`, `batching-simulator`, `roofline-explorer`, `layer-explorer`, `attention-variants`, `rope-rotation`, `expert-router`, `warp-access`, `occupancy`, `matmul-tiling`, `warp-reduce`, `online-softmax`, `decode-timeline`, `launch-overhead`, `graph-padding`, `caching-allocator`, `gil-threads`). A new one needs a component there, an entry in `src/widgets/Widgets.tsx`, and its name added to `WIDGET_NAMES` in `scripts/build-content.mjs`.
 
 ## Flashcard decks
 

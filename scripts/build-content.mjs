@@ -164,7 +164,48 @@ const PARTS = [
     untracked: true,
     chapters: ['about'],
   },
+
+  // The AI Infrastructure Engineer Handbook, a second course on the same site at /infra. Its chapters live in
+  // content/infra/ (dir) and its progress, home page and sidebar are separate from the system design course
+  // (handbook). content/infra/SYLLABUS.md is the plan for the rest of it.
+  {
+    id: 'infra-orientation',
+    handbook: 'infra',
+    dir: 'infra',
+    title: 'Orientation',
+    description: 'What an inference engineer does, how the job is hired for, and the models and machines the labs use.',
+    chapters: ['inference-engineer-role', 'models-and-machines'],
+  },
+  {
+    id: 'infra-workload',
+    handbook: 'infra',
+    dir: 'infra',
+    title: 'The model as a workload',
+    description:
+      'Where the FLOPs and bytes of a transformer go, the arithmetic that predicts speed, latency and cost, and what mixture-of-experts models change.',
+    chapters: ['transformer-as-workload', 'inference-arithmetic', 'mixture-of-experts'],
+  },
+  {
+    id: 'infra-kernels',
+    handbook: 'infra',
+    dir: 'infra',
+    title: 'GPUs and kernels',
+    description: 'How a GPU runs threads and moves memory, how to write kernels in Triton and read them in CUDA, FlashAttention, and profiling.',
+    chapters: ['gpu-execution', 'triton-kernels', 'cuda-basics', 'flash-attention', 'profiling'],
+  },
+  {
+    id: 'infra-runtime',
+    handbook: 'infra',
+    dir: 'infra',
+    title: 'The runtime layer',
+    description:
+      'What eager PyTorch costs, CUDA graphs, torch.compile and the caching allocator; C++ bindings and the GIL; and ahead-of-time compilers and runtimes.',
+    chapters: ['pytorch-execution', 'native-code', 'graph-runtimes'],
+  },
 ]
+
+/** Folders under content/ that hold a handbook's chapters, besides content/ itself. */
+const CHAPTER_DIRS = [...new Set(PARTS.map((p) => p.dir).filter(Boolean))]
 
 // content/flashcards/<id>.md
 const DECKS = [
@@ -218,6 +259,25 @@ const DECKS = [
     title: 'AI design questions',
     description: 'The key choices and numbers inside the eight AI designs, plus a four-step walkthrough of each.',
   },
+  // Decks for the AI Infrastructure Engineer Handbook, one per part; the flashcards page lists them under it.
+  {
+    id: 'infra-workload',
+    handbook: 'infra',
+    title: 'Orientation and the model as a workload',
+    description: 'The inference role, model and hardware numbers, FLOPs and bytes per layer, attention variants, RoPE, the roofline, and MoE.',
+  },
+  {
+    id: 'infra-kernels',
+    handbook: 'infra',
+    title: 'GPUs and kernels',
+    description: 'Warps, occupancy, coalescing and banks, tensor-core peaks, Triton and CUDA kernels, FlashAttention, and profiling.',
+  },
+  {
+    id: 'infra-runtime',
+    handbook: 'infra',
+    title: 'The runtime layer',
+    description: 'Launch overhead, CUDA graphs, torch.compile and the caching allocator; bindings, zero copy and the GIL; and export, ONNX and TensorRT.',
+  },
 ]
 
 // Sections too small to track on their own; they're folded into the preceding section.
@@ -225,7 +285,29 @@ const FOLD_INTO_PREVIOUS = /^(source\(s\)|disadvantage\(s\)|further reading)/i
 
 // Interactive diagrams (src/widgets/Widgets.tsx), placed with a ```widget block. The build leaves an
 // empty placeholder where each one goes and the app renders into it.
-const WIDGET_NAMES = new Set(['hash-ring', 'cache-strategies', 'replication', 'rate-limiter', 'kv-cache-calculator', 'batching-simulator'])
+const WIDGET_NAMES = new Set([
+  'hash-ring',
+  'cache-strategies',
+  'replication',
+  'rate-limiter',
+  'kv-cache-calculator',
+  'batching-simulator',
+  'roofline-explorer',
+  'layer-explorer',
+  'attention-variants',
+  'rope-rotation',
+  'expert-router',
+  'warp-access',
+  'occupancy',
+  'matmul-tiling',
+  'warp-reduce',
+  'online-softmax',
+  'decode-timeline',
+  'launch-overhead',
+  'graph-padding',
+  'caching-allocator',
+  'gil-threads',
+])
 
 function widgetNode(name, where) {
   if (!WIDGET_NAMES.has(name)) throw new Error(`${where}: no interactive diagram called "${name}". Known: ${[...WIDGET_NAMES].join(', ')}.`)
@@ -342,8 +424,8 @@ async function renderSection(section, ctx) {
 // Sources
 
 /** A chapter: "##" headings become sections, shifted down a level so they render as <h3>. */
-function readChapter(id) {
-  const file = `content/${id}.md`
+function readChapter(id, dir) {
+  const file = dir ? `content/${dir}/${id}.md` : `content/${id}.md`
   if (!fs.existsSync(path.join(ROOT, file))) throw new Error(`${file} doesn't exist, but PARTS lists it.`)
   const tree = parser.parse(fs.readFileSync(path.join(ROOT, file), 'utf8'))
   slugHeadings(tree)
@@ -413,10 +495,12 @@ fs.mkdirSync(path.join(OUT_CONTENT, 'flashcards'), { recursive: true })
 fs.mkdirSync(path.dirname(OUT_MANIFEST), { recursive: true })
 
 const listed = PARTS.flatMap((p) => p.chapters)
-for (const f of fs.readdirSync(CONTENT)) {
-  const id = f.replace(/\.md$/, '')
-  if (f.endsWith('.md') && !['README', 'COVERAGE'].includes(id) && !listed.includes(id)) {
-    console.warn(`  content/${f} isn't in PARTS, so it isn't published.`)
+for (const dir of ['', ...CHAPTER_DIRS]) {
+  for (const f of fs.readdirSync(path.join(CONTENT, dir))) {
+    const id = f.replace(/\.md$/, '')
+    if (f.endsWith('.md') && !['README', 'COVERAGE', 'SYLLABUS'].includes(id) && !listed.includes(id)) {
+      console.warn(`  content/${dir ? dir + '/' : ''}${f} isn't in PARTS, so it isn't published.`)
+    }
   }
 }
 
@@ -433,7 +517,7 @@ const sectionsOf = new Map() // chapter id -> rendered sections
 for (const part of PARTS) {
   const chapters = []
   for (const id of part.chapters) {
-    const src = readChapter(id)
+    const src = readChapter(id, part.dir)
     const sections = []
     for (const s of splitSections(src.nodes, 3)) sections.push(await renderSection(s, src.ctx))
     sectionsOf.set(id, sections)
@@ -454,6 +538,7 @@ for (const part of PARTS) {
   }
   manifest.parts.push({
     id: part.id,
+    handbook: part.handbook ?? 'system-design',
     title: part.title,
     description: part.description,
     ...(part.untracked ? { untracked: true } : {}),
@@ -464,7 +549,7 @@ for (const part of PARTS) {
 for (const deck of DECKS) {
   const cards = await deckCards(deck.id, `content/flashcards/${deck.id}.md`)
   fs.writeFileSync(path.join(OUT_CONTENT, 'flashcards', `${deck.id}.json`), JSON.stringify({ id: deck.id, title: deck.title, cards }))
-  manifest.decks.push({ ...deck, cardIds: cards.map((c) => c.id) })
+  manifest.decks.push({ ...deck, handbook: deck.handbook ?? 'system-design', cardIds: cards.map((c) => c.id) })
 }
 
 // Old URLs, for the app to send readers on. "sections" maps an old section ("chapter/section", the key

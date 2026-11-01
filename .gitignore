@@ -8,3 +8,5 @@ src/generated
 .env
 .env.local
 .env.*.local
+public/labs/infra/gpu/modal_costs.jsonl
+public/labs/**/__pycache__/
