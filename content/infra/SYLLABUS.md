@@ -119,8 +119,8 @@ Start applying around week 26 to 28; interview prep (Part 10) runs alongside the
 | 0.1 | `inference-engineer-role.md` | Drafted 2026-10-31 |
 | 0.2 | `models-and-machines.md` | Drafted 2026-10-31. Running example is now three models: Llama 3.2 1B for [Mac] labs (an 8 GB M2 cannot hold 8B), Llama 3.1 8B, Qwen3-30B-A3B |
 | 1.1 | `transformer-as-workload.md` | Drafted 2026-10-31 |
-| 1.2 | `inference-arithmetic.md` | Drafted 2026-10-31. Lab part B (vLLM on a rented GPU) has no measured reference output yet |
-| 1.3 | `mixture-of-experts.md` | Drafted 2026-10-31. Labs A and B measured on the M2 (Granite 3.1 1B-A400M as the real router); part C (vLLM on an H100) not yet run |
+| 1.2 | `inference-arithmetic.md` | Drafted 2026-10-31. Lab part B (vLLM on an H100) run 2026-11-01: MBU 69% at batch 1 to 76% at batch 64, and 2.3 times slower with `enforce_eager` |
+| 1.3 | `mixture-of-experts.md` | Drafted 2026-10-31. Labs A and B measured on the M2 (Granite 3.1 1B-A400M as the real router); part C (vLLM on an H100) run 2026-11-01 |
 | 2.1 | `gpu-execution.md` | Drafted 2026-11-01. Measured on Modal H100 and A10; the M2 part uses `access_patterns.py` |
 | 2.2 | `triton-kernels.md` | Drafted 2026-11-01. Four Triton kernels measured on H100 and A10; grouped tile order +3% on H100, +25% on A10 |
 | 2.3 | `cuda-basics.md` | Drafted 2026-11-01. CUDA RMSNorm on H100; compute-sanitizer demo on A10 (both need `--toolkit`) |
@@ -134,9 +134,9 @@ Part 2 runs its GPU labs on Modal through `public/labs/infra/gpu/modal_run.py`, 
 
 Part 3 runs its one GPU lab on a Modal H100 with `--cpu 4`, a new `modal_run.py` option: a Modal container is guaranteed only 0.125 CPU cores by default, which made launch-bound timings vary by host. Part 3's GPU runs, including diagnostics, cost about $0.55 of GPU time. Deck `infra-runtime` covers Part 3 (42 cards). Part 3 widgets: `launch-overhead`, `graph-padding`, `caching-allocator`, `gil-threads`.
 
-Part 0 and Part 1 are complete and published at `/infra`, and Parts 2 and 3 are drafted (four parts in `PARTS` with `handbook: 'infra'`). The deck `infra-workload` covers Parts 0 and 1 (32 cards). Widgets built so far: `roofline-explorer` (1.2 and 1.3, includes Qwen3-30B-A3B), `layer-explorer`, `attention-variants` and `rope-rotation` (1.1), and `expert-router` (1.3).
+Part 0 and Part 1 are complete and published at `/infra`, and Parts 2 and 3 are drafted (four parts in `PARTS` with `handbook: 'infra'`). The deck `infra-workload` covers Parts 0 and 1 (34 cards). Widgets built so far: `roofline-explorer` (1.2 and 1.3, includes Qwen3-30B-A3B), `layer-explorer`, `attention-variants` and `rope-rotation` (1.1), and `expert-router` (1.3).
 
-Every lab script is a downloadable file in `public/labs/infra/` (served at `/labs/infra/`), with a README and `requirements.txt`. Scripts that need an NVIDIA GPU live in `public/labs/infra/gpu/`, and that folder's README lists what to run and what results to send back. Still waiting on a GPU session: `gpu/decode_sweep.py` (1.2 part B) and `gpu/moe_decode_sweep.py` (1.3 part C).
+Every lab script is a downloadable file in `public/labs/infra/` (served at `/labs/infra/`), with a README and `requirements.txt`. Scripts that need an NVIDIA GPU live in `public/labs/infra/gpu/`, and that folder's README lists what to run and what results to send back. The vLLM labs, `gpu/decode_sweep.py` (1.2 part B) and `gpu/moe_decode_sweep.py` (1.3 part C), ran on an H100 on 2026-11-01 for about $1.30 of GPU time.
 
 ## Part 0: Orientation
 

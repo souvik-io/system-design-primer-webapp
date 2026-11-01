@@ -248,7 +248,7 @@ Two ratios say how close a real system comes to the model:
 - **Model FLOPs utilization (MFU)**, defined in the PaLM paper, is achieved FLOP/s ÷ peak FLOP/s, counting only the FLOPs the model needs. Use it for compute-bound work such as prefill and training.
 - **Model bandwidth utilization (MBU)**, defined in Databricks' inference performance guide, is achieved bytes/s ÷ peak bandwidth, where achieved bytes/s = (weight bytes + KV cache bytes read per step) ÷ step time. Use it for decode.
 
-An example with made-up numbers: if an engine serves Llama 3.1 8B at batch 1 on an H100 at 150 tokens a second, each 6.7 ms step reads about 15.0 GB plus a little cache, so MBU = 15.0 GB × 150 ÷ 3.35 TB/s ≈ 67%. The model's 219 tokens a second is MBU 100%. Measured MBU tells you how much there is left to gain, and the lab measures a real one.
+For example, the lab below measured vLLM serving Llama 3.1 8B at batch 1 on an H100 at 152 tokens a second. Each 6.56 ms step reads about 15.0 GB of weights plus 0.3 GB of cache, so MBU = 15.3 GB ÷ 6.56 ms ÷ 3.35 TB/s ≈ 69%. The model's 219 tokens a second would be MBU 100%. Measured MBU tells you how much there is left to gain.
 
 ## Why real numbers fall short
 
@@ -281,43 +281,42 @@ Part B is done when the table and a paragraph of explanation are in `notes/` and
 
 Part A has no single right answer; your laptop's numbers are the answer. Check that the flat region at small batches matches your copy bandwidth, and that the large-batch region matches your square-matmul peak.
 
-For part B, this script drives vLLM's latency benchmark. It needs `pip install vllm` on the GPU machine and access to the model (accept Meta's licence on Hugging Face, or use a mirror such as `unsloth/Meta-Llama-3.1-8B-Instruct`). Command flags change between vLLM releases, so check `vllm bench latency --help` on yours. The script is in the GPU folder as [gpu/decode_sweep.py](/labs/infra/gpu/decode_sweep.py), and that folder's [README](/labs/infra/gpu/README.md) lists what to record.
+For part B, the script [gpu/decode_sweep.py](/labs/infra/gpu/decode_sweep.py) loads the model in vLLM once and times the two runs per batch with vLLM's own `generate`, using the same settings as `vllm bench latency`: random prompt tokens, `ignore_eos` so that every run generates exactly the requested number of tokens, and the median of 10 timed runs. It uses `unsloth/Meta-Llama-3.1-8B-Instruct`, an ungated copy of Meta's weights, and then repeats batches 1 and 8 with `enforce_eager=True`. The heart of it is the subtraction:
 
 ```python
-# decode_sweep.py: decode step time per batch size, from two vLLM latency runs per batch.
-import json
-import subprocess
-import tempfile
+def run_seconds(prompts, output_len, warmup=3, iters=10):
+    params = SamplingParams(temperature=1.0, top_p=1.0, ignore_eos=True, max_tokens=output_len)
+    ...                                            # warm up, then return the median of `iters` timed runs
 
-MODEL = "unsloth/Meta-Llama-3.1-8B-Instruct"
-PROMPT, STEPS = 2000, 256
-WEIGHT_BYTES, KV_PER_TOKEN, BANDWIDTH = 15.0e9, 131_072, 3.35e12   # H100 SXM; use 300e9 on an L4
-
-
-def avg_latency(batch: int, output_len: int) -> float:
-    with tempfile.NamedTemporaryFile(suffix=".json") as f:
-        subprocess.run(["vllm", "bench", "latency", "--model", MODEL, "--batch-size", str(batch),
-                        "--input-len", str(PROMPT), "--output-len", str(output_len),
-                        "--num-iters-warmup", "3", "--num-iters", "10",
-                        "--max-model-len", "4096", "--output-json", f.name], check=True)
-        return json.load(open(f.name))["avg_latency"]
-
-
-for batch in (1, 8, 32, 64):
-    step = (avg_latency(batch, STEPS + 1) - avg_latency(batch, 1)) / STEPS
-    context = PROMPT + STEPS / 2                   # average context during the 256 steps
-    bytes_per_step = WEIGHT_BYTES + batch * context * KV_PER_TOKEN
-    mbu = bytes_per_step / step / BANDWIDTH
-    print(f"batch {batch:3d}: step {step * 1e3:6.2f} ms, {1 / step:5.0f} tok/s per user, "
-          f"{batch / step:6.0f} total, MBU {mbu:4.0%}")
+step = (run_seconds(prompts, STEPS + 1) - run_seconds(prompts, 1)) / STEPS   # STEPS = 256
+context = PROMPT + STEPS / 2                       # average context during the 256 steps
+bytes_per_step = WEIGHT_BYTES + batch * context * KV_PER_TOKEN
+mbu = bytes_per_step / step / BANDWIDTH
 ```
 
-This chapter's author has not run part B on an H100, so there is no reference output to copy; your numbers are the result. What to expect, and how to explain it:
+On Modal it runs with `modal run modal_run.py --script decode_sweep.py --gpu H100 --vllm`. Its output on an H100:
 
-- **Measured steps are slower than the model at every batch.** MBU somewhere between half and most of the bandwidth is typical for a well-tuned engine at moderate batch sizes. An MBU above 100% means the byte count is wrong, for example a KV cache in FP8 when you assumed BF16.
-- **At batch 1 the gap is mostly overhead.** The weights are read in a few milliseconds, so fixed costs per step (sampling, scheduling, kernel launches not covered by CUDA graphs) are a large share. Running once with `--enforce-eager`, which turns off CUDA graphs, shows how much of the step they save.
-- **At batch 64 the gap is mostly attention efficiency.** The KV cache reads are over half the bytes, and paged attention kernels reading scattered blocks rarely reach full bandwidth.
-- **The shape should match the model.** Total throughput should rise steeply from batch 1 to 8 and then more slowly, and per-user speed should fall once the cache dominates. If the shape differs, look for a configuration limit: `max_num_seqs` or `max_num_batched_tokens` capping the real batch, or `gpu_memory_utilization` leaving too little cache.
+```text
+NVIDIA H100 80GB HBM3, vLLM 0.32.0, PyTorch 2.13.0+cu130
+unsloth/Meta-Llama-3.1-8B-Instruct, BF16, 2000-token prompts, 256 decode steps timed (median of 10 runs)
+Model loaded and ready in 195 s with CUDA graphs and torch.compile, 18 s with enforce_eager
+
+                 batch      step     model   MBU  tok/s per user  tok/s total
+default              1   6.56 ms   4.56 ms   69%             152          152
+default              8   7.27 ms   5.14 ms   71%             138         1101
+default             32   9.67 ms   7.14 ms   74%             103         3310
+default             64  12.87 ms   9.81 ms   76%              78         4971
+enforce_eager        1  14.90 ms   4.56 ms   31%              67           67
+enforce_eager        8  14.69 ms   5.14 ms   35%              68          545
+```
+
+The 195 seconds of the first load include downloading the 16 GB of weights, compiling the model with `torch.compile` and capturing its CUDA graphs; the second load found the weights already on disk and compiled nothing. How to read the table:
+
+- **The measured steps are slower than the model at every batch, but the shape matches.** MBU runs from 69% at batch 1 to 76% at batch 64. Chapter 2.1's probe measured 3.0 TB/s, 90% of the spec, as the realistic ceiling for reading this GPU's memory, so vLLM reaches roughly 77 to 85% of what the memory can deliver. Total throughput rises 7.2 times from batch 1 to 8 and 4.5 times more from 8 to 64, while each user's speed falls from 152 to 78 tokens a second as the cache grows to more than half of the bytes read.
+- **At batch 1, the gap is a fixed cost per step.** The step took 2.0 ms longer than the model. Reading 15 GB at the probe's 3.0 TB/s would take 5.0 ms, so roughly 1.5 ms of each 6.56 ms step goes to work the model leaves out: sampling, scheduling, the small kernels between the matmuls, and matmuls with one row that read the weights below copy speed.
+- **At batch 64, the cache is read efficiently.** From batch 1 to 64, the step grew by 6.31 ms while the bytes read grew by about 17.6 GB of KV cache, an effective 2.8 TB/s, close to the copy ceiling. The gap at batch 64, 3.1 ms, is mostly the same fixed cost as at batch 1, plus the extra rows in every matmul. The lab's contexts were long and all the same length, which suits vLLM's attention kernels; mixed or very short contexts may be read less efficiently.
+- **CUDA graphs and compilation more than double the speed at small batch.** With `enforce_eager=True`, which in vLLM 0.32 turns off both, batch 1 took 14.90 ms instead of 6.56 ms, and batch 8 took no longer than batch 1, the signature of a step limited by launching kernels from the CPU rather than by the GPU's work. This is the effect that [chapter 3.1](/learn/pytorch-execution) measures kernel by kernel.
+- **If your shape differs, look for a configuration limit.** `max_num_seqs` or `max_num_batched_tokens` can cap the real batch, and `gpu_memory_utilization` can leave too little room for the cache. An MBU above 100% means the byte count is wrong, for example a KV cache in FP8 when you assumed BF16.
 
 </details>
 

@@ -5,6 +5,7 @@
 #   modal run modal_run.py --script gpu_probe.py --gpu H100
 #   modal run modal_run.py --script cuda_rmsnorm.py --gpu H100 --toolkit   # needs nvcc to compile CUDA
 #   modal run modal_run.py --script decode_runtime.py --gpu H100 --cpu 4   # reserve 4 CPU cores
+#   modal run modal_run.py --script decode_sweep.py --gpu H100 --vllm      # the image with vLLM installed
 #
 # A container is guaranteed only 0.125 CPU cores by default and borrows more when the host has spare capacity
 # (https://modal.com/docs/guide/resources). Anything limited by kernel launches, such as a batch-1 decode step,
@@ -42,6 +43,16 @@ toolkit = (
     .pip_install("torch==2.15.0", "numpy", "ninja")
     .add_local_dir(HERE, "/labs", ignore=IGNORE)
 )
+# The vLLM image, for the serving labs. vLLM pins its own PyTorch version (2.13.0, built with CUDA 13.0, for vLLM
+# 0.32.0), so it gets an image of its own. It starts from NVIDIA's CUDA 13.0 development image because FlashInfer,
+# whose sampler vLLM uses by default, compiles some of its kernels with nvcc the first time they run. The function
+# reserves 4 CPU cores and 32 GiB of memory, because vLLM's scheduler runs on the CPU and loading a model's weights
+# goes through host memory.
+vllm_image = (
+    modal.Image.from_registry("nvidia/cuda:13.0.3-devel-ubuntu24.04", add_python="3.12")
+    .pip_install("vllm==0.32.0")
+    .add_local_dir(HERE, "/labs", ignore=IGNORE)
+)
 app = modal.App("inference-handbook-labs")
 
 
@@ -63,9 +74,15 @@ def run_with_toolkit(script: str, args: list[str]) -> float:
     return _run(script, args)
 
 
+@app.function(image=vllm_image, gpu="H100", cpu=4.0, memory=32 * 1024, timeout=60 * 60)
+def run_with_vllm(script: str, args: list[str]) -> float:
+    return _run(script, args)
+
+
 @app.local_entrypoint()
-def main(script: str, gpu: str = "A10", args: str = "", toolkit: bool = False, cpu: float = 0.0) -> None:
-    fn = run_with_toolkit if toolkit else run
+def main(script: str, gpu: str = "A10", args: str = "", toolkit: bool = False, vllm: bool = False,
+         cpu: float = 0.0) -> None:
+    fn = run_with_vllm if vllm else run_with_toolkit if toolkit else run
     options = {"gpu": gpu, **({"cpu": cpu} if cpu else {})}
     seconds = fn.with_options(**options).remote(script, args.split())
     price = PRICE.get(gpu.split(":")[0].rstrip("!"))

@@ -123,6 +123,11 @@ A prefill reads the weights once for thousands of prompt tokens and is compute-b
 
 Achievable bandwidth is below the spec sheet, and the M2 copy reached 84% of it. **Overhead between kernels**, such as launches and the Python scheduler, can rival GPU time at batch 1. Kernels are less efficient on **awkward shapes** such as matmuls with 1 to 16 rows. The model **leaves out work** such as sampling, the large LM head output and streaming, and real batches mix prefill and decode.
 
+## What did vLLM measure for Llama 3.1 8B decode on an H100, and what did CUDA graphs contribute?
+<!-- /learn/inference-arithmetic#lab-measure-a-serving-engine-against-the-model -->
+
+With 2,000-token prompts, a decode step took **6.56 ms at batch 1** and **12.87 ms at batch 64**, an **MBU of 69% rising to 76%**, against a practical ceiling of about 90% of the spec bandwidth. With `enforce_eager=True`, which turns off CUDA graphs and `torch.compile`, batch 1 took **14.90 ms**, and batch 8 took no longer than batch 1, because launching kernels from the CPU set the pace.
+
 <!-- chapter: mixture-of-experts -->
 
 ## Walk through what one MoE layer does for one token.
@@ -169,3 +174,8 @@ The Switch Transformer caps each expert at (tokens ÷ experts) × capacity facto
 <!-- /learn/mixture-of-experts#how-engines-run-an-moe-layer -->
 
 They sort the (token, expert) pairs by expert so that each expert's tokens are contiguous, run all the experts' matmuls in one **grouped matmul** kernel, then restore token order and add each token's k results. In vLLM, `moe_align_block_size` does the sorting and padding, and the Triton kernel `fused_moe_kernel` runs the grouped matmul. Across GPUs, all-to-all dispatch and combine steps surround the kernel.
+
+## On one H100, where did Qwen3-30B-A3B stop being faster than Llama 3.1 8B at decode, and why earlier than predicted?
+<!-- /learn/mixture-of-experts#lab-an-moe-layer-and-a-real-router -->
+
+The MoE model was faster at **batch 1 and 2** but already **21% slower at batch 4**, where the model had predicted a tie. Its **fixed cost per step is larger**: 48 layers, each with routing, sorting by expert and small expert matmuls, so at batch 1 it took **2.48 times** its prediction against 1.39 times for the dense model.

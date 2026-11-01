@@ -150,7 +150,7 @@ When experts are spread over GPUs, two communication steps surround that kernel.
 
 ## Lab: an MoE layer and a real router
 
-**Tier: [Mac] for parts A and B, [1 GPU] for part C.** Parts A and B run on an 8 GB M2 MacBook in about a minute each. Part C needs a rented 80 GB GPU and is optional for now.
+**Tier: [Mac] for parts A and B, [1 GPU] for part C.** Parts A and B run on an 8 GB M2 MacBook in about a minute each. Part C needs a rented 80 GB GPU, which costs well under a dollar on Modal.
 
 The scripts are ready to download, and they also sit in the site's repository at `public/labs/infra/`:
 
@@ -165,7 +165,7 @@ Try parts A and B yourself before you open the scripts or the reference solution
 
 **Part B, a real router.** Run Granite 3.1 1B-A400M over a few thousand tokens of prose and of code with `output_router_logits=True`, and record the top-8 experts that every token chose in every layer. From those choices, report four results: the busiest expert's load against the even share per layer, how differently prose and code are routed, the number of experts a decode batch of B tokens touches compared with the even formula, and how many tokens a capacity factor of 1.0 to 2.0 would drop.
 
-**Part C, measured against predicted (GPU, later).** Serve Qwen3-30B-A3B and Llama 3.1 8B with vLLM on one H100, measure the decode step time at batch 1 to 16, and put the results next to `moe_arithmetic.py`'s predictions. The GPU folder's [README](/labs/infra/gpu/README.md) lists what to record and send back.
+**Part C, measured against predicted (GPU).** Serve Qwen3-30B-A3B and Llama 3.1 8B with vLLM on one H100, measure the decode step time at batch 1 to 16, and put the results next to `moe_arithmetic.py`'s predictions. The GPU folder's [README](/labs/infra/gpu/README.md) lists what to record and send back.
 
 The lab is done when parts A and B run, when you can explain each number they print, and when your notes say at which batch size Qwen3-30B-A3B stops being faster than the 8B model on one H100, and why.
 
@@ -255,7 +255,39 @@ Four things in the output are worth noticing:
 - The measured count of experts touched stays below the even formula at every batch size, which is good for the bytes a step reads. The busiest expert's share is the cost that comes with it.
 - Dropping tokens at a capacity factor of 1.25 would remove almost a quarter of the expert computations in this model, which is why serving engines run every routed token.
 
-**Part C.** The chapter's author has not yet run this part, so there is no reference output to compare against. The model predicts that Qwen3-30B-A3B is faster than the 8B model at batch 1 and 2, about even at batch 4, and slower from batch 8 on. Expect the measured MoE steps to be further from the prediction than the dense ones, for two reasons: each expert's matmul is small and runs below the bandwidth that a large matmul reaches, and the routing and sorting steps add fixed time to every layer.
+**Part C.** The script [gpu/moe_decode_sweep.py](/labs/infra/gpu/moe_decode_sweep.py) loads each model in vLLM once and isolates decode the same way as chapter 1.2's lab: for each batch it subtracts a run that generates 1 token from a run that generates 129, and divides by the 128 decode steps. It also prints a few of vLLM's own start-up lines. Run on Modal with `modal run modal_run.py --script moe_decode_sweep.py --gpu H100 --vllm`, its output was:
+
+```text
+[Qwen3-30B-A3B] Loading weights took 12.61 seconds
+[Qwen3-30B-A3B] [backbone] torch.compile took 33.95 s in total
+[Qwen3-30B-A3B] Available KV cache memory: 12.18 GiB
+[Qwen3-30B-A3B] GPU KV cache size: 133,072 tokens, Maximum concurrency for 2,048 tokens per request: 64.98x
+[Meta-Llama-3.1-8B-Instruct] Loading weights took 2.09 seconds
+[Meta-Llama-3.1-8B-Instruct] [backbone] torch.compile took 13.26 s in total
+[Meta-Llama-3.1-8B-Instruct] Available KV cache memory: 54.44 GiB
+[Meta-Llama-3.1-8B-Instruct] GPU KV cache size: 445,968 tokens, Maximum concurrency for 2,048 tokens per request: 217.76x
+NVIDIA H100 80GB HBM3, vLLM 0.32.0, PyTorch 2.13.0+cu130; prediction at 3.35 TB/s
+BF16, 1000-token prompts, 128 decode steps timed (median of 8 runs)
+
+model                                batch   measured  predicted  ratio   tok/s
+Qwen/Qwen3-30B-A3B                       1    4.58 ms    1.85 ms   2.48     218
+Qwen/Qwen3-30B-A3B                       2    5.51 ms    2.89 ms   1.90     363
+Qwen/Qwen3-30B-A3B                       4    7.81 ms    4.80 ms   1.63     512
+Qwen/Qwen3-30B-A3B                       8    9.36 ms    7.96 ms   1.18     855
+Qwen/Qwen3-30B-A3B                      16   12.24 ms   12.38 ms   0.99    1308
+unsloth/Meta-Llama-3.1-8B-Instruct       1    6.30 ms    4.52 ms   1.39     159
+unsloth/Meta-Llama-3.1-8B-Instruct       2    6.32 ms    4.56 ms   1.39     317
+unsloth/Meta-Llama-3.1-8B-Instruct       4    6.47 ms    4.64 ms   1.39     618
+unsloth/Meta-Llama-3.1-8B-Instruct       8    6.66 ms    4.81 ms   1.38    1201
+unsloth/Meta-Llama-3.1-8B-Instruct      16    7.00 ms    5.14 ms   1.36    2286
+```
+
+The predictions differ slightly from the table earlier in this chapter because these runs use 1,000-token prompts and 128 steps, so the average context is 1,064 tokens instead of 2,000. Four things stand out:
+
+- **The crossover came earlier than predicted.** The model said the MoE model would be faster at batch 1 and 2 and about even at batch 4. It was faster at batch 1, 4.58 ms against 6.30 ms, and at batch 2, but already 21% slower at batch 4, 7.81 ms against 6.47 ms, and 75% slower at batch 16.
+- **The MoE model's fixed cost is large.** At batch 1 it took 2.48 times its prediction, against 1.39 times for the dense model. A step of Qwen3-30B-A3B runs 48 layers instead of 32, and each layer adds routing, sorting the tokens by expert and a grouped matmul over small expert matrices, so it has more small kernels and more matmuls too small to reach full bandwidth. Those costs barely depend on the batch, so the ratio falls as the batch grows and the bytes read dominate.
+- **At batch 16 the measured step matched the prediction, which means the prediction counted too many bytes.** A ratio of 0.99 would be 100% of the spec bandwidth, which no real step reaches; chapter 2.1 measured 3.0 TB/s, 90% of the spec, as the practical ceiling. The prediction assumes even routing, under which 16 tokens touch about 82 experts per layer. Part B showed Granite's trained router touching fewer experts than the even formula at every batch size; if Qwen3's router does the same with this lab's random prompt tokens, the real step reads fewer bytes than predicted. The dense model, whose bytes are known exactly, stayed at 1.36 to 1.39 times its prediction throughout.
+- **Memory limits the MoE model's batch.** After its 61 GB of weights, Qwen3-30B-A3B left 12.18 GiB for the KV cache, enough for 65 requests of 2,048 tokens, against 218 for the 8B model. On one GPU, the dense model can serve a batch more than three times larger, which is the regime where it is also faster per step. MoE models pay off when the batch is spread over several GPUs that together hold the experts, the subject of Part 6.
 
 </details>
 
