@@ -38,7 +38,7 @@ const ANSWERS = [
     id: 'cpu',
     label: 'The CPU cannot launch kernels fast enough',
     right: true,
-    why: 'Right. Hundreds of kernels that each run for one or two microseconds, separated in this profiled trace by gaps of about ten microseconds, mean that the GPU finishes each kernel and then waits for the CPU to launch the next one. CUDA graphs and torch.compile, in Part 3, remove most of this overhead.',
+    why: 'Right. Hundreds of kernels that each run for one or two microseconds, separated in this profiled trace by gaps of about twenty microseconds, mean that the GPU finishes each kernel and then waits for the CPU to launch the next one. CUDA graphs and torch.compile, in Part 3, remove most of this overhead.',
   },
 ]
 

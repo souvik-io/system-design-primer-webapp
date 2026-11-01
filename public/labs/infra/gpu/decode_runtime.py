@@ -36,12 +36,14 @@ def timed(fn, iters):
 
 
 def gpu_profile(fn):
-    """Kernels launched and the GPU's busy time (ms) for one call of fn, from the PyTorch profiler."""
+    """Kernels launched and the GPU's busy time (ms) for one call of fn, from the PyTorch profiler. Memory copies and
+    memsets also run on the GPU, but they are not kernels, so they are left out."""
     from torch.profiler import ProfilerActivity, profile
     with profile(activities=[ProfilerActivity.CUDA]) as prof:
         fn()
         torch.cuda.synchronize()
-    kernels = [e for e in prof.events() if e.device_type == torch.autograd.DeviceType.CUDA and e.device_time > 0]
+    kernels = [e for e in prof.events() if e.device_type == torch.autograd.DeviceType.CUDA and e.device_time > 0
+               and not e.name.startswith(("Memcpy", "Memset"))]
     return len(kernels), sum(e.device_time for e in kernels) / 1e3
 
 
@@ -85,6 +87,8 @@ torch.cuda.current_stream().wait_stream(side)
 tiny_graph = torch.cuda.CUDAGraph()
 with torch.cuda.graph(tiny_graph):
     tiny_kernels()                                  # recorded, not run
+tiny_graph.replay()                                 # the first replay also uploads the graph to the GPU, so leave it
+torch.cuda.synchronize()                            # out of the timing
 replay = timed(tiny_graph.replay, 50)
 print(f"\n1. 200 tiny kernels\n"
       f"   launched one by one: {eager * 1e6:,.0f} us ({eager / 200 * 1e6:.1f} us per kernel)\n"

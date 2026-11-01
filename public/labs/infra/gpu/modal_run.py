@@ -36,11 +36,12 @@ image = (
     .pip_install("torch==2.15.0", "numpy", "transformers")
     .add_local_dir(HERE, "/labs", ignore=IGNORE)
 )
-# The toolkit image adds nvcc and compute-sanitizer, for labs that compile CUDA. Its CUDA version (13.2) matches
+# The toolkit image adds nvcc, compute-sanitizer and the Nsight tools, for labs that compile or profile CUDA. Its CUDA version (13.2) matches
 # the one the pinned PyTorch 2.15.0 wheels were built with; change both together.
 toolkit = (
     modal.Image.from_registry("nvidia/cuda:13.2.1-devel-ubuntu24.04", add_python="3.12")
-    .pip_install("torch==2.15.0", "numpy", "ninja")
+    .apt_install("libdw1")                       # Nsight Systems' trace importer needs libdw.so.1, which the image lacks
+    .pip_install("torch==2.15.0", "numpy", "ninja", "transformers")
     .add_local_dir(HERE, "/labs", ignore=IGNORE)
 )
 # The vLLM image, for the serving labs. vLLM pins its own PyTorch version (2.13.0, built with CUDA 13.0, for vLLM

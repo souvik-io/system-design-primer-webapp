@@ -121,16 +121,16 @@ Start applying around week 26 to 28; interview prep (Part 10) runs alongside the
 | 1.1 | `transformer-as-workload.md` | Drafted 2026-10-31 |
 | 1.2 | `inference-arithmetic.md` | Drafted 2026-10-31. Lab part B (vLLM on an H100) run 2026-11-01: MBU 69% at batch 1 to 76% at batch 64, and 2.3 times slower with `enforce_eager` |
 | 1.3 | `mixture-of-experts.md` | Drafted 2026-10-31. Labs A and B measured on the M2 (Granite 3.1 1B-A400M as the real router); part C (vLLM on an H100) run 2026-11-01 |
-| 2.1 | `gpu-execution.md` | Drafted 2026-11-01. Measured on Modal H100 and A10; the M2 part uses `access_patterns.py` |
+| 2.1 | `gpu-execution.md` | Drafted 2026-11-01. Measured on Modal H100 and A10, and the probe also on an L4 once one was available; the M2 part uses `access_patterns.py` |
 | 2.2 | `triton-kernels.md` | Drafted 2026-11-01. Four Triton kernels measured on H100 and A10; grouped tile order +3% on H100, +25% on A10 |
 | 2.3 | `cuda-basics.md` | Drafted 2026-11-01. CUDA RMSNorm on H100; compute-sanitizer demo on A10 (both need `--toolkit`) |
 | 2.4 | `flash-attention.md` | Drafted 2026-11-01. Triton FlashAttention 364 TFLOP/s vs SDPA 586 on H100 |
-| 2.5 | `profiling.md` | Drafted 2026-11-01. Real torch.profiler trace of a Llama 3.2 1B decode step drives the `decode-timeline` widget; Nsight Compute works with `--clock-control none`; nsys failed to import its trace in the Modal container |
-| 3.1 | `pytorch-execution.md` | Drafted 2026-11-01. `gpu/decode_runtime.py` on an H100 (`--cpu 4`): decode step 9.44 ms eager, 2.79 ms static cache + hand-captured CUDA graph, 1.82 ms `torch.compile(mode="reduce-overhead")`. Found that cuDNN attention builds a graph per new KV length (46.73 ms first pass) |
+| 2.5 | `profiling.md` | Drafted 2026-11-01. Real torch.profiler trace of a Llama 3.2 1B decode step drives the `decode-timeline` widget; Nsight Compute works with `--clock-control none`; Nsight Systems works once the toolkit image has `libdw1` (`nsys_decode.py`). Re-run 2026-11-01 so the profiled step avoids cuDNN's one-time plan build |
+| 3.1 | `pytorch-execution.md` | Drafted 2026-11-01. `gpu/decode_runtime.py` on an H100 (`--cpu 4`): decode step 10.30 ms eager, 2.80 ms static cache + hand-captured CUDA graph, 1.84 ms `torch.compile(mode="reduce-overhead")`. Found that cuDNN attention builds a graph per new KV length (52.84 ms first pass). Re-run 2026-11-01 after review tweaks (graph warm-up replay, kernels only) |
 | 3.2 | `native-code.md` | Drafted 2026-11-01. `native_sampler.py` (pybind11 via `load_inline`) on the M2: C++ releasing the GIL 3.5x on 4 threads, holding it 1.0x, NumPy 2.3x. Elective 3.2b (Rust) is a "taking it further" note in the reference solution, without code |
 | 3.3 | `graph-runtimes.md` | Drafted 2026-11-01. The planned TensorRT-LLM vs vLLM lab was replaced: TensorRT-LLM removed its TensorRT engine backend from the pre-release 1.3.0rc21 (July 2026). `export_runtimes.py` compares eager, `torch.compile`, ONNX Runtime and AOTInductor on the M2 |
 
-Part 2 runs its GPU labs on Modal through `public/labs/infra/gpu/modal_run.py`, which logs each run's cost to `modal_costs.jsonl` (gitignored). The handbook's planned cheap GPU was the L4, but Modal had no L4 capacity for over an hour on 2026-10-31, so Part 2 uses the A10 (24 GB GDDR6, 600 GB/s, 125 TFLOPS dense BF16, no FP8) as its low-end GPU. Part 2's GPU runs cost about $0.25 in total. Deck `infra-kernels` covers Part 2 (27 cards). Part 2 widgets: `warp-access`, `occupancy`, `matmul-tiling`, `warp-reduce`, `online-softmax`, `decode-timeline`.
+Part 2 runs its GPU labs on Modal through `public/labs/infra/gpu/modal_run.py`, which logs each run's cost to `modal_costs.jsonl` (gitignored). The handbook's planned cheap GPU was the L4, but Modal had no L4 capacity for over an hour on 2026-10-31, so Part 2 uses the A10 (24 GB GDDR6, 600 GB/s, 125 TFLOPS dense BF16, no FP8) as its low-end GPU. An L4 was available on 2026-11-01, and `gpu_probe.py` was run on it to check chapter 2.1's L4 figures. Part 2's GPU runs cost about $0.25 in total, plus about $0.10 for the 2026-11-01 re-runs (profiling, Nsight Systems, the L4 probe). Deck `infra-kernels` covers Part 2 (29 cards). Part 2 widgets: `warp-access`, `occupancy`, `matmul-tiling`, `warp-reduce`, `online-softmax`, `decode-timeline`.
 
 Part 3 runs its one GPU lab on a Modal H100 with `--cpu 4`, a new `modal_run.py` option: a Modal container is guaranteed only 0.125 CPU cores by default, which made launch-bound timings vary by host. Part 3's GPU runs, including diagnostics, cost about $0.55 of GPU time. Deck `infra-runtime` covers Part 3 (42 cards). Part 3 widgets: `launch-overhead`, `graph-padding`, `caching-allocator`, `gil-threads`.
 
@@ -173,7 +173,7 @@ Every lab script is a downloadable file in `public/labs/infra/` (served at `/lab
 - Latency floor for a decode step = bytes / bandwidth; throughput ceiling = FLOPs / peak.
 - Cost: tokens per second per GPU to $ per million tokens.
 - **Simulation:** "Roofline explorer" (new widget): pick GPU (A100, H100, H200, B200, L4, M-series), precision, batch, context length; a point moves along the roofline and the panel shows step time, tokens/s and $/M tokens.
-- **Lab [Mac + 1 GPU]:** measure real decode tokens/s at batch 1, 8, 32, 128 for the running model; plot measured vs predicted on the roofline. Explain the gap. Reference: notebook and expected plot shape.
+- **Lab [Mac + 1 GPU]:** measure your machine's roofline, then measure real decode step times with vLLM at batch 1, 8, 32 and 64 for Llama 3.1 8B, next to the predicted ones, and explain the gap. Reference: measured H100 output.
 - Prereqs: `/learn/gpus-for-ai`, `/learn/ai-estimation`.
 
 ### 1.3 Mixture-of-experts models
@@ -235,7 +235,7 @@ Every lab script is a downloadable file in `public/labs/infra/` (served at `/lab
 - CUDA graphs: capture and replay; why engines capture one graph per batch size; padding batches to captured sizes.
 - The CUDA caching allocator, fragmentation, `PYTORCH_CUDA_ALLOC_CONF`.
 - **Simulation:** "Launch overhead": a timeline of 200 tiny kernels launched one by one vs replayed as a graph.
-- **Lab [1 GPU]:** take your Part 1 decoder and get decode latency down using `torch.compile` and CUDA graphs; report each step's gain. Reference included.
+- **Lab [1 GPU]:** take chapter 2.5's Llama 3.2 1B decode step and get its latency down with a static KV cache, a CUDA graph and `torch.compile`; report each step's gain, and measure the caching allocator with and without expandable segments. Reference included.
 
 ### 3.2 Native code and Python bindings
 - When to drop to C++: tight loops on the CPU side (schedulers, tokenizers, samplers), custom ops.
@@ -245,8 +245,8 @@ Every lab script is a downloadable file in `public/labs/infra/` (served at `/lab
 - **Elective 3.2b:** the same with Rust and PyO3.
 
 ### 3.3 Compilers and graph runtimes
-- ONNX and ONNX Runtime, TensorRT and TensorRT-LLM engine builds, `torch.export`; when an ahead-of-time engine wins and what it costs (build times, rigid shapes).
-- **Lab [1 GPU], optional:** export the running model to a TensorRT-LLM engine and compare with vLLM at two batch sizes.
+- ONNX and ONNX Runtime, TensorRT and TensorRT-LLM engine builds and TensorRT-LLM's move to PyTorch, `torch.export` and AOTInductor; when an ahead-of-time engine wins and what it costs (build times, rigid shapes).
+- **Lab [Mac]:** export a small decoder with `torch.export`, then run it eagerly, with `torch.compile`, in ONNX Runtime and as an AOTInductor package, comparing build time, speed and start-up. (This replaced a planned TensorRT-LLM engine against vLLM lab: TensorRT-LLM removed its TensorRT engine backend from the pre-release 1.3.0rc21 in July 2026.)
 
 **Deck: "Runtime layer"**.
 

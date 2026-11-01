@@ -5,14 +5,14 @@ import { IndexSlider, Key, Narration, Segmented, Stat, WidgetFrame } from './ui'
 // (content/infra/pytorch-execution.md). Eager: the CPU spends `launch` µs issuing each kernel, and the GPU starts
 // kernel i when both its launch has finished and kernel i - 1 is done. Graph: the CPU makes one launch call and the
 // GPU runs the recorded kernels back to back, with a small gap between them. Defaults come from decode_runtime.py
-// on an H100: 5.2 µs per kernel launched from Python, 1.1 µs of GPU work per kernel, and 1.2 µs per kernel when the
-// same 200 kernels are replayed as a graph (238 µs in all, so about 0.065 µs between kernels). Replaying a graph is
+// on an H100: 1,192 µs for 200 kernels launched from Python (5.96 µs each), 212 µs of GPU work (1.06 µs each), and
+// 228 µs when the same 200 kernels are replayed as a graph, so about 0.05 µs between kernels. Replaying a graph is
 // charged as one launch call of the same cost.
 
 const COUNTS = [20, 50, 100, 200]
-const LAUNCH = [2, 3, 5.2, 7.4, 10, 20]
-const WORK = [1.1, 2, 5, 10, 20]
-const GRAPH_GAP = 0.065
+const LAUNCH = [2, 3, 5.96, 7.4, 10, 20]
+const WORK = [1.06, 2, 5, 10, 20]
+const GRAPH_GAP = 0.05
 
 type Mode = 'eager' | 'graph'
 

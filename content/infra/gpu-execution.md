@@ -40,7 +40,7 @@ That only works if enough warps are resident. **Occupancy** is the number of act
 | 32-bit registers | 65,536 | 65,536 |
 | Shared memory | 228 KB, at most 227 KB per block | 100 KB, at most 99 KB per block |
 
-The figures come from NVIDIA's Hopper and Ada tuning guides, and the lab's probe printed the same register and shared memory sizes on a real H100. Registers are usually the limit that bites. A block of 256 threads that uses 64 registers per thread needs 16,384 registers, so at most four such blocks fit on an SM, which is 32 of the H100's 64 warp slots and 50% occupancy.
+The figures come from NVIDIA's Hopper and Ada tuning guides, and the lab's probe printed the same register and shared memory sizes on a real H100 and a real L4. Registers are usually the limit that bites. A block of 256 threads that uses 64 registers per thread needs 16,384 registers, so at most four such blocks fit on an SM, which is 32 of the H100's 64 warp slots and 50% occupancy.
 
 High occupancy is not a goal in itself. The Best Practices Guide states that higher occupancy does not always mean higher performance. Memory-bound kernels such as element-wise operations need many warps in flight to keep the memory system busy. Matmul kernels often run best at low occupancy, because each warp keeps many independent loads and tensor-core operations in flight, and the registers that limit occupancy are what hold its tile of the output.
 
@@ -65,7 +65,7 @@ A GPU's memory comes in layers. Each layer down is larger and slower, and a fast
 | L2 cache | 50 MB for the whole GPU | 48 MB for the whole GPU | The hardware |
 | HBM or GDDR | 80 GB of HBM3 at 3.35 TB/s | 24 GB of GDDR6 at 300 GB/s | The program, through allocations |
 
-The H100 rows come from the Hopper tuning guide and NVIDIA's H100 specifications, and the L4 rows from the Ada tuning guide, NVIDIA's L4 specifications and the Ada architecture whitepaper, whose L4 table lists 58 SMs and 49,152 KB of L2. The probe confirmed the H100's 50 MB of L2 on real hardware, as 52,428,800 bytes, exactly 50 MiB.
+The H100 rows come from the Hopper tuning guide and NVIDIA's H100 specifications, and the L4 rows from the Ada tuning guide, NVIDIA's L4 specifications and the Ada architecture whitepaper, whose L4 table lists 58 SMs and 49,152 KB of L2. The probe confirmed both L2 sizes on real hardware: 52,428,800 bytes on the H100, exactly 50 MiB, and 50,331,648 bytes on the L4, exactly 48 MiB.
 
 **Shared memory** is the layer that kernel writers manage by hand. It is fast scratch space on the SM, visible to all threads of one block. A matmul kernel loads a tile of each input from HBM into shared memory once and then lets every thread in the block reuse it many times. FlashAttention, covered in chapter 2.4, is built around exactly that idea.
 
@@ -246,9 +246,11 @@ Sections 2, 3 and 4 of the output are printed in full earlier in this chapter. T
 | BF16 matmul | 803 | 989 | 81% |
 | FP8 matmul | 1,411 | 1,979 | 71% |
 
-No real kernel reaches a spec sheet's peak, and these shares are typical for a well-tuned library. The size sweep in the chapter shows that a larger problem does not raise them: FP8 levels off at about 70% of its peak and BF16 at about 80%. The BF16 rate even dips at 16,384. [Chapter 2.5](/learn/profiling#benchmarking-without-fooling-yourself) measured the reason: under a long run of large matmuls, the H100 reached its 700 W power limit and lowered its SM clock from 1,980 MHz to about 1,410 MHz.
+No real kernel reaches a spec sheet's peak, and these shares are typical for a well-tuned library. The size sweep in the chapter shows that a larger problem does not raise them: FP8 levels off at about 70% of its peak and BF16 at about 80%. The BF16 rate even dips at 16,384. [Chapter 2.5](/learn/profiling#benchmarking-without-fooling-yourself) measured the reason: under a long run of large matmuls, the H100 reached its 700 W power limit and lowered its SM clock from 1,980 MHz to about 1,400 MHz.
 
 The same script on a Modal A10, an older Ampere GPU with 24 GB of GDDR6, gives a useful contrast for about a fifth of a cent. It reported 72 SMs and an L2 cache of only 6 MiB, so even the 8 MiB working set no longer fits in L2. Large copies ran at 485 GB/s, 81% of the 600 GB/s NVIDIA specifies, and BF16 matmuls at 82 TFLOP/s, 66% of the 125 TFLOP/s dense peak. The A10 has no FP8 tensor cores, and the script says so instead of measuring them. The strided reads fell from 478 GB/s at stride 1 to 113 GB/s at stride 8, about a sixth of the H100's rates, and random reads to 43 GB/s. Beyond stride 8 the A10's curve almost flattens, at 104 and 89 GB/s, as the 32-byte sector rule predicts, while the H100's keeps falling. That suggests the H100's HBM is fetched in larger units than the A10's GDDR6.
+
+The L4, the cheap GPU this handbook planned around, was unavailable on Modal when this part's labs were first run, which is why the A10 appears instead. When one became available, the same script took 9 seconds on it, under a cent. It confirmed the L4 figures in the tables above, which came from NVIDIA's documents: 58 SMs, 1,536 threads per SM, 100 KB of shared memory per SM with 99 KB per block, and an L2 of 50,331,648 bytes, exactly 48 MiB. That L2 is eight times the A10's, so the 16 and 32 MiB working sets copied at about 1.9 TB/s, while those beyond it fell to 231 GB/s, 77% of the 300 GB/s NVIDIA specifies. BF16 matmuls ran at 59 TFLOP/s and FP8 at 112 TFLOP/s, under half of the dense peaks of 121 and 242 TFLOP/s. The L4 is a 72 W card, so it most likely cannot hold its peak clock through a long run of dense matmuls, the limit chapter 2.5 measured on the H100; the probe does not record the clock, so that explanation is untested here. Strided reads fell from 232 GB/s at stride 1 to 57 GB/s at stride 8, about a quarter, as on the other two GPUs.
 
 </details>
 

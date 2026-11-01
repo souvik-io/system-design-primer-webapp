@@ -133,14 +133,24 @@ One script reported the **fastest of 20** back-to-back runs. Triton's `do_bench`
 ## What did nvidia-smi show during a long run of matmuls on an H100, and what does it mean for benchmarks?
 <!-- /learn/profiling#benchmarking-without-fooling-yourself -->
 
-Power reached the **700 W limit** and the SM clock fell from 1,980 MHz to about **1,410 MHz**. A short benchmark that ends before the GPU reaches its power limit reports a higher rate than a long production run. Record the clocks and power with every benchmark result, and run long enough to reach a steady state.
+Power reached the **700 W limit** and the SM clock fell from 1,980 MHz to about **1,400 MHz**. A short benchmark that ends before the GPU reaches its power limit reports a higher rate than a long production run. Record the clocks and power with every benchmark result, and run long enough to reach a steady state.
 
 ## What did the profile of a batch-1 decode step of Llama 3.2 1B on an H100 show?
 <!-- /learn/profiling#profiling-a-decode-step-with-the-pytorch-profiler -->
 
-The step took **7.49 ms** against a roofline estimate of 0.74 ms. It ran **694 kernels** totalling **2.21 ms** of GPU work, so the GPU was idle about **70%** of the time, with a median kernel of 1.7 µs. The step is limited by **CPU launch overhead**; CUDA graphs and kernel fusion are the fix. An earlier run of the same script on another Modal host took 15.68 ms, twice as long, because the host CPU limits the launch rate.
+The step took **16.12 ms** against a roofline estimate of 0.74 ms. It ran **694 kernels** totalling **2.24 ms** of GPU work, so the GPU was idle about **86%** of the time, with a median kernel of 1.7 µs. The step is limited by **CPU launch overhead**; CUDA graphs and kernel fusion are the fix. Other runs of the same script on other Modal hosts took 15.68 ms and 7.49 ms, because the host CPU limits the launch rate.
 
 ## What do sectors per request and DRAM throughput from Nsight Compute tell you about a memory-bound kernel?
 <!-- /learn/profiling#nsight-compute-inside-one-kernel -->
 
 **Sectors per request** shows coalescing: the lab's contiguous read loaded 16 sectors per warp request (16-byte loads) and the stride-8 read 32, the worst case. **DRAM throughput** counts every byte moved, so the strided kernel kept DRAM 95% busy yet ran 4.3 times slower, moving eight times as many sectors for the same useful data. High DRAM throughput alone does not mean an efficient kernel.
+
+## Before trusting a profile of one decode step, what should you check, and what did the lab's first profile show?
+<!-- /learn/profiling#profiling-a-decode-step-with-the-pytorch-profiler -->
+
+Check the **longest gap between kernels**, because a one-step profile records **one-time costs** along with recurring ones. The lab's first profile landed on a KV cache length no earlier step had used, and showed a single **40.8 ms gap** before the first attention kernel: cuDNN building its attention plan for that length. Profiling a step at a length already seen brought the longest gap down to **198 µs**.
+
+## What did Nsight Systems add to the PyTorch profiler's view of the decode step?
+<!-- /learn/profiling#nsight-systems-the-whole-timeline -->
+
+Its kernel table agreed with the PyTorch profiler, **694 kernels** and about **2.2 ms** of GPU work per step. Its **CUDA API table** showed the CPU's side: **694 launch calls of about 6 µs** each, roughly **4 ms** of each 16.85 ms step, with the rest of the CPU time in Python and PyTorch's dispatch. On Modal, its trace importer needed the **`libdw1`** package.

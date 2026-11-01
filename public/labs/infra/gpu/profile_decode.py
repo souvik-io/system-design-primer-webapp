@@ -56,6 +56,10 @@ ideal = weights / {"H100": 3.35e12, "A10": 600e9}.get(next((k for k in ("H100", 
 print(f"1. Decode step at batch 1: {step * 1e3:.2f} ms wall time ({1 / step:.0f} tokens/s); "
       f"reading the weights once at the spec bandwidth would take {ideal * 1e3:.2f} ms")
 
+# Profile a step at a cache length the timing loop has already used. PyTorch's cuDNN attention builds and caches a
+# plan for each new key length (chapter 3.1), so a step at a new length would record a one-time build of about 40 ms.
+cache, tok = decode_steps(1)
+torch.cuda.synchronize()
 with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA]) as prof, torch.no_grad():
     out = model(input_ids=tok, past_key_values=cache, use_cache=True)
     tok = out.logits[:, -1:].argmax(-1)
@@ -67,8 +71,10 @@ launches = [e for e in events if e.get("cat") == "cuda_runtime" and "LaunchKerne
 t_first, t_last = kernels[0]["ts"], max(e["ts"] + e["dur"] for e in kernels)
 busy = sum(e["dur"] for e in kernels)
 span = t_last - t_first
+gap = max(b["ts"] - (a["ts"] + a["dur"]) for a, b in zip(kernels, kernels[1:]))
 print(f"2. One profiled step: {len(kernels)} GPU kernels, {len(launches)} kernel launches from the CPU; "
-      f"GPU busy {busy / 1e3:.2f} ms of a {span / 1e3:.2f} ms span ({busy / span:.0%})")
+      f"GPU busy {busy / 1e3:.2f} ms of a {span / 1e3:.2f} ms span ({busy / span:.0%}); "
+      f"longest gap between kernels {gap:.0f} us")
 
 print("\n   Top kernels by total GPU time in the step:")
 print(prof.key_averages().table(sort_by="cuda_time_total", row_limit=8, max_name_column_width=60))

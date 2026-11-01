@@ -10,7 +10,7 @@ Each operation passes through **Python, PyTorch's C++ dispatcher and the CUDA dr
 ## What did the lab measure for 200 tiny kernels on an H100, launched one by one and replayed as a CUDA graph?
 <!-- /learn/pytorch-execution#what-eager-mode-costs -->
 
-The kernels did about **1.1 µs** of GPU work each. Launched one by one from Python they took **5.2 µs** per kernel, so the GPU waited about four fifths of the time. Replayed as a CUDA graph they took **1.2 µs** per kernel, **4.4 times** faster.
+The kernels did about **1.1 µs** of GPU work each. Launched one by one from Python they took **6.0 µs** per kernel, so the GPU waited about four fifths of the time. Replayed as a CUDA graph they took **1.1 µs** per kernel, **5.2 times** faster.
 
 ## What is a CUDA graph, and what are the three stages of submitting work through one?
 <!-- /learn/pytorch-execution#cuda-graphs-record-once-replay-many-times -->
@@ -30,7 +30,7 @@ Its default **dynamic KV cache** grows by concatenation, so every step allocates
 ## In the lab, why was the static-cache step slower than the default one in eager mode, and what did a CUDA graph do to it?
 <!-- /learn/pytorch-execution#cuda-graphs-record-once-replay-many-times -->
 
-Eager with a static cache took **11.62 ms** against **9.44 ms**, with 831 kernels instead of 695, because every layer also **writes its keys and values into the cache in place** and masks attention over all **1,024 slots**, small operations that each cost CPU time in a launch-bound step. Captured by hand in a CUDA graph, the same step took **2.79 ms**, 3.4 times faster than the original, with the GPU busy for 2.58 ms of it. Warming up and capturing the graph took 0.07 seconds.
+Eager with a static cache took **12.52 ms** against **10.30 ms**, with 829 kernels instead of 694, because every layer also **writes its keys and values into the cache in place** and masks attention over all **1,024 slots**, small operations that each cost CPU time in a launch-bound step. Captured by hand in a CUDA graph, the same step took **2.80 ms**, 3.7 times faster than the original, with the GPU busy for 2.59 ms of it. Warming up and capturing the graph took 0.06 seconds.
 
 ## Why can a change of kernels change greedy output, and how should implementations be compared?
 <!-- /learn/pytorch-execution#cuda-graphs-record-once-replay-many-times -->
@@ -65,7 +65,7 @@ Attention's work depends on every sequence's length, which changes each step. Th
 ## What did torch.compile do to the decode step in the lab, with and without CUDA graphs?
 <!-- /learn/pytorch-execution#torchcompile-dynamo-aotautograd-and-inductor -->
 
-Fusion cut the kernels from **831 to 325** and the GPU work from **2.67 to 1.74 ms**. In default mode the step still took **3.94 ms**, because its kernels were still launched from Python. With `reduce-overhead` it took **1.82 ms**, **5.2 times** faster than the original 9.44 ms, with the GPU busy 94% of the time. Compilation took 33.5 seconds for default mode and 24.3 seconds for `reduce-overhead`.
+Fusion cut the kernels from **829 to 323** and the GPU work from **2.67 to 1.72 ms**. In default mode the step still took **4.18 ms**, because its kernels were still launched from Python. With `reduce-overhead` it took **1.84 ms**, **5.6 times** faster than the original 10.30 ms, with the GPU busy 94% of the time. Compilation took 30.7 seconds for default mode and 21.5 seconds for `reduce-overhead`.
 
 ## What is a graph break, what causes one, and how do you find them?
 <!-- /learn/pytorch-execution#graph-breaks-guards-and-recompiles -->
@@ -85,7 +85,7 @@ By default it first compiles for the **exact shapes**, then on a change **recomp
 ## Why was the first pass of the default decode step five times slower than the second in the lab?
 <!-- /learn/pytorch-execution#graph-breaks-guards-and-recompiles -->
 
-Attention ran NVIDIA's **cuDNN** kernels, and PyTorch's cuDNN integration **builds and caches a cuDNN graph for each new combination of sequence lengths**. A growing KV cache presents a **new key length every step**, so the first pass paid for a build at each step: **46.73 ms** against 9.44 ms. The static cache's fixed 1,024 slots showed no difference (11.85 against 11.62 ms).
+Attention ran NVIDIA's **cuDNN** kernels, and PyTorch's cuDNN integration **builds and caches a cuDNN graph for each new combination of sequence lengths**. A growing KV cache presents a **new key length every step**, so the first pass paid for a build at each step: **52.84 ms** against 10.30 ms. The static cache's fixed 1,024 slots showed no difference (12.48 against 12.52 ms).
 
 ## Why does PyTorch use a caching allocator, and what does it mean for nvidia-smi?
 <!-- /learn/pytorch-execution#the-cuda-caching-allocator -->
