@@ -129,8 +129,11 @@ Start applying around week 26 to 28; interview prep (Part 10) runs alongside the
 | 3.1 | `pytorch-execution.md` | Drafted 2026-11-01. `gpu/decode_runtime.py` on an H100 (`--cpu 4`): decode step 10.30 ms eager, 2.80 ms static cache + hand-captured CUDA graph, 1.84 ms `torch.compile(mode="reduce-overhead")`. Found that cuDNN attention builds a graph per new KV length (52.84 ms first pass). Re-run 2026-11-01 after review tweaks (graph warm-up replay, kernels only) |
 | 3.2 | `native-code.md` | Drafted 2026-11-01. `native_sampler.py` (pybind11 via `load_inline`) on the M2: C++ releasing the GIL 3.5x on 4 threads, holding it 1.0x, NumPy 2.3x. Elective 3.2b (Rust) is a "taking it further" note in the reference solution, without code |
 | 3.3 | `graph-runtimes.md` | Drafted 2026-11-01. The planned TensorRT-LLM vs vLLM lab was replaced: TensorRT-LLM removed its TensorRT engine backend from the pre-release 1.3.0rc21 (July 2026). `export_runtimes.py` compares eager, `torch.compile`, ONNX Runtime and AOTInductor on the M2 |
+| 4.1 | `number-formats.md` | Drafted 2026-11-08. `number_formats.py` on the M2 decodes every format from its bit fields, matches PyTorch's casts on 1M values per format, and quantizes SmolLM2-135M's weights (FP4 per tensor 37% error, MXFP4 11.8%, NVFP4 9.5%). `gpu/format_matmul.py` measured on a Modal H100 and B200 and a GCP spot L4: NVFP4 4.4x BF16 in the prefill shape on the B200. Widget `bit-explorer` |
 
 Part 2 runs its GPU labs on Modal through `public/labs/infra/gpu/modal_run.py`, which logs each run's cost to `modal_costs.jsonl` (gitignored). The handbook's planned cheap GPU was the L4, but Modal had no L4 capacity for over an hour on 2026-10-31, so Part 2 uses the A10 (24 GB GDDR6, 600 GB/s, 125 TFLOPS dense BF16, no FP8) as its low-end GPU. An L4 was available on 2026-11-01, and `gpu_probe.py` was run on it to check chapter 2.1's L4 figures. Part 2's GPU runs cost about $0.25 in total, plus about $0.10 for the 2026-11-01 re-runs (profiling, Nsight Systems, the L4 probe). Deck `infra-kernels` covers Part 2 (29 cards). Part 2 widgets: `warp-access`, `occupancy`, `matmul-tiling`, `warp-reduce`, `online-softmax`, `decode-timeline`.
+
+From Part 4, GPU labs run on both Modal and Google Cloud (`gcp_run.py`, spot VMs in a project with GPU quota), from the same Dockerfiles in `gpu/images/`, and `gpu/budget.py` checks every run against the free credit left on each platform. Modal takes the H100 and B200 runs; Google Cloud takes L4 runs, GKE (Part 8) and long development sessions.
 
 Part 3 runs its one GPU lab on a Modal H100 with `--cpu 4`, a new `modal_run.py` option: a Modal container is guaranteed only 0.125 CPU cores by default, which made launch-bound timings vary by host. Part 3's GPU runs, including diagnostics, cost about $0.55 of GPU time. Deck `infra-runtime` covers Part 3 (42 cards). Part 3 widgets: `launch-overhead`, `graph-padding`, `caching-allocator`, `gil-threads`.
 
@@ -475,7 +478,7 @@ Existing widgets to reuse: `kv-cache-calculator`, `batching-simulator`.
 | Tiling animator, built as `matmul-tiling` | 2.2 | 1 |
 | Online softmax stepper, built as `online-softmax` | 2.4 | 1 |
 | Quantization playground | 4.2 | 1 |
-| Bit/format explorer | 4.1 | 2 |
+| Bit/format explorer, built as `bit-explorer` | 4.1 | 2 |
 | Paged KV allocator (extends existing) | 5.1 | 1 |
 | Radix tree prefix cache | 5.3 | 2 |
 | Speculative decoding simulator | 5.4 | 2 |

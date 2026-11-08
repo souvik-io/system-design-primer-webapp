@@ -56,6 +56,7 @@ Which platform to use: Modal starts in seconds, bills per second and has H100s w
 | `decode_runtime.py` | 3.1 | H100 (`--cpu 4`) | Launch overhead, a decode step with a static cache, a CUDA graph and torch.compile, and the caching allocator |
 | `decode_sweep.py` | 1.2, lab part B | H100 (`--vllm`) | Llama 3.1 8B decode step time and MBU at batch 1 to 64 with vLLM, with and without CUDA graphs |
 | `moe_decode_sweep.py` | 1.3, lab part C | H100 (`--vllm`) | Qwen3-30B-A3B against Llama 3.1 8B with vLLM, next to the roofline prediction |
+| `format_matmul.py` | 4.1 | H100, B200 (Modal), L4 (Google Cloud) | Matmul speed and error in BF16, FP16, INT8, FP8, and on Blackwell MXFP8, MXFP4 and NVFP4, at a prefill and a decode shape |
 
 The two vLLM scripts call vLLM's Python API and were written against vLLM 0.32.0. On Modal, add `--vllm` to run them in an image with vLLM installed, built on NVIDIA's CUDA 13.0 development image because FlashInfer, vLLM's default sampler, compiles some kernels with `nvcc` on first use; that function also reserves 4 CPU cores and 32 GiB of memory. Elsewhere, `pip install vllm` on the GPU machine. Each run took about 10 minutes of H100 time, about $0.65, most of it downloading the weights and compiling the models.
 

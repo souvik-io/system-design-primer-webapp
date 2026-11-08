@@ -27,6 +27,7 @@ const WIDGETS: Record<string, ComponentType> = {
   'graph-padding': lazy(() => import('./GraphPadding')),
   'caching-allocator': lazy(() => import('./CachingAllocator')),
   'gil-threads': lazy(() => import('./GilThreads')),
+  'bit-explorer': lazy(() => import('./BitExplorer')),
 }
 
 export function Widgets({ root, chapter }: { root: RefObject<HTMLElement | null>; chapter: unknown }) {

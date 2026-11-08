@@ -202,6 +202,14 @@ const PARTS = [
       'What eager PyTorch costs, CUDA graphs, torch.compile and the caching allocator; C++ bindings and the GIL; and ahead-of-time compilers and runtimes.',
     chapters: ['pytorch-execution', 'native-code', 'graph-runtimes'],
   },
+  {
+    id: 'infra-compression',
+    handbook: 'infra',
+    dir: 'infra',
+    title: 'Compression',
+    description: 'Number formats from FP32 to NVFP4, the arithmetic of quantization, the algorithms that produce quantized checkpoints, and how to measure what they cost in quality.',
+    chapters: ['number-formats'],
+  },
 ]
 
 /** Folders under content/ that hold a handbook's chapters, besides content/ itself. */
@@ -307,6 +315,7 @@ const WIDGET_NAMES = new Set([
   'graph-padding',
   'caching-allocator',
   'gil-threads',
+  'bit-explorer',
 ])
 
 function widgetNode(name, where) {
