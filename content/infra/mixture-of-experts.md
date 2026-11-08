@@ -255,7 +255,7 @@ Four things in the output are worth noticing:
 - The measured count of experts touched stays below the even formula at every batch size, which is good for the bytes a step reads. The busiest expert's share is the cost that comes with it.
 - Dropping tokens at a capacity factor of 1.25 would remove almost a quarter of the expert computations in this model, which is why serving engines run every routed token.
 
-**Part C.** The script [gpu/moe_decode_sweep.py](/labs/infra/gpu/moe_decode_sweep.py) loads each model in vLLM once and isolates decode the same way as chapter 1.2's lab: for each batch it subtracts a run that generates 1 token from a run that generates 129, and divides by the 128 decode steps. It also prints a few of vLLM's own start-up lines. Run on Modal with `modal run modal_run.py --script moe_decode_sweep.py --gpu H100 --vllm`, its output was:
+**Part C.** The script [gpu/moe_decode_sweep.py](/labs/infra/gpu/moe_decode_sweep.py) loads each model in vLLM once and isolates decode the same way as chapter 1.2's lab: for each batch it subtracts a run that generates 1 token from a run that generates 129, and divides by the 128 decode steps. It also prints a few of vLLM's own start-up lines. Run on Modal with `modal run modal_run.py --script moe_decode_sweep.py --gpu 'H100!' --vllm`, its output was:
 
 ```text
 [Qwen3-30B-A3B] Loading weights took 12.61 seconds

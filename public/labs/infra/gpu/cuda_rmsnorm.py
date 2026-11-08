@@ -6,7 +6,7 @@
 # Both reduce the sum of squares with warp shuffles, then across warps through shared memory.
 #
 # Needs an NVIDIA GPU and nvcc (the CUDA toolkit), because torch.utils.cpp_extension compiles the code.
-# Run: python cuda_rmsnorm.py      or: modal run modal_run.py --script cuda_rmsnorm.py --gpu H100 --toolkit
+# Run: python cuda_rmsnorm.py      or: modal run modal_run.py --script cuda_rmsnorm.py --gpu 'H100!' --toolkit
 import torch
 import triton
 from torch.utils.cpp_extension import load_inline

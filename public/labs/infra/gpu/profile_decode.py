@@ -7,7 +7,7 @@
 #  4. It samples the GPU's SM clock, power and temperature with nvidia-smi while a long run of matmuls is in flight.
 #
 # Needs an NVIDIA GPU, and downloads about 2.5 GB of weights from Hugging Face on the first run.
-# Run: python profile_decode.py      or: modal run modal_run.py --script profile_decode.py --gpu H100
+# Run: python profile_decode.py      or: modal run modal_run.py --script profile_decode.py --gpu 'H100!'
 import json
 import subprocess
 import time

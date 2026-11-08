@@ -11,7 +11,7 @@
 # its GPU memory back inside one process.
 #
 # Needs one 80 GB GPU and vLLM (written against v0.32.0). On Modal:
-#   modal run modal_run.py --script decode_sweep.py --gpu H100 --vllm
+#   modal run modal_run.py --script decode_sweep.py --gpu 'H100!' --vllm
 # Elsewhere: pip install vllm, then python decode_sweep.py
 import json
 import subprocess

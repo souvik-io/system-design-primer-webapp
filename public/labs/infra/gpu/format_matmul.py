@@ -10,7 +10,7 @@
 # (torch.nn.functional.scaled_mm), and on Blackwell (compute capability 10.x) MXFP8, MXFP4 and NVFP4 with block
 # scales. A format the GPU or this PyTorch build does not support prints the reason and is skipped.
 #
-#   modal run modal_run.py --script format_matmul.py --gpu H100
+#   modal run modal_run.py --script format_matmul.py --gpu 'H100!'
 #   modal run modal_run.py --script format_matmul.py --gpu B200
 #   python gcp_run.py --script format_matmul.py --gpu L4
 #   python format_matmul.py                      # on any machine with an NVIDIA GPU

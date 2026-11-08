@@ -294,7 +294,7 @@ bytes_per_step = WEIGHT_BYTES + batch * context * KV_PER_TOKEN
 mbu = bytes_per_step / step / BANDWIDTH
 ```
 
-On Modal it runs with `modal run modal_run.py --script decode_sweep.py --gpu H100 --vllm`. Its output on an H100:
+On Modal it runs with `modal run modal_run.py --script decode_sweep.py --gpu 'H100!' --vllm`. Its output on an H100:
 
 ```text
 NVIDIA H100 80GB HBM3, vLLM 0.32.0, PyTorch 2.13.0+cu130

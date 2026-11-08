@@ -13,7 +13,7 @@
 #  3. The caching allocator: a "growing batch" pattern of allocations with and without expandable segments.
 #
 # Needs an NVIDIA GPU, and downloads about 2.5 GB of weights from Hugging Face on the first run.
-# Run: python decode_runtime.py      or: modal run modal_run.py --script decode_runtime.py --gpu H100 --cpu 4
+# Run: python decode_runtime.py      or: modal run modal_run.py --script decode_runtime.py --gpu 'H100!' --cpu 4
 import json
 import os
 import subprocess

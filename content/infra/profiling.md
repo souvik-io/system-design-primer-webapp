@@ -143,8 +143,8 @@ The roofline from Part 1 tells you which case to expect before you profile, and 
 
 The scripts are ready to download:
 
-- [gpu/profile_decode.py](/labs/infra/gpu/profile_decode.py) loads Llama 3.2 1B, measures and profiles a decode step, writes its timeline to `decode_trace.json`, and samples the GPU's clock and power under load. Run it with `modal run modal_run.py --script profile_decode.py --gpu H100 --cpu 4`.
-- [gpu/nsys_decode.py](/labs/infra/gpu/nsys_decode.py) records 20 decode steps under Nsight Systems and prints its NVTX, kernel and CUDA API summaries. Run it with `modal run modal_run.py --script nsys_decode.py --gpu H100 --toolkit --cpu 4`.
+- [gpu/profile_decode.py](/labs/infra/gpu/profile_decode.py) loads Llama 3.2 1B, measures and profiles a decode step, writes its timeline to `decode_trace.json`, and samples the GPU's clock and power under load. Run it with `modal run modal_run.py --script profile_decode.py --gpu 'H100!' --cpu 4`.
+- [gpu/nsys_decode.py](/labs/infra/gpu/nsys_decode.py) records 20 decode steps under Nsight Systems and prints its NVTX, kernel and CUDA API summaries. Run it with `modal run modal_run.py --script nsys_decode.py --gpu 'H100!' --toolkit --cpu 4`.
 - [gpu/ncu_strided.py](/labs/infra/gpu/ncu_strided.py) runs a contiguous and a strided read under Nsight Compute. It needs the CUDA toolkit, so run it with `modal run modal_run.py --script ncu_strided.py --gpu A10 --toolkit`. Modal's A10 type may give you an A10 or the closely related A10G.
 
 **Part A, a decode step.** Profile one batch-1 decode step of Llama 3.2 1B with `torch.profiler`. Report the step time, the number of kernels, the GPU's busy time, and the top kernels. Compare the step time with the roofline estimate from chapter 1.2.

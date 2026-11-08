@@ -150,7 +150,7 @@ The scripts are ready to download:
 
 - [gpu/cuda_rmsnorm.py](/labs/infra/gpu/cuda_rmsnorm.py) holds both CUDA kernels, compiles them with `torch.utils.cpp_extension.load_inline`, and compares them with the Triton kernel and PyTorch.
 - [gpu/cuda_bug.py](/labs/infra/gpu/cuda_bug.py) holds the off-by-one kernel and runs itself under `compute-sanitizer`.
-- Run them with `modal run modal_run.py --script cuda_rmsnorm.py --gpu H100 --toolkit`, or with `python cuda_rmsnorm.py` on a machine with an NVIDIA GPU and the CUDA toolkit.
+- Run them with `modal run modal_run.py --script cuda_rmsnorm.py --gpu 'H100!' --toolkit`, or with `python cuda_rmsnorm.py` on a machine with an NVIDIA GPU and the CUDA toolkit.
 
 **Part A, a CUDA RMSNorm.** Write an RMSNorm kernel for BF16 rows in CUDA, with one block per row, a warp-shuffle reduction and a shared-memory reduction across warps. Expose it to Python with `load_inline` and check it against a PyTorch reference. Then write a second version with 16-byte loads and measure both in GB/s. The part is done when both versions are within one BF16 rounding step of the reference and the vectorized version is at least 1.5 times faster than the first.
 
