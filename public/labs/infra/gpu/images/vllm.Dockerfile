@@ -3,6 +3,8 @@
 # FlashInfer, whose sampler vLLM uses by default, compiles some of its kernels with nvcc the first time they run.
 #   docker build -t lab-vllm -f images/vllm.Dockerfile images
 FROM nvidia/cuda:13.0.3-devel-ubuntu24.04
+# A slow PyPI download should be retried rather than fail the whole build.
+ENV PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=10
 RUN apt-get update \
  && apt-get install -y --no-install-recommends python3 python3-venv python3-dev build-essential \
  && rm -rf /var/lib/apt/lists/*

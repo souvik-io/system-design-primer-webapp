@@ -207,8 +207,8 @@ const PARTS = [
     handbook: 'infra',
     dir: 'infra',
     title: 'Compression',
-    description: 'Number formats from FP32 to NVFP4, the arithmetic of quantization, the algorithms that produce quantized checkpoints, and how to measure what they cost in quality.',
-    chapters: ['number-formats'],
+    description: 'Number formats from FP32 to NVFP4, the arithmetic of quantization, the algorithms that produce quantized checkpoints, how to measure what they cost in quality, and when pruning or distillation is worth it instead.',
+    chapters: ['number-formats', 'quantization-math', 'ptq-algorithms', 'quality-eval', 'other-compression'],
   },
 ]
 
@@ -316,6 +316,10 @@ const WIDGET_NAMES = new Set([
   'caching-allocator',
   'gil-threads',
   'bit-explorer',
+  'quantization-playground',
+  'outlier-migration',
+  'pareto-picker',
+  'sparsity-pattern',
 ])
 
 function widgetNode(name, where) {

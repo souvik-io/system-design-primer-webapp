@@ -4,6 +4,7 @@
 #   python gcp_run.py --script cuda_rmsnorm.py --gpu L4 --toolkit       # nvcc, compute-sanitizer, Nsight
 #   python gcp_run.py --script decode_sweep.py --gpu L4 --vllm          # the image with vLLM installed
 #   python gcp_run.py --script decode_sweep.py --gpu L4 --vllm --args "--quick"
+#   python gcp_run.py --script quantize_and_eval.py --gpu L4 --quant --max-hours 5
 #   python gcp_run.py --gpu L4 --keep --max-hours 3                     # a VM to SSH into and work on
 #   python gcp_run.py --list                                            # VMs this script started
 #   python gcp_run.py --cleanup                                         # delete them all
@@ -100,6 +101,41 @@ def ssh(vm: dict, command: str, project: str, log=None, check: bool = True) -> i
     if check and code != 0:
         raise RuntimeError(f"command on the VM failed with exit code {code}")
     return code
+
+
+def run_detached(vm: dict, command: str, project: str, log) -> int:
+    """Start a long command on the VM in the background and follow its output by polling, so that a dropped SSH
+    connection (a laptop going to sleep, a flaky network) does not kill a run that takes hours. Returns the
+    command's exit code."""
+    start = (f"rm -f ~/run.log ~/run.exit; nohup bash -c {shlex.quote(command + '; echo $? > ~/run.exit')} "
+             "> ~/run.log 2>&1 < /dev/null &")
+    ssh(vm, start, project)
+    offset, failures = 0, 0
+    while True:
+        time.sleep(20)
+        cmd = ["gcloud", "compute", "ssh", vm["name"], f"--zone={vm['zone']}", f"--project={project}", "--quiet",
+               "--strict-host-key-checking=no",
+               # The exit file is read before the log: if it exists, the log is already complete.
+               f"--command=E=$(cat ~/run.exit 2>/dev/null); tail -c +{offset + 1} ~/run.log; printf '\\n__EXIT__%s' \"$E\"",
+               "--",
+               "-o", "ServerAliveInterval=30", "-o", "ConnectTimeout=30"]
+        r = subprocess.run(cmd, capture_output=True)
+        if r.returncode != 0 or b"__EXIT__" not in r.stdout:
+            failures += 1
+            if failures >= 30:                    # about 10 minutes without a connection
+                raise RuntimeError("lost contact with the VM")
+            continue
+        failures = 0
+        body, _, code = r.stdout.rpartition(b"\n__EXIT__")
+        if body:
+            text = body.decode(errors="replace")
+            sys.stdout.write(text)
+            sys.stdout.flush()
+            log.write(text)
+            log.flush()
+            offset += len(body)
+        if code.strip():
+            return int(code.strip())
 
 
 def create_vm(name: str, gpu: str, spot: bool, max_hours: float, project: str) -> dict:
@@ -209,6 +245,7 @@ def main() -> None:
     ap.add_argument("--gpu", default="L4", choices=MACHINES)
     ap.add_argument("--toolkit", action="store_true", help="use images/toolkit.Dockerfile (nvcc, Nsight)")
     ap.add_argument("--vllm", action="store_true", help="use images/vllm.Dockerfile")
+    ap.add_argument("--quant", action="store_true", help="use images/quant.Dockerfile (vLLM and llm-compressor)")
     ap.add_argument("--on-demand", action="store_true", help="normal price instead of Spot; cannot be reclaimed")
     ap.add_argument("--max-hours", type=float, default=1.0, help="Google deletes the VM after this long (default 1)")
     ap.add_argument("--keep", action="store_true", help="leave the VM running for SSH until --max-hours or --cleanup")
@@ -244,7 +281,7 @@ def main() -> None:
     rate = hourly(a.gpu, spot)
     budget.check("gcp", rate * a.max_hours, a.allow_over_budget)
 
-    kind = "vllm" if a.vllm else "toolkit" if a.toolkit else "base"
+    kind = "quant" if a.quant else "vllm" if a.vllm else "toolkit" if a.toolkit else "base"
     stem = Path(a.script).stem if a.script else "session"
     stamp = time.strftime("%Y%m%d-%H%M%S")
     name = f"lab-{stem}-{a.gpu}-{stamp}".lower().replace("_", "-").replace(":", "x")[:63]
@@ -274,11 +311,12 @@ def main() -> None:
                 return
             env = f"-e HF_TOKEN={shlex.quote(os.environ['HF_TOKEN'])} " if os.environ.get("HF_TOKEN") else ""
             inner = ("nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader && "
-                     f"python {shlex.quote(a.script)} {a.args}")
+                     f"python -u {shlex.quote(a.script)} {a.args}")
             t = time.time()
-            code = ssh(vm, f"cd ~/labs && sudo docker run --rm --gpus all --ipc=host -v ~/labs:/labs "
-                           f"-v ~/hf-cache:/root/.cache/huggingface -w /labs {env}lab-{kind} bash -c {shlex.quote(inner)}",
-                       project, log, check=False)
+            # Detached and polled, so the run survives a dropped SSH connection.
+            code = run_detached(vm, f"cd ~/labs && sudo docker run --rm --gpus all --ipc=host -v ~/labs:/labs "
+                                    f"-v ~/hf-cache:/root/.cache/huggingface -w /labs {env}lab-{kind} "
+                                    f"bash -c {shlex.quote(inner)}", project, log)
             script_seconds = time.time() - t
         files = fetch_outputs(vm, project, workdir)
         if files:

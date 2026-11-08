@@ -5,6 +5,8 @@
 FROM nvidia/cuda:13.2.1-devel-ubuntu24.04
 # libdw1: Nsight Systems' trace importer needs libdw.so.1, which the image lacks.
 # python3-dev: torch.utils.cpp_extension compiles against Python's headers.
+# A slow PyPI download should be retried rather than fail the whole build.
+ENV PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=10
 RUN apt-get update \
  && apt-get install -y --no-install-recommends python3 python3-venv python3-dev build-essential libdw1 \
  && rm -rf /var/lib/apt/lists/*

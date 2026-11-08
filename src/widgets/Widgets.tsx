@@ -28,6 +28,10 @@ const WIDGETS: Record<string, ComponentType> = {
   'caching-allocator': lazy(() => import('./CachingAllocator')),
   'gil-threads': lazy(() => import('./GilThreads')),
   'bit-explorer': lazy(() => import('./BitExplorer')),
+  'quantization-playground': lazy(() => import('./QuantizationPlayground')),
+  'outlier-migration': lazy(() => import('./OutlierMigration')),
+  'pareto-picker': lazy(() => import('./ParetoPicker')),
+  'sparsity-pattern': lazy(() => import('./SparsityPattern')),
 }
 
 export function Widgets({ root, chapter }: { root: RefObject<HTMLElement | null>; chapter: unknown }) {

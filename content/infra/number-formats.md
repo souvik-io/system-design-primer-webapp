@@ -47,13 +47,13 @@ Range turned out to matter more for deep learning than precision, and BF16 becam
 
 FP8 halves the bytes again, and with 8 bits there is no longer one good split. The 2022 paper by NVIDIA, Arm and Intel that proposed today's FP8, later published as the OCP 8-bit floating-point specification, defined two encodings. E4M3 has 4 exponent and 3 mantissa bits and is meant for weights and activations. To gain range, it breaks with IEEE 754: it has no infinities, and only one pattern per sign, S.1111.111, is NaN, so the all-ones exponent holds numbers and the largest value is 448 instead of 240. E5M2 has 5 exponent and 2 mantissa bits, follows the IEEE conventions, and reaches 57,344; it is meant for gradients, which span a wider range and tolerate less precision. PyTorch calls them `torch.float8_e4m3fn` and `torch.float8_e5m2`, where "fn" means finite with NaN.
 
-Even E4M3's range is narrow. Its values run from 0.002 to 448, and a layer's weights or activations can sit anywhere in FP32's range, so FP8 always travels with a scale factor: the tensor is divided by a scale before it is cast, so that its largest value lands near 448, and the scale is kept in FP32 to multiply back. The scale can be one per tensor, one per row or per output channel, or one per block. DeepSeek-V3, trained in FP8, used E4M3 for every tensor, with one scale per 1 × 128 tile of activations and one per 128 × 128 block of weights. The lab shows that the cast itself is exact to specification: rounding a million values with the field rules above gave the same result as PyTorch's cast for every value, in all four 8- and 16-bit formats.
+Even E4M3's range is narrow. Its values run from 0.002 to 448, and a layer's weights or activations can sit anywhere in FP32's range, so FP8 always travels with a scale factor: the tensor is divided by a scale before it is cast, so that its largest value lands near 448, and the scale is kept in FP32 to multiply back. The scale can be one per tensor, one per row or per output channel, or one per block. DeepSeek-V3, trained in FP8, used E4M3 for every input of its FP8 matrix multiplications, with one scale per 1 × 128 tile of activations and one per 128 × 128 block of weights, and kept the embeddings, normalization, attention and output head in BF16 or FP32. The lab shows that the cast itself is exact to specification: rounding a million values with the field rules above gave the same result as PyTorch's cast for every value, in all four 8- and 16-bit formats.
 
 The FP8 that AMD's MI300 series runs is slightly different. Its E4M3FNUZ and E5M2FNUZ variants, whose names stand for finite, no negative zero, have a single NaN in the pattern that would be -0 and an exponent bias one higher, so E4M3FNUZ tops out at 240 instead of 448. A checkpoint quantized with OCP E4M3 scales has to be rescaled before an MI300 can run it. AMD's MI350 series moved to the OCP encodings.
 
 ## Integers: INT8 and INT4
 
-An integer format with a scale is the other way to use 8 or 4 bits. INT8 holds the integers from -128 to 127 and INT4 those from -8 to 7, and a scale maps them onto the data, so the stored values are evenly spaced: 255 or 15 levels, the same gap everywhere. A float of the same size places its values densely near zero and sparsely near its largest value.
+An integer format with a scale is the other way to use 8 or 4 bits. INT8 holds the integers from -128 to 127 and INT4 those from -8 to 7, and a scale maps them onto the data, so the stored values are evenly spaced: 256 or 16 levels, the same gap everywhere. A float of the same size places its values densely near zero and sparsely near its largest value.
 
 Which grid fits better depends on the data. Weights are roughly bell-shaped: most of them are small and a few are large. With one scale for a whole tensor, the largest weight sets the scale, and an evenly spaced grid then has few levels left for the small weights that are most of the tensor. The lab quantized all 106 million linear-layer weights of SmolLM2-135M this way. INT8 rounded 5.2% of the nonzero weights to zero and had a relative error of 3.6%, against 2.6% for FP8 E4M3 with no weights lost to zero. At 4 bits the gap was large: INT4 with one scale per tensor zeroed 69% of the weights, with an error of 58%, and FP4 zeroed 48%, with an error of 37%. Neither is usable, which is the point of the next section.
 
@@ -80,7 +80,7 @@ b -> w
 q -> w
 ```
 
-NVFP4 costs 4.5 bits per value, and on SmolLM2-135M it gave the lowest 4-bit error, 9.5%, with no weights clamped. NVIDIA reports that NVFP4 reduces a model's memory by about 3.5 times against FP16 and 1.8 times against FP8, and that DeepSeek-R1-0528 quantized to NVFP4 scored within 1 point of its FP8 version on seven benchmarks, from MMLU-Pro to AIME 2024. MXFP4 is in production too: OpenAI's gpt-oss models were post-trained with their mixture-of-experts weights in MXFP4, which lets gpt-oss-120b fit on a single 80 GB GPU. Switch the widget above to "A block of weights" to watch the three scaling methods handle the same 32 weights, with and without an outlier.
+NVFP4 costs 4.5 bits per value, and on SmolLM2-135M it gave the lowest 4-bit error, 9.5%, with no weights clamped. NVIDIA reports that NVFP4 reduces a model's memory by about 3.5 times against FP16 and 1.8 times against FP8, and that DeepSeek-R1-0528 quantized to NVFP4 lost at most 1 point against its FP8 version on seven benchmarks, from MMLU-Pro to AIME 2024. MXFP4 is in production too: OpenAI's gpt-oss models were post-trained with their mixture-of-experts weights in MXFP4, which lets gpt-oss-120b fit on a single 80 GB GPU. Switch the widget above to "A block of weights" to watch the three scaling methods handle the same 32 weights, with and without an outlier.
 
 ## What each GPU runs natively
 
@@ -89,13 +89,13 @@ A format is native on a GPU when its tensor cores take that format as input. Any
 | GPU | Architecture | Tensor-core input formats | Dense peak, BF16 / FP8 / FP4 (TFLOP/s) |
 |---|---|---|---|
 | NVIDIA A100 | Ampere | TF32, BF16, FP16, INT8, INT4 | 312 / none / none |
-| NVIDIA L4, L40S | Ada | TF32, BF16, FP16, FP8, INT8 | L4: 121 / 242 / none |
-| NVIDIA H100 | Hopper | TF32, BF16, FP16, FP8, INT8 | 989 / 1,979 / none |
+| NVIDIA L4, L40S | Ada | TF32, BF16, FP16, FP8, INT8, INT4 | L4: 121 / 242 / none |
+| NVIDIA H100 SXM | Hopper | TF32, BF16, FP16, FP8, INT8 | 989 / 1,979 / none |
 | NVIDIA B200 | Blackwell | TF32, BF16, FP16, FP8, FP6, FP4, INT8, with MX and NVFP4 block scales | 2,250 / 4,500 / 9,000 |
-| AMD MI300X | CDNA 3 | BF16, FP16, FP8 (FNUZ), INT8 | |
+| AMD MI300X | CDNA 3 | TF32, BF16, FP16, FP8 (FNUZ), INT8 | |
 | AMD MI350X, MI355X | CDNA 4 | BF16, FP16, FP8 (OCP), FP6, FP4, INT8 | |
 
-NVIDIA prints most peaks "with sparsity", a 2:4 structured-sparsity mode, and the dense peak is half; the table gives dense figures. The B200's are NVIDIA's HGX B200 figures for eight GPUs, divided by eight. Each format step down doubles the peak, because a tensor core of the same size handles twice as many narrower multiplications. The H100's product page lists no INT4, and FP8 first appeared in Ada and Hopper, so an A100 can store FP8 weights but must convert them before multiplying.
+NVIDIA prints most peaks "with sparsity", a 2:4 structured-sparsity mode, and the dense peak is half; the table gives dense figures. The B200's are NVIDIA's HGX B200 figures for eight GPUs, divided by eight. Each step from 16 to 8 to 4 bits doubles the peak, because a tensor core of the same size handles twice as many narrower multiplications; FP6 runs at the FP8 rate, and Ada's INT4 at its INT8 rate. The H100's product page lists no INT4, and FP8 first appeared in Ada and Hopper, so an A100 can store FP8 weights but must convert them before multiplying.
 
 ## Measured: one matmul in each format
 
@@ -121,7 +121,7 @@ The L4, an Ada GPU rented on Google Cloud for the lab, also runs FP8. In the pre
 The scripts are ready to download: [number_formats.py](/labs/infra/number_formats.py) and [gpu/format_matmul.py](/labs/infra/gpu/format_matmul.py). Run the first with `python number_formats.py`. Run the second with any of these commands from the `gpu/` folder, which build the same container from `images/base.Dockerfile` on either platform:
 
 ```bash
-modal run modal_run.py --script format_matmul.py --gpu H100     # about 10 s of GPU time, under $0.01
+modal run modal_run.py --script format_matmul.py --gpu 'H100!'  # about 10 s of GPU time, under $0.01
 modal run modal_run.py --script format_matmul.py --gpu B200     # the only GPU here with FP4; about $0.02
 python gcp_run.py --script format_matmul.py --gpu L4            # a spot VM; about $0.13, mostly image build time
 ```
@@ -315,4 +315,4 @@ The MI300X's tensor cores use the FNUZ variant of E4M3, whose exponent bias is o
 - [Accelerating AI Training with NVIDIA TF32 Tensor Cores](https://developer.nvidia.com/blog/accelerating-ai-training-with-tf32-tensor-cores/) explains TF32 and how tensor cores use it.
 - The [DeepSeek-V3 technical report](https://arxiv.org/abs/2412.19437), section 3.3, describes FP8 training with fine-grained tile and block scales.
 - AMD's [ROCm precision support](https://rocm.docs.amd.com/en/latest/reference/precision-support.html) page lists the formats of each Instinct generation, including the FNUZ FP8 variants.
-- PyTorch's [torch.finfo](https://docs.pytorch.org/docs/2.15/type_info.html) documents the numeric properties of each floating-point dtype.
+- PyTorch's [torch.finfo](https://docs.pytorch.org/docs/2.15/type_info.html) documents the numeric properties of its floating-point dtypes; the page lists the 16-, 32- and 64-bit ones, and `torch.finfo` also accepts the FP8 dtypes, as the lab does.
