@@ -1,0 +1,17 @@
+{
+  "_comment": "Copy to credits.json (which git ignores) and enter your own credits. Google Cloud lists them under Billing > Credits; amounts are in your billing currency, and expires is the month each one runs out. Add a line whenever a new credit arrives. modal_monthly_cap_usd keeps Modal runs inside its free monthly allowance, with headroom for the CPU and memory charges the cost log leaves out.",
+  "usd_to_inr": 95.5,
+  "modal_monthly_cap_usd": 25,
+  "gcp_project": "your-project-id",
+  "gcp_spent_before_ledger_inr": 0,
+  "gcp_credits": [
+    {
+      "amount_inr": 955.46,
+      "expires": "2027-02"
+    },
+    {
+      "amount_inr": 955.46,
+      "expires": "2027-03"
+    }
+  ]
+}

@@ -1,6 +1,23 @@
 # GPU labs: run these on an NVIDIA GPU
 
-These scripts need an NVIDIA GPU, so they are kept apart from the Mac labs one folder up. They are plain Python and run unchanged on any machine with an NVIDIA GPU (`python <script>`), or on a rented GPU through Modal with `modal_run.py`.
+These scripts need an NVIDIA GPU, so they are kept apart from the Mac labs one folder up. They are plain Python and run unchanged on any machine with an NVIDIA GPU (`python <script>`). Two launchers rent a GPU for you: `modal_run.py` on Modal and `gcp_run.py` on Google Cloud. Both build their containers from the same Dockerfiles in `images/`, so a lab gives the same software on either platform:
+
+| Image | Dockerfile | Holds | Launcher flag |
+|---|---|---|---|
+| base | `images/base.Dockerfile` | Python 3.12, PyTorch 2.15.0 (CUDA 13.2 runtime, Triton), NumPy, Transformers | none |
+| toolkit | `images/toolkit.Dockerfile` | the base packages on NVIDIA's CUDA 13.2 development image: `nvcc`, `compute-sanitizer`, Nsight Compute and Nsight Systems | `--toolkit` |
+| vllm | `images/vllm.Dockerfile` | vLLM 0.32.0 on NVIDIA's CUDA 13.0 development image | `--vllm` |
+
+Without either launcher, build and run an image yourself on any machine with an NVIDIA GPU and the NVIDIA Container Toolkit:
+
+```bash
+docker build -t lab-base -f images/base.Dockerfile images
+docker run --rm --gpus all --ipc=host -v "$PWD":/labs -w /labs lab-base python gpu_probe.py
+```
+
+## Keeping it inside free credit
+
+Modal's Starter plan includes $30 of credit a month, and Google Cloud accounts often carry promotional credits. `budget.py` keeps a ledger so the labs stay inside them. Copy `credits.example.json` to `credits.json` (git ignores it), enter your Google Cloud credits and their expiry months, and set your project. Before every run, each launcher prints what is left and refuses to start a run whose worst case (its time limit at the hourly price) does not fit; `--allow-over-budget` overrides that. `python budget.py` prints the balance at any time. The ledger only sees runs made through the launchers, so also set a billing alert on each account.
 
 ## Running on Modal
 
@@ -10,6 +27,18 @@ These scripts need an NVIDIA GPU, so they are kept apart from the Mac labs one f
 4. Scripts that compile CUDA code (`cuda_rmsnorm.py`, `cuda_bug.py`, `ncu_strided.py`) need the CUDA toolkit: add `--toolkit` to use NVIDIA's CUDA 13.2 development image, which includes `nvcc`, `compute-sanitizer`, Nsight Compute and Nsight Systems (with the `libdw1` package its trace importer needs).
 5. A container is guaranteed only 0.125 CPU cores by default and borrows more when the host has spare capacity, so launch-bound measurements, such as a batch-1 decode step, vary from host to host. Add `--cpu 4` to reserve four cores; it adds a fraction of a cent per minute.
 6. Each successful run prints how long the script ran on the GPU and an estimated cost, and appends them to `modal_costs.jsonl`. The estimate covers GPU time only. It leaves out container start-up and the CPU and memory charges, including cores reserved with `--cpu`, which Modal also bills, so the real cost is a little higher. Modal bills while a container runs, not while a job waits for a free GPU; in October 2026 L4s were sometimes unavailable for an hour, while H100s and A10s started within a minute.
+
+## Running on Google Cloud
+
+1. Install the Google Cloud CLI and sign in with `gcloud auth login`. Use a project with billing turned on, and put its ID in `credits.json` as `gcp_project` (or pass `--project`).
+2. Request GPU quota (IAM & Admin > Quotas): `GPUS_ALL_REGIONS` of at least 1, plus the GPU type in `us-central1`, such as `PREEMPTIBLE_NVIDIA_L4_GPUS`. New projects start with none, and Google may refuse a request for a project with no billing history; a request on an older project of the same account is more likely to pass.
+3. Run a script: `python gcp_run.py --script gpu_probe.py --gpu L4`. GPU types are `L4` (g2-standard-8), `L4:2` (two L4s), `A100` (40 GB) and `A100-80GB`, all in `us-central1`. `--toolkit` and `--vllm` choose the image, as on Modal.
+4. Each run creates a Spot VM from Google's Deep Learning VM image, copies this folder to it, builds the image from `images/`, runs the script, copies the output and any files the script wrote to `runs/<script>-<gpu>-<time>/`, and deletes the VM, even after an error or Ctrl-C. Every VM also gets a time limit (`--max-hours`, one hour by default) after which Google deletes it, so nothing keeps billing if your laptop disconnects.
+5. Spot VMs cost about 40% of the normal price but can be reclaimed at any moment; the launcher says so when it happens, and you run again or add `--on-demand`.
+6. `--keep --max-hours 3` (with or without `--script`) leaves a VM running for you to SSH into, which suits long sessions such as building the Part 5 engine. `--list` shows the VMs the launcher started and `--cleanup` deletes them.
+7. Each run appends the VM's lifetime and estimated cost to `gcp_costs.jsonl`. The hourly prices in `gcp_run.py` come from Google's Cloud Billing Catalog for us-central1 (November 2026): an L4 Spot VM costs about $0.51 an hour, an A100 40 GB Spot VM about $1.99.
+
+Which platform to use: Modal starts in seconds, bills per second and has H100s without a quota request, so H100 labs and short benchmarks run there. Google Cloud is cheaper for L4s, gives you a whole VM (root access, GPU clock control, long sessions), and runs the Kubernetes labs in Part 8.
 
 ## Scripts
 
