@@ -67,11 +67,11 @@ Of the 85.8 ms, about 72 ms is the engine core computing the prefill of 2,006 to
 
 After the first token, the engine settles into steps of 6.6 ms, which is 151 tokens per second for this lone request. In a median step the main loop spends 0.11 ms in `schedule()`, 1.4 ms in `execute_model` (of which 0.42 ms copies the batch's token ids and positions into buffers on the GPU, and 0.03 ms replays the CUDA graph), 0.65 ms in `sample_tokens`, 0.06 ms in `update_from_output`, and 4.0 ms waiting for the GPU. The output thread encodes each message in 0.01 ms, and the API server spends 0.07 ms decoding and detokenizing it. With one request, vLLM's own Python costs about 2.5 ms per step, and the next section shows why that does not add to the step time.
 
-The second request shows what the prefix cache does to the same prompt. `get_computed_blocks` found 2,000 of its 2,021 tokens, so the scheduler gave it 21 tokens and 2 new blocks instead of 2,006 and 126, and its first chunk arrived after 31.1 ms. The hit is 2,000 and not 2,016 for two reasons. The cache works in whole blocks of 16 tokens. And the two prompts differ only in the question, which begins inside the 126th block, so the first 125 blocks, 2,000 tokens, are identical.
+The second request shows what the prefix cache does to the same prompt. `get_computed_blocks` found 2,000 of its 2,021 tokens, so the scheduler gave it 21 tokens and 2 new blocks instead of 2,006 and 126, and its first chunk arrived after 31.1 ms. The hit is 2,000 tokens and not 2,021 for two reasons. The cache works in whole blocks of 16 tokens and never covers a prompt's last token, so even an identical prompt would have hit at most 126 blocks, 2,016 tokens. And the two prompts differ only in the question, which begins inside the 126th block, so only the first 125 blocks, 2,000 tokens, are identical.
 
 ## The engine core's loop
 
-The main loop is `EngineCoreProc.run_busy_loop` in `v1/engine/core.py`, and it is four lines long.
+The main loop is `EngineCoreProc.run_busy_loop` in `v1/engine/core.py`. Without the two calls that publish request counts for monitoring, it is four lines long.
 
 ```python
 def run_busy_loop(self):
@@ -101,7 +101,7 @@ def step(self):                                    # abridged from v1/engine/cor
 
 The forward pass and sampling are separate calls so that a grammar's token mask for structured output can be computed on the CPU while the GPU runs the forward pass.
 
-A default server does not use `step`. It uses `step_with_batch_queue`, because **asynchronous scheduling** is on by default for text generation. The idea is that the CPU work for step N+1 can be done while the GPU is still running step N. The function schedules a batch, launches it, and if the queue of launched batches is not yet full it returns at once to schedule the next one. Only when nothing more can be scheduled does it block on the oldest batch and apply its output. The queue holds 2 batches when there is no pipeline parallelism (`max_concurrent_batches` in `config/vllm.py`), so under load one batch is always in flight behind the one being waited for.
+A default server does not use `step`. It uses `step_with_batch_queue`, because **asynchronous scheduling** is on by default for text generation. The idea is that the CPU work for step N+1 can be done while the GPU is still running step N. The function schedules a batch, launches it, and if the queue of launched batches is not yet full it returns at once to schedule the next one. Only when the queue is full, or nothing more can be scheduled, does it block on the oldest batch and apply its output. The queue holds 2 batches when there is no pipeline parallelism (`max_concurrent_batches` in `config/vllm.py`), so under load one batch is always in flight behind the one being waited for.
 
 The trace shows this plainly. Step 2 was scheduled at 63.7 ms, when the request's first token did not exist yet: the scheduler counted it as an output placeholder (`num_output_placeholders`), and the model runner, which keeps each request's last sampled token on the GPU, fed it to the next step without the CPU ever seeing it. The main loop then waited in `AsyncOutput.get_output`, which blocks on a CUDA event recorded after a non-blocking copy of the sampled tokens to the CPU.
 
@@ -195,22 +195,22 @@ A block is entered in the table only when it is full, and a block with a hash is
 A server that takes two minutes to start is doing three things that nano_engine did not. The log of the traced server shows each of them.
 
 ```text
-Model loading took 15.0 GiB memory and 51.716951 seconds
-[backbone] Compiling a graph for compile range (1, 8192) takes 6.78 s
-[backbone] torch.compile took 17.70 s in total
+Model loading took 15.0 GiB memory and 89.942680 seconds
+[backbone] Compiling a graph for compile range (1, 8192) takes 7.58 s
+[backbone] torch.compile took 22.98 s in total
 Available KV cache memory: 55.06 GiB
 GPU KV cache size: 451,056 tokens, Maximum concurrency for 4,096 tokens per request: 110.12x
 CUDA graph pool memory: 0.45 GiB (actual), 0.9 GiB (estimated), difference: 0.45 GiB (100.4%).
 Free memory on device (78.66/79.17 GiB) on startup. Desired GPU memory utilization is (0.92, 72.84 GiB). Actual usage
 is 15.81 GiB for consumed memory (weights + non-torch), 1.97 GiB for peak activation, and 0.45 GiB for CUDAGraph memory.
-init engine (profile, create kv cache, warmup model) took 111.60 s (compilation: 17.70 s)
+init engine (profile, create kv cache, warmup model) took 129.08 s (compilation: 22.98 s)
 ```
 
 First it compiles the model. vLLM's compilation mode (`CompilationMode.VLLM_COMPILE`, in `config/compilation.py`) traces the model once with `torch.compile` for any batch from 1 to `max_num_batched_tokens` tokens and splits the traced graph at each attention operation. The pieces between two attention calls contain only operations with fixed shapes for a given number of tokens, which is what a CUDA graph needs. Attention is left outside the pieces because its work depends on how long each request's context is.
 
 Then it sizes the KV cache, the way chapter 5.1 did: it runs a profile pass at the full token budget, reads the peak, and gives the cache what is left of `gpu_memory_utilization`. Here 0.92 of 79.17 GiB is 72.84 GiB, the weights and other fixed memory take 15.81 GiB and the peak of activations 1.97 GiB, and the remaining 55.06 GiB holds 451,056 tokens at 131,072 bytes each.
 
-Then it captures CUDA graphs, in the default mode `FULL_AND_PIECEWISE`, for a fixed list of batch sizes. There are two kinds of graph. A **full** graph records the whole forward pass, attention included, and is valid only for a batch in which every request runs exactly one token, which is a pure decode step. A **piecewise** graph is one small graph per compiled piece, with attention called normally between them, and is valid for any batch of that many tokens, prefill chunks included. The list of sizes is 1, 2, 4, then every multiple of 8 up to 248, then every multiple of 16 from 256 up to a maximum that defaults to 512, which makes 51 sizes. A piecewise graph is captured for every size, and a full graph for every size a batch of decodes can have: on the A10 run of this lab, where `max_num_seqs` defaulted to 256, the log shows 51 piecewise captures and 35 full ones. A batch is padded up to the next size in the list, as in the graph-padding widget of [PyTorch execution](/learn/pytorch-execution).
+Then it captures CUDA graphs, in the default mode `FULL_AND_PIECEWISE`, for a fixed list of batch sizes. There are two kinds of graph. A **full** graph records the whole forward pass, attention included, and is valid only for a batch in which every request runs exactly one token, which is a pure decode step. A **piecewise** graph is one small graph per compiled piece, with attention called normally between them, and is valid for any batch of that many tokens, prefill chunks included. The list of sizes is 1, 2, 4, then every multiple of 8 up to 248, then every multiple of 16 from 256 up to a maximum. The maximum defaults to twice `max_num_seqs` or 512, whichever is smaller (1,024 on B200-class GPUs), so on an H100 with default settings there are 51 sizes, and a server started with `--max-num-seqs 16` captures graphs only up to 32 tokens. A piecewise graph is captured for every size, and a full graph for every size a batch of decodes can have: on the A10 run of this lab, where `max_num_seqs` defaulted to 256, the log shows 51 piecewise captures and 35 full ones. A batch is padded up to the next size in the list, as in the graph-padding widget of [PyTorch execution](/learn/pytorch-execution).
 
 At each step `CudagraphDispatcher.dispatch` (`v1/cudagraph_dispatcher.py`) picks one of three paths: the full graph if the batch is all decodes and its size was captured, otherwise the piecewise graph if the token count is at most the largest captured size, and otherwise the compiled model with no graph at all. The trace caught all three.
 
@@ -220,7 +220,7 @@ At each step `CudagraphDispatcher.dispatch` (`v1/cudagraph_dispatcher.py`) picks
 | Request 2's prefill | 21 | Piecewise graphs, 10.9 ms | 14.2 ms |
 | Request 1's prefill | 2,006 | No graph, because 2,006 is more than 512 | 51.0 ms |
 
-A decode step costs the main loop about a millisecond however many layers the model has, because replaying a graph is one call. This is the mechanism behind chapter 5.1's result that vLLM with graphs was 1.12 times faster than vLLM without them on the benchmark, and it is why the full graph is reserved for decode steps, where the GPU's work is short and the launch overhead would otherwise be a large part of it. A prefill of thousands of tokens keeps the GPU busy for tens of milliseconds whichever way it is launched.
+A decode step costs the main loop about 1.4 ms however many layers the model has, because replaying a graph is one call. This is the main mechanism behind chapter 5.1's result that vLLM's default was 1.12 times faster than its eager mode on the benchmark (eager mode turns off `torch.compile` as well as the graphs), and it is why the full graph is reserved for decode steps, where the GPU's work is short and the launch overhead would otherwise be a large part of it. A prefill of thousands of tokens keeps the GPU busy for tens of milliseconds whichever way it is launched.
 
 ## Five settings, measured
 
@@ -236,7 +236,7 @@ Most of vLLM's flags do not change performance. Five do, and they are the ones a
 
 A GPU with 160 GiB or more, such as a B200, gets 16,384 tokens and 1,024 sequences in both modes, and `--performance-mode throughput` doubles whichever of the two limits you did not set yourself.
 
-The lab measures these with the workload of chapter 5.1 sent over HTTP: 256 streamed requests to Llama 3.1 8B on an H100, prompt and output lengths each drawn between 100 and 1,024 tokens, all sent at the same moment. It reports output tokens per second over the whole burst, the time to the first token, the time per token once a request is decoding, and the 99th-percentile gap between two chunks of one stream.
+The lab measures these with the workload of chapter 5.1 sent over HTTP: 256 streamed requests to Llama 3.1 8B on an H100, prompt and output lengths each drawn between 100 and 1,024 tokens, all sent at the same moment. It reports output tokens per second over the whole burst, the time to the first token, the time per token once a request is decoding, and the longest gap between two chunks of any one stream.
 
 | Configuration | KV cache, tokens | Output tokens/s | First token, median | First token, p99 | Per token, median | Longest gap in a stream | Preemptions |
 |---|---|---|---|---|---|---|---|
@@ -258,7 +258,7 @@ The default server reaches 8,332 output tokens per second over HTTP. Chapter 5.1
 
 **Prefix caching removes the shared part of a prompt.** The last experiment sends 64 requests that share a 3,000-token prefix and differ in their final 50 tokens. The first goes alone, and the other 63 follow together once it has finished.
 
-| | The 63 requests, total | First token, median | First token, p99 | Prompt tokens found in the cache |
+| | The 63 requests, total | First token, median | First token, p99 | Prompt tokens found in the cache, all 64 requests |
 |---|---|---|---|---|
 | Prefix caching on (default) | 0.38 s | 282 ms | 289 ms | 188,496 of 195,200 |
 | `--no-enable-prefix-caching` | 4.81 s | 2,463 ms | 4,661 ms | 0 |

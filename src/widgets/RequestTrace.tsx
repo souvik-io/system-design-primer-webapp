@@ -57,7 +57,7 @@ const ABOUT: Record<string, { file: string; what: string }> = {
   },
   'EngineCore.step_with_batch_queue': {
     file: 'v1/engine/core.py',
-    what: 'One iteration of the engine: schedule a batch, hand it to the model runner, and, if nothing more can be scheduled, wait for the oldest batch still on the GPU and process its output.',
+    what: 'One iteration of the engine: schedule a batch and hand it to the model runner. If the queue of launched batches is full, or nothing more can be scheduled, it then waits for the oldest batch still on the GPU and processes its output.',
   },
   'Scheduler.schedule': {
     file: 'v1/core/sched/scheduler.py',
@@ -73,7 +73,7 @@ const ABOUT: Record<string, { file: string; what: string }> = {
   },
   'GPUModelRunner.execute_model (V2)': {
     file: 'v1/worker/gpu/model_runner.py',
-    what: 'Copies token ids, positions and block tables to the GPU and launches the forward pass: one replay of a full CUDA graph for a batch of decodes, or a piecewise graph for a batch with a prefill. It returns before the GPU has finished.',
+    what: 'Copies token ids, positions and block tables to the GPU and launches the forward pass: one replay of a full CUDA graph for a batch of decodes, piecewise CUDA graphs for a batch with a prefill of up to 512 tokens, and the compiled model without a graph for a larger batch, such as the first request\'s 2,006-token prefill. It returns before the GPU has finished.',
   },
   'runner: prepare_inputs': {
     file: 'v1/worker/gpu/model_runner.py',
