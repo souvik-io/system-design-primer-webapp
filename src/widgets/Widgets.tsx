@@ -27,6 +27,13 @@ const WIDGETS: Record<string, ComponentType> = {
   'graph-padding': lazy(() => import('./GraphPadding')),
   'caching-allocator': lazy(() => import('./CachingAllocator')),
   'gil-threads': lazy(() => import('./GilThreads')),
+  'bit-explorer': lazy(() => import('./BitExplorer')),
+  'quantization-playground': lazy(() => import('./QuantizationPlayground')),
+  'outlier-migration': lazy(() => import('./OutlierMigration')),
+  'pareto-picker': lazy(() => import('./ParetoPicker')),
+  'sparsity-pattern': lazy(() => import('./SparsityPattern')),
+  'paged-kv-allocator': lazy(() => import('./PagedKvAllocator')),
+  'request-trace': lazy(() => import('./RequestTrace')),
 }
 
 export function Widgets({ root, chapter }: { root: RefObject<HTMLElement | null>; chapter: unknown }) {

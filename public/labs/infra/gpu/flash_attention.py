@@ -6,7 +6,7 @@
 #   naive:  scores = Q @ K^T, softmax, @ V, materialising the full N x N matrix (as plain PyTorch would)
 #   SDPA:   torch.nn.functional.scaled_dot_product_attention, which picks a fused backend on its own
 #
-# Needs an NVIDIA GPU. Run: python flash_attention.py   or: modal run modal_run.py --script flash_attention.py --gpu H100
+# Needs an NVIDIA GPU. Run: python flash_attention.py   or: modal run modal_run.py --script flash_attention.py --gpu 'H100!'
 import math
 
 import torch

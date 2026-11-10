@@ -6,7 +6,7 @@
 # building an attention plan for each new cache length (chapter 3.1). The parent then runs `nsys stats` on the
 # report and prints three summaries: the NVTX ranges (one per step), the GPU kernels, and the CUDA API calls made on the CPU.
 #
-# Needs Nsight Systems and an NVIDIA GPU. On Modal: modal run modal_run.py --script nsys_decode.py --gpu H100 --toolkit
+# Needs Nsight Systems and an NVIDIA GPU. On Modal: modal run modal_run.py --script nsys_decode.py --gpu 'H100!' --toolkit
 # Elsewhere: python nsys_decode.py (with nsys on the PATH). The .nsys-rep file can be opened in the Nsight Systems GUI.
 import csv
 import io

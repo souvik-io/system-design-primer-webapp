@@ -164,7 +164,7 @@ To see where memory goes, PyTorch records allocation history with `torch.cuda.me
 
 **Tier: [1 GPU].** The run took 104 seconds of H100 time on Modal, about 11 cents, including a 2.5 GB model download.
 
-The script is ready to download: [gpu/decode_runtime.py](/labs/infra/gpu/decode_runtime.py). Run it with `modal run modal_run.py --script decode_runtime.py --gpu H100 --cpu 4`, or with `python decode_runtime.py` on your own NVIDIA GPU. The `--cpu 4` option reserves four CPU cores: a Modal container is guaranteed only 0.125 cores by default and borrows more when the host has spare capacity, and a launch-bound step is exactly the kind of workload whose speed then depends on how busy the host is.
+The script is ready to download: [gpu/decode_runtime.py](/labs/infra/gpu/decode_runtime.py). Run it with `modal run modal_run.py --script decode_runtime.py --gpu 'H100!' --cpu 4`, or with `python decode_runtime.py` on your own NVIDIA GPU. The `--cpu 4` option reserves four CPU cores: a Modal container is guaranteed only 0.125 cores by default and borrows more when the host has spare capacity, and a launch-bound step is exactly the kind of workload whose speed then depends on how busy the host is.
 
 **Part A, the launch floor.** Time 200 tiny kernels launched one by one and replayed as a CUDA graph, and compute the CPU cost per launch on your machine.
 

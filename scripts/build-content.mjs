@@ -202,6 +202,23 @@ const PARTS = [
       'What eager PyTorch costs, CUDA graphs, torch.compile and the caching allocator; C++ bindings and the GIL; and ahead-of-time compilers and runtimes.',
     chapters: ['pytorch-execution', 'native-code', 'graph-runtimes'],
   },
+  {
+    id: 'infra-compression',
+    handbook: 'infra',
+    dir: 'infra',
+    title: 'Compression',
+    description: 'Number formats from FP32 to NVFP4, the arithmetic of quantization, the algorithms that produce quantized checkpoints, how to measure what they cost in quality, and when pruning or distillation is worth it instead.',
+    chapters: ['number-formats', 'quantization-math', 'ptq-algorithms', 'quality-eval', 'other-compression'],
+  },
+  {
+    id: 'infra-serving',
+    handbook: 'infra',
+    dir: 'infra',
+    title: 'Serving engines',
+    description:
+      'An inference engine built from scratch, with a paged KV cache, continuous batching under a token budget, chunked prefill, preemption and an OpenAI-compatible server, measured against vLLM. Then vLLM itself: one request traced through its processes, its scheduler and block pool read against yours, and its main settings measured.',
+    chapters: ['mini-inference-engine', 'inside-vllm'],
+  },
 ]
 
 /** Folders under content/ that hold a handbook's chapters, besides content/ itself. */
@@ -307,6 +324,13 @@ const WIDGET_NAMES = new Set([
   'graph-padding',
   'caching-allocator',
   'gil-threads',
+  'bit-explorer',
+  'quantization-playground',
+  'outlier-migration',
+  'pareto-picker',
+  'sparsity-pattern',
+  'paged-kv-allocator',
+  'request-trace',
 ])
 
 function widgetNode(name, where) {

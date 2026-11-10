@@ -6,7 +6,7 @@
 #   4. matmul          tiles of A and B through shared memory, tl.dot on tensor cores, grouped order for L2
 #
 # Needs an NVIDIA GPU; Triton ships inside the Linux PyTorch wheels.
-# Run: python triton_kernels.py          or: modal run modal_run.py --script triton_kernels.py --gpu H100
+# Run: python triton_kernels.py          or: modal run modal_run.py --script triton_kernels.py --gpu 'H100!'
 import torch
 import triton
 import triton.language as tl

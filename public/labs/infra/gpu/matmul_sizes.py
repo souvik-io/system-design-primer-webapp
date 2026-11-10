@@ -2,7 +2,7 @@
 # Small matmuls cannot fill every SM with work, so they reach a smaller share of the peak.
 #
 # Run on an NVIDIA GPU:  python matmul_sizes.py
-# Or on Modal:           modal run modal_run.py --script matmul_sizes.py --gpu H100
+# Or on Modal:           modal run modal_run.py --script matmul_sizes.py --gpu 'H100!'
 import torch
 
 dev = torch.device("cuda")

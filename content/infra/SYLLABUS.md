@@ -129,8 +129,17 @@ Start applying around week 26 to 28; interview prep (Part 10) runs alongside the
 | 3.1 | `pytorch-execution.md` | Drafted 2026-11-01. `gpu/decode_runtime.py` on an H100 (`--cpu 4`): decode step 10.30 ms eager, 2.80 ms static cache + hand-captured CUDA graph, 1.84 ms `torch.compile(mode="reduce-overhead")`. Found that cuDNN attention builds a graph per new KV length (52.84 ms first pass). Re-run 2026-11-01 after review tweaks (graph warm-up replay, kernels only) |
 | 3.2 | `native-code.md` | Drafted 2026-11-01. `native_sampler.py` (pybind11 via `load_inline`) on the M2: C++ releasing the GIL 3.5x on 4 threads, holding it 1.0x, NumPy 2.3x. Elective 3.2b (Rust) is a "taking it further" note in the reference solution, without code |
 | 3.3 | `graph-runtimes.md` | Drafted 2026-11-01. The planned TensorRT-LLM vs vLLM lab was replaced: TensorRT-LLM removed its TensorRT engine backend from the pre-release 1.3.0rc21 (July 2026). `export_runtimes.py` compares eager, `torch.compile`, ONNX Runtime and AOTInductor on the M2 |
+| 4.1 | `number-formats.md` | Drafted 2026-11-08. `number_formats.py` on the M2 decodes every format from its bit fields, matches PyTorch's casts on 1M values per format, and quantizes SmolLM2-135M's weights (FP4 per tensor 37% error, MXFP4 11.8%, NVFP4 9.5%). `gpu/format_matmul.py` measured on a Modal H100 and B200 and a GCP spot L4: NVFP4 4.4x BF16 in the prefill shape on the B200. Widget `bit-explorer` |
+| 4.2 | `quantization-math.md` | Drafted 2026-11-08. `quant_math.py` on the M2: INT8/INT4 by granularity on SmolLM2-135M (INT4 group 128 asymmetric: 10.5% weight error, perplexity +35%), clipping, a packed INT4 layer, activation outliers (one `down_proj` input reached 2,643) and W8A8 per-tensor +89% vs per-token +4%. `gpu/w4a16_matmul.py` on a Modal H100 (Marlin 3.1x BF16 at batch 1, 0.5x at 4,096; FP8 W8A8 1.24-1.37x everywhere) and a GCP L4. Widget `quantization-playground` |
+| 4.3 | `ptq-algorithms.md` | Drafted 2026-11-08. `ptq_algorithms.py` implements GPTQ, AWQ and SmoothQuant from scratch on SmolLM2-135M (INT4 perplexity +35% RTN, +17% GPTQ act-order, +20% AWQ; SmoothQuant brings per-tensor W8A8 from +89% to +6%). `gpu/quantize_and_eval.py` quantizes Llama 3.1 8B seven ways with llm-compressor and serves each version in vLLM on a Modal H100 (new `quant` image; 37 min, $2.40): INT4 5.4 GiB of weights, FP8/INT8 W8A8 1.44-1.51x prefill, decode 1.45-1.65x at batch 1; GPTQ calibrated on WikiText has the best INT4 perplexity but RTN-level GSM8K (66.6% vs 73.4% for perfectblend calibration). Widget `outlier-migration` |
+| 4.4 | `quality-eval.md` | Drafted 2026-11-08. `quality_eval.py`: perplexity, KL divergence, top-1 agreement, ARC-Easy accuracy and flips for seven SmolLM2 versions (AWQ: lowest KL of the INT4 versions but not the best accuracy; every INT4 version flips 10-16% of answers). Widget `pareto-picker` from the 8B results |
+| 4.5 | `other-compression.md` | Drafted 2026-11-08 as "Pruning and distillation". `pruning.py`: magnitude vs Wanda, unstructured vs 2:4 on SmolLM2 (Wanda 2:4 +512%, far worse than INT4). `gpu/sparse_matmul.py`: 2:4 slower than dense on an H100 at every size; 1.6-1.7x on an L4 only at small batches. Widget `sparsity-pattern` |
+| 5.1 | `mini-inference-engine.md` | Drafted 2026-11-10. `nano_engine/` (about 650 lines of core) matches Hugging Face token for token; on a Modal H100 with Llama 3.1 8B it reaches 4,997 output tok/s against vLLM's 8,189 (1.64x). Widget `paged-kv-allocator` |
+| 5.2 | `inside-vllm.md` | Drafted 2026-11-10 against vLLM 0.32.0 source. `gpu/inside_vllm.py` traces a request through `vllm serve` (first token 85.8 ms for a 2,022-token prompt, 31.1 ms with a prefix-cache hit; decode step 6.6 ms) and sweeps five settings on an H100 (8,332 tok/s at defaults; 172 preemptions at `gpu_memory_utilization=0.3`). The lab's contribution task is left to the reader, with a reading map as the reference. Widget `request-trace` |
 
 Part 2 runs its GPU labs on Modal through `public/labs/infra/gpu/modal_run.py`, which logs each run's cost to `modal_costs.jsonl` (gitignored). The handbook's planned cheap GPU was the L4, but Modal had no L4 capacity for over an hour on 2026-10-31, so Part 2 uses the A10 (24 GB GDDR6, 600 GB/s, 125 TFLOPS dense BF16, no FP8) as its low-end GPU. An L4 was available on 2026-11-01, and `gpu_probe.py` was run on it to check chapter 2.1's L4 figures. Part 2's GPU runs cost about $0.25 in total, plus about $0.10 for the 2026-11-01 re-runs (profiling, Nsight Systems, the L4 probe). Deck `infra-kernels` covers Part 2 (29 cards). Part 2 widgets: `warp-access`, `occupancy`, `matmul-tiling`, `warp-reduce`, `online-softmax`, `decode-timeline`.
+
+From Part 4, GPU labs run on both Modal and Google Cloud (`gcp_run.py`, spot VMs in a project with GPU quota), from the same Dockerfiles in `gpu/images/`, and `gpu/budget.py` checks every run against the free credit left on each platform. Modal takes the H100 and B200 runs; Google Cloud takes L4 runs, GKE (Part 8) and long development sessions.
 
 Part 3 runs its one GPU lab on a Modal H100 with `--cpu 4`, a new `modal_run.py` option: a Modal container is guaranteed only 0.125 CPU cores by default, which made launch-bound timings vary by host. Part 3's GPU runs, including diagnostics, cost about $0.55 of GPU time. Deck `infra-runtime` covers Part 3 (42 cards). Part 3 widgets: `launch-overhead`, `graph-padding`, `caching-allocator`, `gil-threads`.
 
@@ -474,9 +483,13 @@ Existing widgets to reuse: `kv-cache-calculator`, `batching-simulator`.
 | Layer explorer (FLOPs/bytes per op), built | 1.1 | 1 |
 | Tiling animator, built as `matmul-tiling` | 2.2 | 1 |
 | Online softmax stepper, built as `online-softmax` | 2.4 | 1 |
-| Quantization playground | 4.2 | 1 |
-| Bit/format explorer | 4.1 | 2 |
-| Paged KV allocator (extends existing) | 5.1 | 1 |
+| Quantization playground, built as `quantization-playground` | 4.2 | 1 |
+| Outlier migration (SmoothQuant), built as `outlier-migration` | 4.3 | 2 |
+| Pareto picker, built as `pareto-picker` from the 8B results | 4.4 | 2 |
+| 2:4 sparsity pattern, built as `sparsity-pattern` | 4.5 | 3 |
+| Bit/format explorer, built as `bit-explorer` | 4.1 | 2 |
+| Paged KV allocator, built as `paged-kv-allocator` | 5.1 | 1 |
+| Request trace through vLLM (added), built as `request-trace` from a real trace | 5.2 | 1 |
 | Radix tree prefix cache | 5.3 | 2 |
 | Speculative decoding simulator | 5.4 | 2 |
 | Ring all-reduce | 6.1 | 2 |

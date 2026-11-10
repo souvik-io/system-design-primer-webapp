@@ -166,7 +166,7 @@ The scripts are ready to download:
 
 - [tiling_traffic.py](/labs/infra/tiling_traffic.py) is the tiling model and needs no packages.
 - [gpu/triton_kernels.py](/labs/infra/gpu/triton_kernels.py) holds the four kernels, their tests and their timings. It needs an NVIDIA GPU, and Triton comes with the Linux PyTorch wheels.
-- [gpu/modal_run.py](/labs/infra/gpu/modal_run.py) runs it on Modal: `modal run modal_run.py --script triton_kernels.py --gpu H100`.
+- [gpu/modal_run.py](/labs/infra/gpu/modal_run.py) runs it on Modal: `modal run modal_run.py --script triton_kernels.py --gpu 'H100!'`.
 
 **Part A, the tiling model.** Write a model of a matmul's memory traffic for a given tile size and tile order, as described in the section on tile order. Use it to predict, for an H100 and an A10, which configurations are memory-bound. The part is done when your model reproduces the table above and you can explain why the A10 gains more from grouped order than the H100.
 

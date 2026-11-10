@@ -9,4 +9,7 @@ src/generated
 .env.local
 .env.*.local
 public/labs/infra/gpu/modal_costs.jsonl
+public/labs/infra/gpu/gcp_costs.jsonl
+public/labs/infra/gpu/credits.json
+public/labs/infra/gpu/runs/
 public/labs/**/__pycache__/

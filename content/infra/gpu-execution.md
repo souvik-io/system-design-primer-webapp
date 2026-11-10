@@ -187,7 +187,7 @@ The scripts are ready to download:
 
 **Part A, access patterns on your Mac.** Measure copy bandwidth for working sets from 2 MiB to 1 GiB, then the useful bandwidth of reading every element, every second, fourth and so on up to every 32nd, and random elements. The part is done when you can say at what working-set size your machine's caches stop helping, and how much a stride of 8 costs compared with a stride of 1.
 
-**Part B, an NVIDIA GPU against its spec sheet.** Print the device's SM count, registers, shared memory and L2 size. Measure copy bandwidth across working sets that fit in L2 and that do not, useful bandwidth for strided and random reads, and matmul throughput in FP32, TF32, BF16 and FP8. Put each measurement next to the figure on NVIDIA's specification page. The part is done when you have a table of measured against specified numbers and a sentence explaining each gap. Run it with `modal run modal_run.py --script gpu_probe.py --gpu H100`, or with `python gpu_probe.py` on any machine that has an NVIDIA GPU.
+**Part B, an NVIDIA GPU against its spec sheet.** Print the device's SM count, registers, shared memory and L2 size. Measure copy bandwidth across working sets that fit in L2 and that do not, useful bandwidth for strided and random reads, and matmul throughput in FP32, TF32, BF16 and FP8. Put each measurement next to the figure on NVIDIA's specification page. The part is done when you have a table of measured against specified numbers and a sentence explaining each gap. Run it with `modal run modal_run.py --script gpu_probe.py --gpu 'H100!'`, or with `python gpu_probe.py` on any machine that has an NVIDIA GPU.
 
 <details>
 <summary>Reference solution</summary>

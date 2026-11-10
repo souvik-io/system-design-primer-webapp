@@ -120,7 +120,7 @@ Decode is a different shape. Each sequence adds one query, which attends to the 
 The scripts are ready to download:
 
 - [online_softmax.py](/labs/infra/online_softmax.py) checks the online softmax and tiled attention in NumPy and prints the traffic model.
-- [gpu/flash_attention.py](/labs/infra/gpu/flash_attention.py) holds the Triton kernel, the plain PyTorch version and the benchmark. Run it with `modal run modal_run.py --script flash_attention.py --gpu H100`.
+- [gpu/flash_attention.py](/labs/infra/gpu/flash_attention.py) holds the Triton kernel, the plain PyTorch version and the benchmark. Run it with `modal run modal_run.py --script flash_attention.py --gpu 'H100!'`.
 
 **Part A, the algorithm on a CPU.** Implement the online softmax over blocks and check it against an ordinary softmax. Then implement causal attention tiled over query blocks and key blocks, without forming the N × N matrix, and check it against ordinary attention. The part is done when both agree to within 10⁻¹² in double precision.
 

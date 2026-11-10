@@ -1,0 +1,702 @@
+{
+ "model": "unsloth/Meta-Llama-3.1-8B-Instruct",
+ "gpu": "NVIDIA H100 80GB HBM3",
+ "vllm": "0.32.0",
+ "startup_s": 268.2,
+ "startup_log": [
+  "Chunked prefill is enabled with max_num_batched_tokens=8192.",
+  "Initializing a V1 LLM engine (v0.32.0) with config: model='unsloth/Meta-Llama-3.1-8B-Instruct', speculative_config=None, tokenizer='unsloth/Meta-Llama-3.1-8B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_revision=main, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=4096, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel",
+  "Using V2 Model Runner",
+  "FlashInfer's precompiled kernels are missing or do not match flashinfer-python 0.7.0.post1 (flashinfer-cubin not installed, flashinfer-jit-cache not installed). FlashInfer then downloads and compiles kernels at startup, which can take several minutes, or fails to import mismatched ones. Run `vllm download-kernels` in this Python environment to install them.",
+  "Initializing model took 2.529659 seconds",
+  "Loading weights took 2.29 seconds",
+  "Model loading took 15.0 GiB memory and 89.942680 seconds",
+  "Using LBNHC KV cache layout.",
+  "[backbone] Starting torch.compile",
+  "[backbone] Using cache directory: /root/.cache/vllm/torch_compile_cache/5dd2ddfbbf/rank_0_0/backbone for vLLM's torch.compile",
+  "[backbone] Compiling a graph for compile range (1, 8192) takes 7.58 s",
+  "[backbone] saved AOT compiled function to /root/.cache/vllm/torch_compile_cache/torch_aot_compile/3b63d3ccc35ae76f02ea6f94e090eb7a9aa2d3f0ae7b8fe8722187c834653157/rank_0_0/model",
+  "[backbone] torch.compile took 22.98 s in total",
+  "Available KV cache memory: 55.06 GiB",
+  "CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9200 is equivalent to --gpu-memory-utilization=0.9087 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.9313. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.",
+  "GPU KV cache size: 451,056 tokens, Maximum concurrency for 4,096 tokens per request: 110.12x",
+  "CUDA graph pool memory: 0.45 GiB (actual), 0.9 GiB (estimated), difference: 0.45 GiB (100.4%).",
+  "Free memory on device (78.66/79.17 GiB) on startup. Desired GPU memory utilization is (0.92, 72.84 GiB). Actual usage is 15.81 GiB for consumed memory (weights + non-torch), 1.97 GiB for peak activation, and 0.45 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=58484841165` (54.47 GiB) to fit into requested memory, or `--kv-cache-memory=64733187584` (60.29 Gi",
+  "Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.",
+  "init engine (profile, create kv cache, warmup model) took 129.08 s (compilation: 22.98 s)"
+ ],
+ "kv_blocks": 28191.0,
+ "block_size": 16.0,
+ "requests": [
+  {
+   "title": "request 1 (cold prefix)",
+   "ttft_ms": 85.79,
+   "total_ms": 205.02,
+   "chunks": 20,
+   "median_chunk_gap_ms": 6.63,
+   "usage": {
+    "prompt_tokens": 2022,
+    "total_tokens": 2041,
+    "completion_tokens": 19
+   },
+   "text": "According to policy 123, gift cards are non-refundable and cannot be returned.",
+   "until_first_token": [
+    {
+     "start_ms": 2.129,
+     "dur_ms": 6.096,
+     "where": "API server / MainThread",
+     "name": "HTTP handler: create_chat_completion",
+     "note": ""
+    },
+    {
+     "start_ms": 2.162,
+     "dur_ms": 5.669,
+     "where": "API server / MainThread",
+     "name": "render: chat template and tokenize",
+     "note": ""
+    },
+    {
+     "start_ms": 9.104,
+     "dur_ms": 0.349,
+     "where": "API server / MainThread",
+     "name": "AsyncLLM._add_request",
+     "note": ""
+    },
+    {
+     "start_ms": 9.209,
+     "dur_ms": 0.218,
+     "where": "API server / MainThread",
+     "name": "client: send request over ZeroMQ",
+     "note": ""
+    },
+    {
+     "start_ms": 9.219,
+     "dur_ms": 0.055,
+     "where": "API server / MainThread",
+     "name": "msgpack encode",
+     "note": ""
+    },
+    {
+     "start_ms": 9.77,
+     "dur_ms": 0.124,
+     "where": "engine core / Thread-2 (process_input_sockets)",
+     "name": "msgpack decode",
+     "note": ""
+    },
+    {
+     "start_ms": 9.964,
+     "dur_ms": 0.449,
+     "where": "engine core / Thread-2 (process_input_sockets)",
+     "name": "core: preprocess_add_request (block hashes)",
+     "note": ""
+    },
+    {
+     "start_ms": 10.579,
+     "dur_ms": 0.112,
+     "where": "engine core / MainThread",
+     "name": "core: _handle_client_request",
+     "note": "ADD"
+    },
+    {
+     "start_ms": 10.599,
+     "dur_ms": 0.031,
+     "where": "engine core / MainThread",
+     "name": "Scheduler.add_request",
+     "note": ""
+    },
+    {
+     "start_ms": 10.741,
+     "dur_ms": 52.96,
+     "where": "engine core / MainThread",
+     "name": "EngineCore.step_with_batch_queue",
+     "note": ""
+    },
+    {
+     "start_ms": 10.746,
+     "dur_ms": 0.593,
+     "where": "engine core / MainThread",
+     "name": "Scheduler.schedule",
+     "note": "2006 tokens for 1 requests"
+    },
+    {
+     "start_ms": 10.777,
+     "dur_ms": 0.066,
+     "where": "engine core / MainThread",
+     "name": "KVCacheManager.get_computed_blocks",
+     "note": "prefix cache hit: 16 of 2022 tokens"
+    },
+    {
+     "start_ms": 10.904,
+     "dur_ms": 0.275,
+     "where": "engine core / MainThread",
+     "name": "KVCacheManager.allocate_slots",
+     "note": "2006 new tokens, 126 new blocks"
+    },
+    {
+     "start_ms": 11.433,
+     "dur_ms": 50.955,
+     "where": "engine core / MainThread",
+     "name": "GPUModelRunner.execute_model (V2)",
+     "note": "2006 tokens"
+    },
+    {
+     "start_ms": 12.88,
+     "dur_ms": 0.767,
+     "where": "engine core / MainThread",
+     "name": "runner: prepare_inputs",
+     "note": ""
+    },
+    {
+     "start_ms": 13.694,
+     "dur_ms": 0.137,
+     "where": "engine core / MainThread",
+     "name": "runner: prepare_attn",
+     "note": ""
+    },
+    {
+     "start_ms": 62.536,
+     "dur_ms": 1.081,
+     "where": "engine core / MainThread",
+     "name": "GPUModelRunner.sample_tokens (V2)",
+     "note": ""
+    },
+    {
+     "start_ms": 63.749,
+     "dur_ms": 18.954,
+     "where": "engine core / MainThread",
+     "name": "EngineCore.step_with_batch_queue",
+     "note": ""
+    },
+    {
+     "start_ms": 63.753,
+     "dur_ms": 0.132,
+     "where": "engine core / MainThread",
+     "name": "Scheduler.schedule",
+     "note": "1 tokens for 1 requests"
+    },
+    {
+     "start_ms": 63.775,
+     "dur_ms": 0.031,
+     "where": "engine core / MainThread",
+     "name": "KVCacheManager.allocate_slots",
+     "note": "1 new tokens, 0 new blocks"
+    },
+    {
+     "start_ms": 63.939,
+     "dur_ms": 1.324,
+     "where": "engine core / MainThread",
+     "name": "GPUModelRunner.execute_model (V2)",
+     "note": "1 tokens"
+    },
+    {
+     "start_ms": 64.162,
+     "dur_ms": 0.505,
+     "where": "engine core / MainThread",
+     "name": "runner: prepare_inputs",
+     "note": ""
+    },
+    {
+     "start_ms": 64.721,
+     "dur_ms": 0.123,
+     "where": "engine core / MainThread",
+     "name": "runner: prepare_attn",
+     "note": ""
+    },
+    {
+     "start_ms": 65.144,
+     "dur_ms": 0.043,
+     "where": "engine core / MainThread",
+     "name": "runner: replay full CUDA graph",
+     "note": ""
+    },
+    {
+     "start_ms": 65.341,
+     "dur_ms": 0.69,
+     "where": "engine core / MainThread",
+     "name": "GPUModelRunner.sample_tokens (V2)",
+     "note": ""
+    },
+    {
+     "start_ms": 66.103,
+     "dur_ms": 16.274,
+     "where": "engine core / MainThread",
+     "name": "AsyncOutput.get_output: wait for the GPU",
+     "note": ""
+    },
+    {
+     "start_ms": 82.446,
+     "dur_ms": 0.134,
+     "where": "engine core / MainThread",
+     "name": "Scheduler.update_from_output",
+     "note": "outputs for 1 requests"
+    },
+    {
+     "start_ms": 82.777,
+     "dur_ms": 6.52,
+     "where": "engine core / MainThread",
+     "name": "EngineCore.step_with_batch_queue",
+     "note": ""
+    },
+    {
+     "start_ms": 82.781,
+     "dur_ms": 0.155,
+     "where": "engine core / MainThread",
+     "name": "Scheduler.schedule",
+     "note": "1 tokens for 1 requests"
+    },
+    {
+     "start_ms": 82.812,
+     "dur_ms": 0.028,
+     "where": "engine core / MainThread",
+     "name": "KVCacheManager.allocate_slots",
+     "note": "1 new tokens, 0 new blocks"
+    },
+    {
+     "start_ms": 83.005,
+     "dur_ms": 1.544,
+     "where": "engine core / MainThread",
+     "name": "GPUModelRunner.execute_model (V2)",
+     "note": "1 tokens"
+    },
+    {
+     "start_ms": 83.099,
+     "dur_ms": 0.016,
+     "where": "engine core / Thread-3 (process_output_sockets)",
+     "name": "msgpack encode",
+     "note": ""
+    },
+    {
+     "start_ms": 83.516,
+     "dur_ms": 0.464,
+     "where": "engine core / MainThread",
+     "name": "runner: prepare_inputs",
+     "note": ""
+    },
+    {
+     "start_ms": 83.634,
+     "dur_ms": 0.036,
+     "where": "API server / MainThread",
+     "name": "msgpack decode",
+     "note": ""
+    },
+    {
+     "start_ms": 83.863,
+     "dur_ms": 0.909,
+     "where": "API server / MainThread",
+     "name": "OutputProcessor.process_outputs: detokenize",
+     "note": "1 request outputs"
+    },
+    {
+     "start_ms": 84.022,
+     "dur_ms": 0.117,
+     "where": "engine core / MainThread",
+     "name": "runner: prepare_attn",
+     "note": ""
+    },
+    {
+     "start_ms": 84.465,
+     "dur_ms": 0.038,
+     "where": "engine core / MainThread",
+     "name": "runner: replay full CUDA graph",
+     "note": ""
+    },
+    {
+     "start_ms": 84.615,
+     "dur_ms": 0.788,
+     "where": "engine core / MainThread",
+     "name": "GPUModelRunner.sample_tokens (V2)",
+     "note": ""
+    },
+    {
+     "start_ms": 85.506,
+     "dur_ms": 3.6,
+     "where": "engine core / MainThread",
+     "name": "AsyncOutput.get_output: wait for the GPU",
+     "note": ""
+    }
+   ],
+   "decode_medians": {
+    "Scheduler.update_from_output": {
+     "calls": 18,
+     "median_ms": 0.059
+    },
+    "EngineCore.step_with_batch_queue": {
+     "calls": 18,
+     "median_ms": 6.574
+    },
+    "Scheduler.schedule": {
+     "calls": 18,
+     "median_ms": 0.109
+    },
+    "KVCacheManager.allocate_slots": {
+     "calls": 17,
+     "median_ms": 0.022
+    },
+    "msgpack encode": {
+     "calls": 18,
+     "median_ms": 0.01
+    },
+    "GPUModelRunner.execute_model (V2)": {
+     "calls": 18,
+     "median_ms": 1.375
+    },
+    "msgpack decode": {
+     "calls": 18,
+     "median_ms": 0.013
+    },
+    "OutputProcessor.process_outputs: detokenize": {
+     "calls": 18,
+     "median_ms": 0.057
+    },
+    "runner: prepare_inputs": {
+     "calls": 17,
+     "median_ms": 0.424
+    },
+    "runner: prepare_attn": {
+     "calls": 17,
+     "median_ms": 0.109
+    },
+    "runner: replay full CUDA graph": {
+     "calls": 17,
+     "median_ms": 0.031
+    },
+    "GPUModelRunner.sample_tokens (V2)": {
+     "calls": 17,
+     "median_ms": 0.647
+    },
+    "AsyncOutput.get_output: wait for the GPU": {
+     "calls": 18,
+     "median_ms": 4.041
+    }
+   }
+  },
+  {
+   "title": "request 2 (same system prompt)",
+   "ttft_ms": 31.14,
+   "total_ms": 180.73,
+   "chunks": 25,
+   "median_chunk_gap_ms": 6.6,
+   "usage": {
+    "prompt_tokens": 2021,
+    "total_tokens": 2045,
+    "completion_tokens": 24
+   },
+   "text": "Shipping times vary depending on your location. According to policy 101, domestic orders typically take 3-7 business days",
+   "until_first_token": [
+    {
+     "start_ms": 1.289,
+     "dur_ms": 4.499,
+     "where": "API server / MainThread",
+     "name": "HTTP handler: create_chat_completion",
+     "note": ""
+    },
+    {
+     "start_ms": 1.316,
+     "dur_ms": 4.214,
+     "where": "API server / MainThread",
+     "name": "render: chat template and tokenize",
+     "note": ""
+    },
+    {
+     "start_ms": 6.418,
+     "dur_ms": 0.246,
+     "where": "API server / MainThread",
+     "name": "AsyncLLM._add_request",
+     "note": ""
+    },
+    {
+     "start_ms": 6.491,
+     "dur_ms": 0.151,
+     "where": "API server / MainThread",
+     "name": "client: send request over ZeroMQ",
+     "note": ""
+    },
+    {
+     "start_ms": 6.498,
+     "dur_ms": 0.025,
+     "where": "API server / MainThread",
+     "name": "msgpack encode",
+     "note": ""
+    },
+    {
+     "start_ms": 6.885,
+     "dur_ms": 0.103,
+     "where": "engine core / Thread-2 (process_input_sockets)",
+     "name": "msgpack decode",
+     "note": ""
+    },
+    {
+     "start_ms": 7.039,
+     "dur_ms": 0.389,
+     "where": "engine core / Thread-2 (process_input_sockets)",
+     "name": "core: preprocess_add_request (block hashes)",
+     "note": ""
+    },
+    {
+     "start_ms": 7.59,
+     "dur_ms": 0.159,
+     "where": "engine core / MainThread",
+     "name": "core: _handle_client_request",
+     "note": "ADD"
+    },
+    {
+     "start_ms": 7.612,
+     "dur_ms": 0.037,
+     "where": "engine core / MainThread",
+     "name": "Scheduler.add_request",
+     "note": ""
+    },
+    {
+     "start_ms": 7.808,
+     "dur_ms": 16.661,
+     "where": "engine core / MainThread",
+     "name": "EngineCore.step_with_batch_queue",
+     "note": ""
+    },
+    {
+     "start_ms": 7.814,
+     "dur_ms": 0.57,
+     "where": "engine core / MainThread",
+     "name": "Scheduler.schedule",
+     "note": "21 tokens for 1 requests"
+    },
+    {
+     "start_ms": 7.845,
+     "dur_ms": 0.191,
+     "where": "engine core / MainThread",
+     "name": "KVCacheManager.get_computed_blocks",
+     "note": "prefix cache hit: 2000 of 2021 tokens"
+    },
+    {
+     "start_ms": 8.113,
+     "dur_ms": 0.138,
+     "where": "engine core / MainThread",
+     "name": "KVCacheManager.allocate_slots",
+     "note": "21 new tokens, 2 new blocks"
+    },
+    {
+     "start_ms": 8.491,
+     "dur_ms": 14.208,
+     "where": "engine core / MainThread",
+     "name": "GPUModelRunner.execute_model (V2)",
+     "note": "21 tokens"
+    },
+    {
+     "start_ms": 10.207,
+     "dur_ms": 0.699,
+     "where": "engine core / MainThread",
+     "name": "runner: prepare_inputs",
+     "note": ""
+    },
+    {
+     "start_ms": 10.952,
+     "dur_ms": 0.176,
+     "where": "engine core / MainThread",
+     "name": "runner: prepare_attn",
+     "note": ""
+    },
+    {
+     "start_ms": 11.596,
+     "dur_ms": 10.95,
+     "where": "engine core / MainThread",
+     "name": "runner: run piecewise CUDA graphs",
+     "note": ""
+    },
+    {
+     "start_ms": 22.839,
+     "dur_ms": 1.507,
+     "where": "engine core / MainThread",
+     "name": "GPUModelRunner.sample_tokens (V2)",
+     "note": ""
+    },
+    {
+     "start_ms": 24.535,
+     "dur_ms": 4.156,
+     "where": "engine core / MainThread",
+     "name": "EngineCore.step_with_batch_queue",
+     "note": ""
+    },
+    {
+     "start_ms": 24.54,
+     "dur_ms": 0.209,
+     "where": "engine core / MainThread",
+     "name": "Scheduler.schedule",
+     "note": "1 tokens for 1 requests"
+    },
+    {
+     "start_ms": 24.575,
+     "dur_ms": 0.054,
+     "where": "engine core / MainThread",
+     "name": "KVCacheManager.allocate_slots",
+     "note": "1 new tokens, 0 new blocks"
+    },
+    {
+     "start_ms": 24.835,
+     "dur_ms": 2.015,
+     "where": "engine core / MainThread",
+     "name": "GPUModelRunner.execute_model (V2)",
+     "note": "1 tokens"
+    },
+    {
+     "start_ms": 25.212,
+     "dur_ms": 0.715,
+     "where": "engine core / MainThread",
+     "name": "runner: prepare_inputs",
+     "note": ""
+    },
+    {
+     "start_ms": 26.009,
+     "dur_ms": 0.202,
+     "where": "engine core / MainThread",
+     "name": "runner: prepare_attn",
+     "note": ""
+    },
+    {
+     "start_ms": 26.724,
+     "dur_ms": 0.051,
+     "where": "engine core / MainThread",
+     "name": "runner: replay full CUDA graph",
+     "note": ""
+    },
+    {
+     "start_ms": 26.97,
+     "dur_ms": 1.195,
+     "where": "engine core / MainThread",
+     "name": "GPUModelRunner.sample_tokens (V2)",
+     "note": ""
+    },
+    {
+     "start_ms": 28.3,
+     "dur_ms": 0.029,
+     "where": "engine core / MainThread",
+     "name": "AsyncOutput.get_output: wait for the GPU",
+     "note": ""
+    },
+    {
+     "start_ms": 28.388,
+     "dur_ms": 0.193,
+     "where": "engine core / MainThread",
+     "name": "Scheduler.update_from_output",
+     "note": "outputs for 1 requests"
+    },
+    {
+     "start_ms": 28.776,
+     "dur_ms": 4.986,
+     "where": "engine core / MainThread",
+     "name": "EngineCore.step_with_batch_queue",
+     "note": ""
+    },
+    {
+     "start_ms": 28.781,
+     "dur_ms": 0.182,
+     "where": "engine core / MainThread",
+     "name": "Scheduler.schedule",
+     "note": "1 tokens for 1 requests"
+    },
+    {
+     "start_ms": 28.812,
+     "dur_ms": 0.039,
+     "where": "engine core / MainThread",
+     "name": "KVCacheManager.allocate_slots",
+     "note": "1 new tokens, 0 new blocks"
+    },
+    {
+     "start_ms": 29.069,
+     "dur_ms": 2.365,
+     "where": "engine core / MainThread",
+     "name": "GPUModelRunner.execute_model (V2)",
+     "note": "1 tokens"
+    },
+    {
+     "start_ms": 29.192,
+     "dur_ms": 0.02,
+     "where": "engine core / Thread-3 (process_output_sockets)",
+     "name": "msgpack encode",
+     "note": ""
+    },
+    {
+     "start_ms": 29.555,
+     "dur_ms": 0.024,
+     "where": "API server / MainThread",
+     "name": "msgpack decode",
+     "note": ""
+    },
+    {
+     "start_ms": 29.715,
+     "dur_ms": 0.806,
+     "where": "API server / MainThread",
+     "name": "OutputProcessor.process_outputs: detokenize",
+     "note": "1 request outputs"
+    },
+    {
+     "start_ms": 29.827,
+     "dur_ms": 0.839,
+     "where": "engine core / MainThread",
+     "name": "runner: prepare_inputs",
+     "note": ""
+    },
+    {
+     "start_ms": 30.708,
+     "dur_ms": 0.146,
+     "where": "engine core / MainThread",
+     "name": "runner: prepare_attn",
+     "note": ""
+    }
+   ],
+   "decode_medians": {
+    "runner: replay full CUDA graph": {
+     "calls": 22,
+     "median_ms": 0.048
+    },
+    "GPUModelRunner.sample_tokens (V2)": {
+     "calls": 22,
+     "median_ms": 0.916
+    },
+    "AsyncOutput.get_output: wait for the GPU": {
+     "calls": 23,
+     "median_ms": 3.279
+    },
+    "Scheduler.update_from_output": {
+     "calls": 23,
+     "median_ms": 0.089
+    },
+    "EngineCore.step_with_batch_queue": {
+     "calls": 23,
+     "median_ms": 6.532
+    },
+    "Scheduler.schedule": {
+     "calls": 23,
+     "median_ms": 0.141
+    },
+    "KVCacheManager.allocate_slots": {
+     "calls": 21,
+     "median_ms": 0.028
+    },
+    "GPUModelRunner.execute_model (V2)": {
+     "calls": 23,
+     "median_ms": 1.705
+    },
+    "msgpack encode": {
+     "calls": 23,
+     "median_ms": 0.011
+    },
+    "runner: prepare_inputs": {
+     "calls": 21,
+     "median_ms": 0.625
+    },
+    "msgpack decode": {
+     "calls": 23,
+     "median_ms": 0.016
+    },
+    "OutputProcessor.process_outputs: detokenize": {
+     "calls": 23,
+     "median_ms": 0.063
+    },
+    "runner: prepare_attn": {
+     "calls": 21,
+     "median_ms": 0.142
+    }
+   }
+  }
+ ]
+}

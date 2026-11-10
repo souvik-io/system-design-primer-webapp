@@ -8,7 +8,7 @@
 #
 # Needs one 80 GB GPU (H100 or A100) and vLLM (written against v0.32.0). Qwen3-30B-A3B in BF16 is 61 GB, so it
 # leaves room for only a modest KV cache. On Modal:
-#   modal run modal_run.py --script moe_decode_sweep.py --gpu H100 --vllm
+#   modal run modal_run.py --script moe_decode_sweep.py --gpu 'H100!' --vllm
 # Elsewhere: pip install vllm, then python moe_decode_sweep.py
 import json
 import subprocess
