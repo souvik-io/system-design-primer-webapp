@@ -8,6 +8,7 @@ These scripts need an NVIDIA GPU, so they are kept apart from the Mac labs one f
 | toolkit | `images/toolkit.Dockerfile` | the base packages on NVIDIA's CUDA 13.2 development image: `nvcc`, `compute-sanitizer`, Nsight Compute and Nsight Systems | `--toolkit` |
 | vllm | `images/vllm.Dockerfile` | vLLM 0.32.0 on NVIDIA's CUDA 13.0 development image | `--vllm` |
 | quant | `images/quant.Dockerfile` | vLLM 0.32.0 in `/opt/venv` and llm-compressor 0.15.0 in `/opt/llmc`, two environments because they pin different PyTorch versions | `--quant` |
+| sglang | `images/sglang.Dockerfile` | SGLang 0.5.23 on NVIDIA's CUDA 13.0 development image; separate from the vLLM image because the two engines pin different PyTorch versions | `--sglang` |
 
 Without either launcher, build and run an image yourself on any machine with an NVIDIA GPU and the NVIDIA Container Toolkit:
 
@@ -65,6 +66,7 @@ Which platform to use: Modal starts in seconds, bills per second and has H100s w
 | `engine_bench.py` | 5.1 | H100 (Modal, `--vllm`), A10 with `--args "--quick"` | nano_engine's tests on the GPU, its throughput against vLLM with and without CUDA graphs, and the chunked-prefill stall benchmark; imports `../nano_engine`, which both launchers copy next to the scripts |
 | `inside_vllm.py` | 5.2 | H100 (Modal, `--vllm`), A10 with `--args "trace --quick"` or `"knobs --quick"` | `--args "trace"`: starts `vllm serve` with timing wrappers on about twenty functions and reports where two requests spent their time (`inside_vllm_trace.json`, and `vllm_trace.json` for Perfetto). `--args "knobs"`: the server restarted with eight configurations under a burst of 256 streamed requests (`inside_vllm_knobs.json`) |
 | `profile_engine.py` | 5.1 | H100 (Modal, `--vllm`) | nano_engine's decode step with 256 sequences: step times, caching-allocator retries (`--default-allocator` to compare) and a PyTorch profile |
+| `prefix_cache_bench.py` | 5.3 | H100 (Modal, `--vllm` with `--args "--engine vllm"`, then `--sglang` with `--args "--engine sglang"`), A10 with `--quick` | One engine per run: 48 six-turn conversations that share a system prompt, with the prefix cache on, off, and with the KV pool cut to 32,768 tokens, and a burst of 64 requests that share a 3,000-token prefix sent to a cold cache (`prefix_cache_vllm.json`, `prefix_cache_sglang.json`) |
 
 The two vLLM scripts call vLLM's Python API and were written against vLLM 0.32.0. On Modal, add `--vllm` to run them in an image with vLLM installed, built on NVIDIA's CUDA 13.0 development image because FlashInfer, vLLM's default sampler, compiles some kernels with `nvcc` on first use; that function also reserves 4 CPU cores and 32 GiB of memory. Elsewhere, `pip install vllm` on the GPU machine. Each run took about 10 minutes of H100 time, about $0.65, most of it downloading the weights and compiling the models.
 

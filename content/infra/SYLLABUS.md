@@ -136,6 +136,7 @@ Start applying around week 26 to 28; interview prep (Part 10) runs alongside the
 | 4.5 | `other-compression.md` | Drafted 2026-11-08 as "Pruning and distillation". `pruning.py`: magnitude vs Wanda, unstructured vs 2:4 on SmolLM2 (Wanda 2:4 +512%, far worse than INT4). `gpu/sparse_matmul.py`: 2:4 slower than dense on an H100 at every size; 1.6-1.7x on an L4 only at small batches. Widget `sparsity-pattern` |
 | 5.1 | `mini-inference-engine.md` | Drafted 2026-11-10. `nano_engine/` (about 650 lines of core) matches Hugging Face token for token; on a Modal H100 with Llama 3.1 8B it reaches 4,997 output tok/s against vLLM's 8,189 (1.64x). Widget `paged-kv-allocator` |
 | 5.2 | `inside-vllm.md` | Drafted 2026-11-10 against vLLM 0.32.0 source. `gpu/inside_vllm.py` traces a request through `vllm serve` (first token 85.8 ms for a 2,022-token prompt, 31.1 ms with a prefix-cache hit; decode step 6.6 ms) and sweeps five settings on an H100 (8,332 tok/s at defaults; 172 preemptions at `gpu_memory_utilization=0.3`). The lab's contribution task is left to the reader, with a reading map as the reference. Widget `request-trace` |
+| 5.3 | `sglang-prefix-caching.md` | Drafted 2026-11-10 against SGLang 0.5.23 and vLLM 0.32.0 source. `prefix_cache_sim.py` implements a radix-tree cache and a hashed-block cache from scratch and replays three workloads through both (within 3 points of each other at every pool size; longest-prefix-first scheduling 93% against 21% for arrival order with a pool that holds one task). `gpu/prefix_cache_bench.py` runs 48 six-turn conversations on each engine on a Modal H100 (new `sglang` image): 98.3% of prompt tokens cached on SGLang and 97.9% on vLLM, median first token 25 and 35 ms against 243 and 199 ms without a cache, 85.9% and 85.1% with the pool cut to 16,384 tokens. Widget `radix-tree` |
 
 Part 2 runs its GPU labs on Modal through `public/labs/infra/gpu/modal_run.py`, which logs each run's cost to `modal_costs.jsonl` (gitignored). The handbook's planned cheap GPU was the L4, but Modal had no L4 capacity for over an hour on 2026-10-31, so Part 2 uses the A10 (24 GB GDDR6, 600 GB/s, 125 TFLOPS dense BF16, no FP8) as its low-end GPU. An L4 was available on 2026-11-01, and `gpu_probe.py` was run on it to check chapter 2.1's L4 figures. Part 2's GPU runs cost about $0.25 in total, plus about $0.10 for the 2026-11-01 re-runs (profiling, Nsight Systems, the L4 probe). Deck `infra-kernels` covers Part 2 (29 cards). Part 2 widgets: `warp-access`, `occupancy`, `matmul-tiling`, `warp-reduce`, `online-softmax`, `decode-timeline`.
 
@@ -490,7 +491,7 @@ Existing widgets to reuse: `kv-cache-calculator`, `batching-simulator`.
 | Bit/format explorer, built as `bit-explorer` | 4.1 | 2 |
 | Paged KV allocator, built as `paged-kv-allocator` | 5.1 | 1 |
 | Request trace through vLLM (added), built as `request-trace` from a real trace | 5.2 | 1 |
-| Radix tree prefix cache | 5.3 | 2 |
+| Radix tree prefix cache, built as `radix-tree` | 5.3 | 2 |
 | Speculative decoding simulator | 5.4 | 2 |
 | Ring all-reduce | 6.1 | 2 |
 | Parallelism planner | 6.2 | 1 |

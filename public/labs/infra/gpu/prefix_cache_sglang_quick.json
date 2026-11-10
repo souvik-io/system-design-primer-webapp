@@ -1,0 +1,284 @@
+{
+ "engine": "sglang",
+ "version": "0.5.23",
+ "model": "unsloth/Llama-3.2-1B-Instruct",
+ "gpu": "NVIDIA A10",
+ "kv_bytes_per_token": 32768,
+ "conversations": 16,
+ "turns": 4,
+ "configs": [
+  {
+   "config": "cache on",
+   "flags": [],
+   "startup_s": 123.1,
+   "pool_tokens": 410522,
+   "burst": {
+    "requests": 64,
+    "seconds": 0.91,
+    "prompt_tokens": 195200,
+    "cached_tokens": 182092,
+    "hit_rate": 0.9328,
+    "requests_with_no_hit": 2,
+    "ttft_ms_p50": 593.8,
+    "ttft_ms_max": 714.3
+   },
+   "chat": {
+    "requests": 64,
+    "seconds": 16.0,
+    "prompt_tokens": 143391,
+    "cached_tokens": 140757,
+    "hit_rate": 0.9816,
+    "completion_tokens": 4903,
+    "ttft_ms_p50": 24.2,
+    "ttft_ms_p99": 133.2,
+    "preemptions": 0,
+    "by_turn": [
+     {
+      "turn": 1,
+      "prompt_tokens_p50": 2063,
+      "cached_tokens_p50": 2026,
+      "hit_rate": 0.9821,
+      "ttft_ms_p50": 26.0,
+      "ttft_ms_p99": 133.2
+     },
+     {
+      "turn": 2,
+      "prompt_tokens_p50": 2206,
+      "cached_tokens_p50": 2162,
+      "hit_rate": 0.9805,
+      "ttft_ms_p50": 24.5,
+      "ttft_ms_p99": 27.8
+     },
+     {
+      "turn": 3,
+      "prompt_tokens_p50": 2356,
+      "cached_tokens_p50": 2315,
+      "hit_rate": 0.9815,
+      "ttft_ms_p50": 23.8,
+      "ttft_ms_p99": 26.9
+     },
+     {
+      "turn": 4,
+      "prompt_tokens_p50": 2511,
+      "cached_tokens_p50": 2469,
+      "hit_rate": 0.9824,
+      "ttft_ms_p50": 23.7,
+      "ttft_ms_p99": 34.6
+     }
+    ]
+   },
+   "server_log": [
+    "[2026-11-10 11:47:56] Attention backend not specified. Use flashinfer backend by default.",
+    "[2026-11-10 11:47:59] server_args={'model_path': 'unsloth/Llama-3.2-1B-Instruct', 'tokenizer_path': 'unsloth/Llama-3.2-1B-Instruct', 'tokenizer_mode': 'auto', 'tokenizer_backend': 'huggingface', 'tokenizer_worker_num': 1, 'detokenizer_worker_num': 1, 'skip_tokenizer_init': False, 'load_format': 'auto', 'model_loader_extra_config': '{}', 'trust_remote_code': False, 'context_length': 8192, 'is_embed",
+    "[2026-11-10 11:48:18] Memory baseline taken. mem usage=0.00 GB",
+    "[2026-11-10 11:48:30] Load weight end. elapsed=10.73 s, type=LlamaForCausalLM, avail mem=19.41 GB, mem usage=2.35 GB.",
+    "[2026-11-10 11:48:34] KV Cache is allocated. dtype: torch.bfloat16, #tokens: 410522, K size: 6.26 GB, V size: 6.26 GB",
+    "[2026-11-10 11:49:29] Capture target prefill CUDA graph end. elapsed=54.51 s, mem usage=0.47 GB, avail mem=5.84 GB.",
+    "[2026-11-10 11:49:30] Capture target decode CUDA graph end. bs=[1, 2, 4, 8, 12, 16, 24, 32, 40, 48], elapsed=1.30 s, mem usage=0.12 GB, avail mem=5.72 GB.",
+    "[2026-11-10 11:49:30] max_total_num_tokens=410522, chunked_prefill_size=4096, max_prefill_tokens=16384, max_running_requests=4096, context_len=8192, available_gpu_mem=5.72 GB"
+   ],
+   "prefill_batches_logged": 73,
+   "sample_prefill_log": [
+    "[2026-11-10 11:49:39] Prefill batch, #new-seq: 1, #new-token: 7, #cached-token: 0, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: True, input throughput (token/s): 0.86",
+    "[2026-11-10 11:49:40] Prefill batch, #new-seq: 1, #new-token: 1, #cached-token: 0, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: False, input throughput (token/s): 0.73",
+    "[2026-11-10 11:49:48] Prefill batch, #new-seq: 1, #new-token: 5, #cached-token: 1, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: True, input throughput (token/s): 0.60",
+    "[2026-11-10 11:49:48] Prefill batch, #new-seq: 1, #new-token: 1, #cached-token: 5, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: False, input throughput (token/s): 16.25",
+    "[2026-11-10 11:49:48] Prefill batch, #new-seq: 1, #new-token: 1, #cached-token: 5, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: False, input throughput (token/s): 16.64",
+    "[2026-11-10 11:49:49] Prefill batch, #new-seq: 2, #new-token: 4096, #cached-token: 0, token usage: 0.02, #running-req: 0, #queue-req: 60, #pending-token: 2004, cuda graph: True, input throughput (token/s): 12265.27"
+   ]
+  },
+  {
+   "config": "cache off",
+   "flags": [
+    "--disable-radix-cache"
+   ],
+   "startup_s": 51.0,
+   "pool_tokens": 410522,
+   "burst": {
+    "requests": 64,
+    "seconds": 7.25,
+    "prompt_tokens": 195200,
+    "cached_tokens": 0,
+    "hit_rate": 0.0,
+    "requests_with_no_hit": 64,
+    "ttft_ms_p50": 3788.1,
+    "ttft_ms_max": 6941.0
+   },
+   "chat": {
+    "requests": 64,
+    "seconds": 18.1,
+    "prompt_tokens": 143659,
+    "cached_tokens": 0,
+    "hit_rate": 0.0,
+    "completion_tokens": 5085,
+    "ttft_ms_p50": 99.9,
+    "ttft_ms_p99": 272.5,
+    "preemptions": 0,
+    "by_turn": [
+     {
+      "turn": 1,
+      "prompt_tokens_p50": 2063,
+      "cached_tokens_p50": 0,
+      "hit_rate": 0.0,
+      "ttft_ms_p50": 89.8,
+      "ttft_ms_p99": 272.5
+     },
+     {
+      "turn": 2,
+      "prompt_tokens_p50": 2206,
+      "cached_tokens_p50": 0,
+      "hit_rate": 0.0,
+      "ttft_ms_p50": 90.1,
+      "ttft_ms_p99": 126.1
+     },
+     {
+      "turn": 3,
+      "prompt_tokens_p50": 2356,
+      "cached_tokens_p50": 0,
+      "hit_rate": 0.0,
+      "ttft_ms_p50": 101.1,
+      "ttft_ms_p99": 234.9
+     },
+     {
+      "turn": 4,
+      "prompt_tokens_p50": 2512,
+      "cached_tokens_p50": 0,
+      "hit_rate": 0.0,
+      "ttft_ms_p50": 106.6,
+      "ttft_ms_p99": 252.6
+     }
+    ]
+   },
+   "server_log": [
+    "[2026-11-10 11:50:29] Attention backend not specified. Use flashinfer backend by default.",
+    "[2026-11-10 11:50:31] server_args={'model_path': 'unsloth/Llama-3.2-1B-Instruct', 'tokenizer_path': 'unsloth/Llama-3.2-1B-Instruct', 'tokenizer_mode': 'auto', 'tokenizer_backend': 'huggingface', 'tokenizer_worker_num': 1, 'detokenizer_worker_num': 1, 'skip_tokenizer_init': False, 'load_format': 'auto', 'model_loader_extra_config': '{}', 'trust_remote_code': False, 'context_length': 8192, 'is_embed",
+    "[2026-11-10 11:50:51] Memory baseline taken. mem usage=0.00 GB",
+    "[2026-11-10 11:50:53] Load weight end. elapsed=0.94 s, type=LlamaForCausalLM, avail mem=19.41 GB, mem usage=2.35 GB.",
+    "[2026-11-10 11:50:57] KV Cache is allocated. dtype: torch.bfloat16, #tokens: 410522, K size: 6.26 GB, V size: 6.26 GB",
+    "[2026-11-10 11:51:04] Capture target prefill CUDA graph end. elapsed=6.33 s, mem usage=0.47 GB, avail mem=5.84 GB.",
+    "[2026-11-10 11:51:05] Capture target decode CUDA graph end. bs=[1, 2, 4, 8, 12, 16, 24, 32, 40, 48], elapsed=1.26 s, mem usage=0.12 GB, avail mem=5.72 GB.",
+    "[2026-11-10 11:51:05] max_total_num_tokens=410522, chunked_prefill_size=4096, max_prefill_tokens=16384, max_running_requests=4096, context_len=8192, available_gpu_mem=5.72 GB"
+   ],
+   "prefill_batches_logged": 117,
+   "sample_prefill_log": [
+    "[2026-11-10 11:51:07] Prefill batch, #new-seq: 1, #new-token: 7, #cached-token: 0, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: True, input throughput (token/s): 4.09",
+    "[2026-11-10 11:51:07] Prefill batch, #new-seq: 1, #new-token: 1, #cached-token: 0, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: False, input throughput (token/s): 2.04",
+    "[2026-11-10 11:51:08] Prefill batch, #new-seq: 1, #new-token: 6, #cached-token: 0, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: True, input throughput (token/s): 5.93",
+    "[2026-11-10 11:51:08] Prefill batch, #new-seq: 1, #new-token: 6, #cached-token: 0, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: True, input throughput (token/s): 113.11",
+    "[2026-11-10 11:51:08] Prefill batch, #new-seq: 1, #new-token: 6, #cached-token: 0, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: True, input throughput (token/s): 111.52",
+    "[2026-11-10 11:51:08] Prefill batch, #new-seq: 1, #new-token: 3050, #cached-token: 0, token usage: 0.01, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: True, input throughput (token/s): 15074.52"
+   ]
+  },
+  {
+   "config": "small pool",
+   "flags": [
+    "--max-total-tokens",
+    "32768"
+   ],
+   "startup_s": 51.0,
+   "pool_tokens": 32768,
+   "chat": {
+    "requests": 64,
+    "seconds": 16.2,
+    "prompt_tokens": 143504,
+    "cached_tokens": 140868,
+    "hit_rate": 0.9816,
+    "completion_tokens": 4920,
+    "ttft_ms_p50": 24.1,
+    "ttft_ms_p99": 32.5,
+    "preemptions": 0,
+    "by_turn": [
+     {
+      "turn": 1,
+      "prompt_tokens_p50": 2063,
+      "cached_tokens_p50": 2026,
+      "hit_rate": 0.9821,
+      "ttft_ms_p50": 25.6,
+      "ttft_ms_p99": 28.9
+     },
+     {
+      "turn": 2,
+      "prompt_tokens_p50": 2206,
+      "cached_tokens_p50": 2162,
+      "hit_rate": 0.9805,
+      "ttft_ms_p50": 23.0,
+      "ttft_ms_p99": 26.6
+     },
+     {
+      "turn": 3,
+      "prompt_tokens_p50": 2359,
+      "cached_tokens_p50": 2317,
+      "hit_rate": 0.9815,
+      "ttft_ms_p50": 24.6,
+      "ttft_ms_p99": 32.5
+     },
+     {
+      "turn": 4,
+      "prompt_tokens_p50": 2511,
+      "cached_tokens_p50": 2469,
+      "hit_rate": 0.9824,
+      "ttft_ms_p50": 23.0,
+      "ttft_ms_p99": 26.5
+     }
+    ]
+   },
+   "server_log": [
+    "[2026-11-10 11:51:57] Attention backend not specified. Use flashinfer backend by default.",
+    "[2026-11-10 11:51:59] server_args={'model_path': 'unsloth/Llama-3.2-1B-Instruct', 'tokenizer_path': 'unsloth/Llama-3.2-1B-Instruct', 'tokenizer_mode': 'auto', 'tokenizer_backend': 'huggingface', 'tokenizer_worker_num': 1, 'detokenizer_worker_num': 1, 'skip_tokenizer_init': False, 'load_format': 'auto', 'model_loader_extra_config': '{}', 'trust_remote_code': False, 'context_length': 8192, 'is_embed",
+    "[2026-11-10 11:52:17] Memory baseline taken. mem usage=0.00 GB",
+    "[2026-11-10 11:52:20] Load weight end. elapsed=0.94 s, type=LlamaForCausalLM, avail mem=19.41 GB, mem usage=2.35 GB.",
+    "[2026-11-10 11:52:23] KV Cache is allocated. dtype: torch.bfloat16, #tokens: 32768, K size: 0.50 GB, V size: 0.50 GB",
+    "[2026-11-10 11:52:30] Capture target prefill CUDA graph end. elapsed=6.29 s, mem usage=0.47 GB, avail mem=17.42 GB.",
+    "[2026-11-10 11:52:31] Capture target decode CUDA graph end. bs=[1, 2, 4, 8, 12, 16, 24, 32, 40, 48], elapsed=1.29 s, mem usage=0.12 GB, avail mem=17.30 GB.",
+    "[2026-11-10 11:52:31] max_total_num_tokens=32768, chunked_prefill_size=4096, max_prefill_tokens=16384, max_running_requests=2048, context_len=8192, available_gpu_mem=17.30 GB"
+   ],
+   "prefill_batches_logged": 68,
+   "sample_prefill_log": [
+    "[2026-11-10 11:52:33] Prefill batch, #new-seq: 1, #new-token: 7, #cached-token: 0, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: True, input throughput (token/s): 4.28",
+    "[2026-11-10 11:52:35] Prefill batch, #new-seq: 1, #new-token: 1, #cached-token: 0, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: False, input throughput (token/s): 0.53",
+    "[2026-11-10 11:52:36] Prefill batch, #new-seq: 1, #new-token: 5, #cached-token: 1, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: True, input throughput (token/s): 4.84",
+    "[2026-11-10 11:52:36] Prefill batch, #new-seq: 1, #new-token: 1, #cached-token: 5, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: False, input throughput (token/s): 16.32",
+    "[2026-11-10 11:52:36] Prefill batch, #new-seq: 1, #new-token: 1, #cached-token: 5, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: False, input throughput (token/s): 16.25",
+    "[2026-11-10 11:52:36] Prefill batch, #new-seq: 1, #new-token: 2064, #cached-token: 1, token usage: 0.06, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: True, input throughput (token/s): 16846.35"
+   ]
+  },
+  {
+   "config": "cache on, lpm",
+   "flags": [
+    "--schedule-policy",
+    "lpm"
+   ],
+   "startup_s": 49.0,
+   "pool_tokens": 410522,
+   "burst": {
+    "requests": 64,
+    "seconds": 0.5,
+    "prompt_tokens": 195200,
+    "cached_tokens": 189000,
+    "hit_rate": 0.9682,
+    "requests_with_no_hit": 1,
+    "ttft_ms_p50": 298.1,
+    "ttft_ms_max": 313.1
+   },
+   "server_log": [
+    "[2026-11-10 11:53:15] Attention backend not specified. Use flashinfer backend by default.",
+    "[2026-11-10 11:53:17] server_args={'model_path': 'unsloth/Llama-3.2-1B-Instruct', 'tokenizer_path': 'unsloth/Llama-3.2-1B-Instruct', 'tokenizer_mode': 'auto', 'tokenizer_backend': 'huggingface', 'tokenizer_worker_num': 1, 'detokenizer_worker_num': 1, 'skip_tokenizer_init': False, 'load_format': 'auto', 'model_loader_extra_config': '{}', 'trust_remote_code': False, 'context_length': 8192, 'is_embed",
+    "[2026-11-10 11:53:35] Memory baseline taken. mem usage=0.00 GB",
+    "[2026-11-10 11:53:38] Load weight end. elapsed=0.90 s, type=LlamaForCausalLM, avail mem=19.41 GB, mem usage=2.35 GB.",
+    "[2026-11-10 11:53:42] KV Cache is allocated. dtype: torch.bfloat16, #tokens: 410522, K size: 6.26 GB, V size: 6.26 GB",
+    "[2026-11-10 11:53:48] Capture target prefill CUDA graph end. elapsed=6.02 s, mem usage=0.47 GB, avail mem=5.84 GB.",
+    "[2026-11-10 11:53:49] Capture target decode CUDA graph end. bs=[1, 2, 4, 8, 12, 16, 24, 32, 40, 48], elapsed=1.04 s, mem usage=0.12 GB, avail mem=5.72 GB.",
+    "[2026-11-10 11:53:49] max_total_num_tokens=410522, chunked_prefill_size=4096, max_prefill_tokens=16384, max_running_requests=4096, context_len=8192, available_gpu_mem=5.72 GB"
+   ],
+   "prefill_batches_logged": 7,
+   "sample_prefill_log": [
+    "[2026-11-10 11:53:51] Prefill batch, #new-seq: 1, #new-token: 7, #cached-token: 0, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: True, input throughput (token/s): 4.18",
+    "[2026-11-10 11:53:52] Prefill batch, #new-seq: 1, #new-token: 1, #cached-token: 0, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: False, input throughput (token/s): 0.87",
+    "[2026-11-10 11:53:53] Prefill batch, #new-seq: 1, #new-token: 5, #cached-token: 1, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: True, input throughput (token/s): 4.84",
+    "[2026-11-10 11:53:53] Prefill batch, #new-seq: 1, #new-token: 1, #cached-token: 5, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: False, input throughput (token/s): 16.62",
+    "[2026-11-10 11:53:53] Prefill batch, #new-seq: 1, #new-token: 1, #cached-token: 5, token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: False, input throughput (token/s): 17.19",
+    "[2026-11-10 11:53:53] Prefill batch, #new-seq: 1, #new-token: 3050, #cached-token: 0, token usage: 0.01, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: True, input throughput (token/s): 16399.98"
+   ]
+  }
+ ]
+}

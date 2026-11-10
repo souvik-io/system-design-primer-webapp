@@ -34,6 +34,7 @@ const WIDGETS: Record<string, ComponentType> = {
   'sparsity-pattern': lazy(() => import('./SparsityPattern')),
   'paged-kv-allocator': lazy(() => import('./PagedKvAllocator')),
   'request-trace': lazy(() => import('./RequestTrace')),
+  'radix-tree': lazy(() => import('./RadixTree')),
 }
 
 export function Widgets({ root, chapter }: { root: RefObject<HTMLElement | null>; chapter: unknown }) {

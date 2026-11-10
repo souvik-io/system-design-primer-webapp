@@ -248,6 +248,7 @@ def main() -> None:
     ap.add_argument("--toolkit", action="store_true", help="use images/toolkit.Dockerfile (nvcc, Nsight)")
     ap.add_argument("--vllm", action="store_true", help="use images/vllm.Dockerfile")
     ap.add_argument("--quant", action="store_true", help="use images/quant.Dockerfile (vLLM and llm-compressor)")
+    ap.add_argument("--sglang", action="store_true", help="use images/sglang.Dockerfile")
     ap.add_argument("--on-demand", action="store_true", help="normal price instead of Spot; cannot be reclaimed")
     ap.add_argument("--max-hours", type=float, default=1.0, help="Google deletes the VM after this long (default 1)")
     ap.add_argument("--keep", action="store_true", help="leave the VM running for SSH until --max-hours or --cleanup")
@@ -283,7 +284,7 @@ def main() -> None:
     rate = hourly(a.gpu, spot)
     budget.check("gcp", rate * a.max_hours, a.allow_over_budget)
 
-    kind = "quant" if a.quant else "vllm" if a.vllm else "toolkit" if a.toolkit else "base"
+    kind = "sglang" if a.sglang else "quant" if a.quant else "vllm" if a.vllm else "toolkit" if a.toolkit else "base"
     stem = Path(a.script).stem if a.script else "session"
     stamp = time.strftime("%Y%m%d-%H%M%S")
     name = f"lab-{stem}-{a.gpu}-{stamp}".lower().replace("_", "-").replace(":", "x")[:63]

@@ -1,0 +1,353 @@
+{
+ "engine": "vllm",
+ "version": "0.32.0",
+ "model": "unsloth/Meta-Llama-3.1-8B-Instruct",
+ "gpu": "NVIDIA H100 80GB HBM3",
+ "kv_bytes_per_token": 131072,
+ "conversations": 48,
+ "turns": 6,
+ "configs": [
+  {
+   "config": "cache on",
+   "flags": [],
+   "startup_s": 868.5,
+   "pool_tokens": 451056,
+   "burst": {
+    "requests": 64,
+    "seconds": 0.55,
+    "prompt_tokens": 195200,
+    "cached_tokens": 188496,
+    "hit_rate": 0.9657,
+    "requests_with_no_hit": 1,
+    "ttft_ms_p50": 453.8,
+    "ttft_ms_max": 464.5
+   },
+   "chat": {
+    "requests": 288,
+    "seconds": 25.5,
+    "prompt_tokens": 698655,
+    "cached_tokens": 684112,
+    "hit_rate": 0.9792,
+    "completion_tokens": 29429,
+    "ttft_ms_p50": 34.9,
+    "ttft_ms_p99": 77.0,
+    "preemptions": 0,
+    "by_turn": [
+     {
+      "turn": 1,
+      "prompt_tokens_p50": 2063,
+      "cached_tokens_p50": 2016,
+      "hit_rate": 0.9774,
+      "ttft_ms_p50": 50.6,
+      "ttft_ms_p99": 79.4
+     },
+     {
+      "turn": 2,
+      "prompt_tokens_p50": 2210,
+      "cached_tokens_p50": 2160,
+      "hit_rate": 0.977,
+      "ttft_ms_p50": 36.5,
+      "ttft_ms_p99": 70.9
+     },
+     {
+      "turn": 3,
+      "prompt_tokens_p50": 2358,
+      "cached_tokens_p50": 2304,
+      "hit_rate": 0.9781,
+      "ttft_ms_p50": 34.5,
+      "ttft_ms_p99": 50.6
+     },
+     {
+      "turn": 4,
+      "prompt_tokens_p50": 2502,
+      "cached_tokens_p50": 2448,
+      "hit_rate": 0.9791,
+      "ttft_ms_p50": 35.2,
+      "ttft_ms_p99": 44.2
+     },
+     {
+      "turn": 5,
+      "prompt_tokens_p50": 2644,
+      "cached_tokens_p50": 2592,
+      "hit_rate": 0.9808,
+      "ttft_ms_p50": 33.3,
+      "ttft_ms_p99": 49.5
+     },
+     {
+      "turn": 6,
+      "prompt_tokens_p50": 2778,
+      "cached_tokens_p50": 2720,
+      "hit_rate": 0.9817,
+      "ttft_ms_p50": 34.1,
+      "ttft_ms_p99": 49.1
+     }
+    ]
+   },
+   "server_log": [
+    "(APIServer pid=34) INFO 11-10 11:55:48 [scheduler.py:307] Chunked prefill is enabled with max_num_batched_tokens=8192.",
+    "(EngineCore pid=99) INFO 11-10 11:56:05 [core.py:133] Initializing a V1 LLM engine (v0.32.0) with config: model='unsloth/Meta-Llama-3.1-8B-Instruct', speculative_config=None, tokenizer='unsloth/Meta-Llama-3.1-8B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_revision=main, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=8192, download_dir=None, load_",
+    "(EngineCore pid=99) INFO 11-10 12:07:26 [utils.py:347] Using LBNHC KV cache layout.",
+    "(EngineCore pid=99) INFO 11-10 12:08:00 [gpu_worker.py:759] Available KV cache memory: 55.06 GiB",
+    "(EngineCore pid=99) INFO 11-10 12:08:00 [gpu_worker.py:774] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9200 is equivalent to --gpu-memory-utilization=0.9087 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.9313. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE",
+    "(EngineCore pid=99) INFO 11-10 12:08:00 [kv_cache_utils.py:2327] GPU KV cache size: 451,056 tokens, Maximum concurrency for 8,192 tokens per request: 55.06x",
+    "(EngineCore pid=99) INFO 11-10 12:09:32 [gpu_worker.py:1034] Free memory on device (78.66/79.17 GiB) on startup. Desired GPU memory utilization is (0.92, 72.84 GiB). Actual usage is 15.81 GiB for consumed memory (weights + non-torch), 1.97 GiB for peak activation, and 0.45 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=58482744013` (54.47 GiB) to fit into r",
+    "(EngineCore pid=99) INFO 11-10 12:09:34 [core.py:395] init engine (profile, create kv cache, warmup model) took 128.09 s (compilation: 19.73 s)",
+    "(APIServer pid=34) INFO 11-10 12:09:47 [loggers.py:335] Engine 000: Avg prompt throughput: 1127.5 tokens/s, Avg generation throughput: 867.7 tokens/s, Running: 12 reqs, Waiting: 0 reqs, GPU KV cache usage: 1.2%, Prefix cache hit rate: 96.7%",
+    "(APIServer pid=34) INFO 11-10 12:09:57 [loggers.py:335] Engine 000: Avg prompt throughput: 743.2 tokens/s, Avg generation throughput: 1503.8 tokens/s, Running: 10 reqs, Waiting: 0 reqs, GPU KV cache usage: 2.2%, Prefix cache hit rate: 97.3%"
+   ]
+  },
+  {
+   "config": "cache off",
+   "flags": [
+    "--no-enable-prefix-caching"
+   ],
+   "startup_s": 76.0,
+   "pool_tokens": 452928,
+   "burst": {
+    "requests": 64,
+    "seconds": 5.17,
+    "prompt_tokens": 195200,
+    "cached_tokens": 0,
+    "hit_rate": 0.0,
+    "requests_with_no_hit": 64,
+    "ttft_ms_p50": 2675.5,
+    "ttft_ms_max": 5003.9
+   },
+   "chat": {
+    "requests": 288,
+    "seconds": 31.3,
+    "prompt_tokens": 699098,
+    "cached_tokens": 0,
+    "hit_rate": 0.0,
+    "completion_tokens": 29521,
+    "ttft_ms_p50": 198.7,
+    "ttft_ms_p99": 569.5,
+    "preemptions": 0,
+    "by_turn": [
+     {
+      "turn": 1,
+      "prompt_tokens_p50": 2063,
+      "cached_tokens_p50": 0,
+      "hit_rate": 0.0,
+      "ttft_ms_p50": 169.4,
+      "ttft_ms_p99": 530.2
+     },
+     {
+      "turn": 2,
+      "prompt_tokens_p50": 2211,
+      "cached_tokens_p50": 0,
+      "hit_rate": 0.0,
+      "ttft_ms_p50": 186.9,
+      "ttft_ms_p99": 409.9
+     },
+     {
+      "turn": 3,
+      "prompt_tokens_p50": 2358,
+      "cached_tokens_p50": 0,
+      "hit_rate": 0.0,
+      "ttft_ms_p50": 185.3,
+      "ttft_ms_p99": 548.3
+     },
+     {
+      "turn": 4,
+      "prompt_tokens_p50": 2499,
+      "cached_tokens_p50": 0,
+      "hit_rate": 0.0,
+      "ttft_ms_p50": 271.5,
+      "ttft_ms_p99": 481.5
+     },
+     {
+      "turn": 5,
+      "prompt_tokens_p50": 2643,
+      "cached_tokens_p50": 0,
+      "hit_rate": 0.0,
+      "ttft_ms_p50": 328.9,
+      "ttft_ms_p99": 612.6
+     },
+     {
+      "turn": 6,
+      "prompt_tokens_p50": 2786,
+      "cached_tokens_p50": 0,
+      "hit_rate": 0.0,
+      "ttft_ms_p50": 167.4,
+      "ttft_ms_p99": 505.3
+     }
+    ]
+   },
+   "server_log": [
+    "(APIServer pid=437) INFO 11-10 12:10:31 [api_utils.py:286] non-default args: {'model_tag': 'unsloth/Meta-Llama-3.1-8B-Instruct', 'enable_prompt_tokens_details': True, 'model': 'unsloth/Meta-Llama-3.1-8B-Instruct', 'max_model_len': 8192, 'enable_prefix_caching': False}",
+    "(APIServer pid=437) INFO 11-10 12:10:31 [scheduler.py:307] Chunked prefill is enabled with max_num_batched_tokens=8192.",
+    "(EngineCore pid=461) INFO 11-10 12:10:46 [core.py:133] Initializing a V1 LLM engine (v0.32.0) with config: model='unsloth/Meta-Llama-3.1-8B-Instruct', speculative_config=None, tokenizer='unsloth/Meta-Llama-3.1-8B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_revision=main, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=8192, download_dir=None, load",
+    "(EngineCore pid=461) INFO 11-10 12:10:57 [utils.py:347] Using LBNHC KV cache layout.",
+    "(EngineCore pid=461) INFO 11-10 12:11:12 [gpu_worker.py:759] Available KV cache memory: 55.29 GiB",
+    "(EngineCore pid=461) INFO 11-10 12:11:12 [gpu_worker.py:774] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9200 is equivalent to --gpu-memory-utilization=0.9087 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.9313. To disable, set VLLM_MEMORY_PROFILER_ESTIMAT",
+    "(EngineCore pid=461) INFO 11-10 12:11:12 [kv_cache_utils.py:2327] GPU KV cache size: 452,928 tokens, Maximum concurrency for 8,192 tokens per request: 55.29x",
+    "(EngineCore pid=461) INFO 11-10 12:11:22 [gpu_worker.py:1034] Free memory on device (78.66/79.17 GiB) on startup. Desired GPU memory utilization is (0.92, 72.84 GiB). Actual usage is 15.81 GiB for consumed memory (weights + non-torch), 1.74 GiB for peak activation, and 0.45 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=58728151757` (54.69 GiB) to fit into ",
+    "(EngineCore pid=461) INFO 11-10 12:11:23 [core.py:395] init engine (profile, create kv cache, warmup model) took 26.16 s (compilation: 0.81 s)",
+    "(APIServer pid=437) INFO 11-10 12:11:36 [loggers.py:335] Engine 000: Avg prompt throughput: 21450.4 tokens/s, Avg generation throughput: 160.7 tokens/s, Running: 32 reqs, Waiting: 0 reqs, GPU KV cache usage: 14.8%",
+    "(APIServer pid=437) INFO 11-10 12:11:46 [loggers.py:335] Engine 000: Avg prompt throughput: 22720.6 tokens/s, Avg generation throughput: 1062.5 tokens/s, Running: 29 reqs, Waiting: 0 reqs, GPU KV cache usage: 15.4%",
+    "(APIServer pid=437) INFO 11-10 12:11:56 [loggers.py:335] Engine 000: Avg prompt throughput: 22936.6 tokens/s, Avg generation throughput: 925.2 tokens/s, Running: 23 reqs, Waiting: 0 reqs, GPU KV cache usage: 13.7%"
+   ]
+  },
+  {
+   "config": "pool 32768",
+   "flags": [
+    "--kv-cache-memory-bytes",
+    "4294967296"
+   ],
+   "startup_s": 58.0,
+   "pool_tokens": 32768,
+   "chat": {
+    "requests": 288,
+    "seconds": 24.9,
+    "prompt_tokens": 698421,
+    "cached_tokens": 667856,
+    "hit_rate": 0.9562,
+    "completion_tokens": 29115,
+    "ttft_ms_p50": 31.8,
+    "ttft_ms_p99": 54.3,
+    "preemptions": 0,
+    "by_turn": [
+     {
+      "turn": 1,
+      "prompt_tokens_p50": 2063,
+      "cached_tokens_p50": 2016,
+      "hit_rate": 0.9774,
+      "ttft_ms_p50": 31.7,
+      "ttft_ms_p99": 47.3
+     },
+     {
+      "turn": 2,
+      "prompt_tokens_p50": 2210,
+      "cached_tokens_p50": 2160,
+      "hit_rate": 0.9773,
+      "ttft_ms_p50": 30.7,
+      "ttft_ms_p99": 42.8
+     },
+     {
+      "turn": 3,
+      "prompt_tokens_p50": 2358,
+      "cached_tokens_p50": 2304,
+      "hit_rate": 0.9788,
+      "ttft_ms_p50": 30.9,
+      "ttft_ms_p99": 42.6
+     },
+     {
+      "turn": 4,
+      "prompt_tokens_p50": 2499,
+      "cached_tokens_p50": 2448,
+      "hit_rate": 0.9764,
+      "ttft_ms_p50": 32.6,
+      "ttft_ms_p99": 54.3
+     },
+     {
+      "turn": 5,
+      "prompt_tokens_p50": 2646,
+      "cached_tokens_p50": 2544,
+      "hit_rate": 0.9148,
+      "ttft_ms_p50": 35.0,
+      "ttft_ms_p99": 55.7
+     },
+     {
+      "turn": 6,
+      "prompt_tokens_p50": 2789,
+      "cached_tokens_p50": 2704,
+      "hit_rate": 0.9261,
+      "ttft_ms_p50": 32.2,
+      "ttft_ms_p99": 55.6
+     }
+    ]
+   },
+   "server_log": [
+    "(APIServer pid=605) INFO 11-10 12:12:29 [scheduler.py:307] Chunked prefill is enabled with max_num_batched_tokens=8192.",
+    "(EngineCore pid=628) INFO 11-10 12:12:43 [core.py:133] Initializing a V1 LLM engine (v0.32.0) with config: model='unsloth/Meta-Llama-3.1-8B-Instruct', speculative_config=None, tokenizer='unsloth/Meta-Llama-3.1-8B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_revision=main, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=8192, download_dir=None, load",
+    "(EngineCore pid=628) INFO 11-10 12:12:52 [utils.py:347] Using LBNHC KV cache layout.",
+    "(EngineCore pid=628) INFO 11-10 12:12:54 [gpu_worker.py:669] Initial free memory 78.66 GiB, reserved 4.0 GiB memory for KV Cache as specified by kv_cache_memory_bytes config and skipped memory profiling. This does not respect the gpu_memory_utilization config. Only use kv_cache_memory_bytes config when you want manual control of KV cache memory size. If OOM'ed, check the difference of initial free",
+    "(EngineCore pid=628) INFO 11-10 12:12:54 [kv_cache_utils.py:2327] GPU KV cache size: 32,768 tokens, Maximum concurrency for 8,192 tokens per request: 4.00x",
+    "(EngineCore pid=628) INFO 11-10 12:13:05 [core.py:395] init engine (profile, create kv cache, warmup model) took 12.88 s (compilation: 0.22 s)",
+    "(APIServer pid=605) INFO 11-10 12:13:18 [loggers.py:335] Engine 000: Avg prompt throughput: 655.3 tokens/s, Avg generation throughput: 975.9 tokens/s, Running: 5 reqs, Waiting: 0 reqs, GPU KV cache usage: 11.1%, Prefix cache hit rate: 96.9%",
+    "(APIServer pid=605) INFO 11-10 12:13:28 [loggers.py:335] Engine 000: Avg prompt throughput: 1570.5 tokens/s, Avg generation throughput: 1406.4 tokens/s, Running: 11 reqs, Waiting: 0 reqs, GPU KV cache usage: 29.8%, Prefix cache hit rate: 96.2%"
+   ]
+  },
+  {
+   "config": "pool 16384",
+   "flags": [
+    "--kv-cache-memory-bytes",
+    "2147483648"
+   ],
+   "startup_s": 62.0,
+   "pool_tokens": 16384,
+   "chat": {
+    "requests": 288,
+    "seconds": 26.3,
+    "prompt_tokens": 700499,
+    "cached_tokens": 595824,
+    "hit_rate": 0.8506,
+    "completion_tokens": 30280,
+    "ttft_ms_p50": 38.1,
+    "ttft_ms_p99": 219.1,
+    "preemptions": 1,
+    "by_turn": [
+     {
+      "turn": 1,
+      "prompt_tokens_p50": 2063,
+      "cached_tokens_p50": 2016,
+      "hit_rate": 0.9774,
+      "ttft_ms_p50": 31.5,
+      "ttft_ms_p99": 40.7
+     },
+     {
+      "turn": 2,
+      "prompt_tokens_p50": 2211,
+      "cached_tokens_p50": 2160,
+      "hit_rate": 0.9722,
+      "ttft_ms_p50": 31.8,
+      "ttft_ms_p99": 40.3
+     },
+     {
+      "turn": 3,
+      "prompt_tokens_p50": 2358,
+      "cached_tokens_p50": 2016,
+      "hit_rate": 0.9064,
+      "ttft_ms_p50": 36.0,
+      "ttft_ms_p99": 71.9
+     },
+     {
+      "turn": 4,
+      "prompt_tokens_p50": 2502,
+      "cached_tokens_p50": 2016,
+      "hit_rate": 0.8225,
+      "ttft_ms_p50": 39.7,
+      "ttft_ms_p99": 75.5
+     },
+     {
+      "turn": 5,
+      "prompt_tokens_p50": 2657,
+      "cached_tokens_p50": 2016,
+      "hit_rate": 0.7596,
+      "ttft_ms_p50": 46.8,
+      "ttft_ms_p99": 219.1
+     },
+     {
+      "turn": 6,
+      "prompt_tokens_p50": 2806,
+      "cached_tokens_p50": 2016,
+      "hit_rate": 0.7255,
+      "ttft_ms_p50": 48.2,
+      "ttft_ms_p99": 244.2
+     }
+    ]
+   },
+   "server_log": [
+    "(APIServer pid=766) INFO 11-10 12:13:59 [scheduler.py:307] Chunked prefill is enabled with max_num_batched_tokens=8192.",
+    "(EngineCore pid=791) INFO 11-10 12:14:13 [core.py:133] Initializing a V1 LLM engine (v0.32.0) with config: model='unsloth/Meta-Llama-3.1-8B-Instruct', speculative_config=None, tokenizer='unsloth/Meta-Llama-3.1-8B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_revision=main, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=8192, download_dir=None, load",
+    "(EngineCore pid=791) INFO 11-10 12:14:22 [utils.py:347] Using LBNHC KV cache layout.",
+    "(EngineCore pid=791) INFO 11-10 12:14:24 [gpu_worker.py:669] Initial free memory 78.66 GiB, reserved 2.0 GiB memory for KV Cache as specified by kv_cache_memory_bytes config and skipped memory profiling. This does not respect the gpu_memory_utilization config. Only use kv_cache_memory_bytes config when you want manual control of KV cache memory size. If OOM'ed, check the difference of initial free",
+    "(EngineCore pid=791) INFO 11-10 12:14:24 [kv_cache_utils.py:2327] GPU KV cache size: 16,384 tokens, Maximum concurrency for 8,192 tokens per request: 2.00x",
+    "(EngineCore pid=791) INFO 11-10 12:14:38 [core.py:395] init engine (profile, create kv cache, warmup model) took 15.70 s (compilation: 0.21 s)",
+    "(APIServer pid=766) INFO 11-10 12:14:51 [loggers.py:335] Engine 000: Avg prompt throughput: 686.8 tokens/s, Avg generation throughput: 932.5 tokens/s, Running: 17 reqs, Waiting: 0 reqs, GPU KV cache usage: 46.6%, Prefix cache hit rate: 96.6%",
+    "(APIServer pid=766) INFO 11-10 12:15:01 [loggers.py:335] Engine 000: Avg prompt throughput: 6408.1 tokens/s, Avg generation throughput: 1435.3 tokens/s, Running: 8 reqs, Waiting: 0 reqs, GPU KV cache usage: 49.8%, Prefix cache hit rate: 87.4%"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,522 @@
+{
+ "engine": "sglang",
+ "version": "0.5.23",
+ "model": "unsloth/Meta-Llama-3.1-8B-Instruct",
+ "gpu": "NVIDIA H100 80GB HBM3",
+ "kv_bytes_per_token": 131072,
+ "conversations": 48,
+ "turns": 6,
+ "configs": [
+  {
+   "config": "cache on",
+   "flags": [],
+   "startup_s": 135.1,
+   "pool_tokens": 410558,
+   "burst": {
+    "requests": 64,
+    "seconds": 0.54,
+    "prompt_tokens": 195200,
+    "cached_tokens": 189000,
+    "hit_rate": 0.9682,
+    "requests_with_no_hit": 1,
+    "ttft_ms_p50": 256.9,
+    "ttft_ms_max": 270.7,
+    "prefill_batches": [
+     {
+      "requests": 1,
+      "computed": 3050,
+      "cached": 0
+     },
+     {
+      "requests": 63,
+      "computed": 3150,
+      "cached": 189000
+     }
+    ]
+   },
+   "chat": {
+    "requests": 288,
+    "seconds": 25.6,
+    "prompt_tokens": 698624,
+    "cached_tokens": 686609,
+    "hit_rate": 0.9828,
+    "completion_tokens": 29327,
+    "ttft_ms_p50": 25.1,
+    "ttft_ms_p99": 34.8,
+    "preemptions": 0,
+    "by_turn": [
+     {
+      "turn": 1,
+      "prompt_tokens_p50": 2063,
+      "cached_tokens_p50": 2026,
+      "hit_rate": 0.9822,
+      "ttft_ms_p50": 25.8,
+      "ttft_ms_p99": 143.5
+     },
+     {
+      "turn": 2,
+      "prompt_tokens_p50": 2212,
+      "cached_tokens_p50": 2169,
+      "hit_rate": 0.9806,
+      "ttft_ms_p50": 24.7,
+      "ttft_ms_p99": 32.6
+     },
+     {
+      "turn": 3,
+      "prompt_tokens_p50": 2358,
+      "cached_tokens_p50": 2315,
+      "hit_rate": 0.9818,
+      "ttft_ms_p50": 25.6,
+      "ttft_ms_p99": 30.8
+     },
+     {
+      "turn": 4,
+      "prompt_tokens_p50": 2494,
+      "cached_tokens_p50": 2450,
+      "hit_rate": 0.9829,
+      "ttft_ms_p50": 24.9,
+      "ttft_ms_p99": 29.0
+     },
+     {
+      "turn": 5,
+      "prompt_tokens_p50": 2645,
+      "cached_tokens_p50": 2603,
+      "hit_rate": 0.9838,
+      "ttft_ms_p50": 25.5,
+      "ttft_ms_p99": 31.1
+     },
+     {
+      "turn": 6,
+      "prompt_tokens_p50": 2786,
+      "cached_tokens_p50": 2744,
+      "hit_rate": 0.9847,
+      "ttft_ms_p50": 25.6,
+      "ttft_ms_p99": 30.7
+     }
+    ]
+   },
+   "server_log": [
+    "[2026-11-10 11:55:06] Attention backend not specified. Use fa3 backend by default.",
+    "[2026-11-10 11:55:26] Memory baseline taken. mem usage=0.00 GB",
+    "[2026-11-10 11:56:14] Load weight end. elapsed=46.20 s, type=LlamaForCausalLM, avail mem=63.47 GB, mem usage=15.02 GB.",
+    "[2026-11-10 11:56:18] KV Cache is allocated. dtype: torch.bfloat16, #tokens: 410558, K size: 25.06 GB, V size: 25.06 GB",
+    "[2026-11-10 11:56:51] Capture target prefill CUDA graph end. elapsed=31.88 s, mem usage=1.45 GB, avail mem=11.64 GB.",
+    "[2026-11-10 11:56:55] Capture target decode CUDA graph end. bs=[1, 2, 4, 8, 12, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248, 256], elapsed=4.06 s, mem usage=0.05 GB, avail mem=11.59 GB.",
+    "[2026-11-10 11:56:55] max_total_num_tokens=410558, chunked_prefill_size=8192, max_prefill_tokens=16384, max_running_requests=4096, context_len=8192, available_gpu_mem=11.59 GB"
+   ]
+  },
+  {
+   "config": "cache off",
+   "flags": [
+    "--disable-radix-cache"
+   ],
+   "startup_s": 57.0,
+   "pool_tokens": 410558,
+   "burst": {
+    "requests": 64,
+    "seconds": 5.09,
+    "prompt_tokens": 195200,
+    "cached_tokens": 0,
+    "hit_rate": 0.0,
+    "requests_with_no_hit": 64,
+    "ttft_ms_p50": 2779.3,
+    "ttft_ms_max": 4843.5,
+    "prefill_batches": [
+     {
+      "requests": 1,
+      "computed": 3050,
+      "cached": 0
+     },
+     {
+      "requests": 3,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 4,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 4,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 3,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 4,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 4,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 3,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 4,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 4,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 3,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 4,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 4,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 3,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 4,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 4,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 3,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 4,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 4,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 4,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 3,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 4,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 4,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 3,
+      "computed": 8192,
+      "cached": 0
+     },
+     {
+      "requests": 2,
+      "computed": 3734,
+      "cached": 0
+     }
+    ]
+   },
+   "chat": {
+    "requests": 288,
+    "seconds": 32.1,
+    "prompt_tokens": 699693,
+    "cached_tokens": 0,
+    "hit_rate": 0.0,
+    "completion_tokens": 29763,
+    "ttft_ms_p50": 243.4,
+    "ttft_ms_p99": 505.4,
+    "preemptions": 0,
+    "by_turn": [
+     {
+      "turn": 1,
+      "prompt_tokens_p50": 2063,
+      "cached_tokens_p50": 0,
+      "hit_rate": 0.0,
+      "ttft_ms_p50": 189.9,
+      "ttft_ms_p99": 505.4
+     },
+     {
+      "turn": 2,
+      "prompt_tokens_p50": 2211,
+      "cached_tokens_p50": 0,
+      "hit_rate": 0.0,
+      "ttft_ms_p50": 237.8,
+      "ttft_ms_p99": 441.3
+     },
+     {
+      "turn": 3,
+      "prompt_tokens_p50": 2359,
+      "cached_tokens_p50": 0,
+      "hit_rate": 0.0,
+      "ttft_ms_p50": 226.6,
+      "ttft_ms_p99": 382.1
+     },
+     {
+      "turn": 4,
+      "prompt_tokens_p50": 2503,
+      "cached_tokens_p50": 0,
+      "hit_rate": 0.0,
+      "ttft_ms_p50": 255.1,
+      "ttft_ms_p99": 439.9
+     },
+     {
+      "turn": 5,
+      "prompt_tokens_p50": 2648,
+      "cached_tokens_p50": 0,
+      "hit_rate": 0.0,
+      "ttft_ms_p50": 342.1,
+      "ttft_ms_p99": 541.1
+     },
+     {
+      "turn": 6,
+      "prompt_tokens_p50": 2794,
+      "cached_tokens_p50": 0,
+      "hit_rate": 0.0,
+      "ttft_ms_p50": 246.3,
+      "ttft_ms_p99": 464.1
+     }
+    ]
+   },
+   "server_log": [
+    "[2026-11-10 11:57:56] Attention backend not specified. Use fa3 backend by default.",
+    "[2026-11-10 11:58:16] Memory baseline taken. mem usage=0.00 GB",
+    "[2026-11-10 11:58:20] Load weight end. elapsed=2.73 s, type=LlamaForCausalLM, avail mem=63.47 GB, mem usage=15.02 GB.",
+    "[2026-11-10 11:58:25] KV Cache is allocated. dtype: torch.bfloat16, #tokens: 410558, K size: 25.06 GB, V size: 25.06 GB",
+    "[2026-11-10 11:58:35] Capture target prefill CUDA graph end. elapsed=10.14 s, mem usage=1.45 GB, avail mem=11.64 GB.",
+    "[2026-11-10 11:58:38] Capture target decode CUDA graph end. bs=[1, 2, 4, 8, 12, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248, 256], elapsed=3.53 s, mem usage=0.05 GB, avail mem=11.59 GB.",
+    "[2026-11-10 11:58:38] max_total_num_tokens=410558, chunked_prefill_size=8192, max_prefill_tokens=16384, max_running_requests=4096, context_len=8192, available_gpu_mem=11.59 GB"
+   ]
+  },
+  {
+   "config": "pool 32768",
+   "flags": [
+    "--max-total-tokens",
+    "32768"
+   ],
+   "startup_s": 63.0,
+   "pool_tokens": 32768,
+   "chat": {
+    "requests": 288,
+    "seconds": 25.8,
+    "prompt_tokens": 699281,
+    "cached_tokens": 670046,
+    "hit_rate": 0.9582,
+    "completion_tokens": 29574,
+    "ttft_ms_p50": 25.6,
+    "ttft_ms_p99": 47.5,
+    "preemptions": 0,
+    "by_turn": [
+     {
+      "turn": 1,
+      "prompt_tokens_p50": 2063,
+      "cached_tokens_p50": 2026,
+      "hit_rate": 0.9822,
+      "ttft_ms_p50": 25.1,
+      "ttft_ms_p99": 30.5
+     },
+     {
+      "turn": 2,
+      "prompt_tokens_p50": 2209,
+      "cached_tokens_p50": 2167,
+      "hit_rate": 0.9807,
+      "ttft_ms_p50": 24.4,
+      "ttft_ms_p99": 28.2
+     },
+     {
+      "turn": 3,
+      "prompt_tokens_p50": 2356,
+      "cached_tokens_p50": 2314,
+      "hit_rate": 0.9818,
+      "ttft_ms_p50": 26.0,
+      "ttft_ms_p99": 30.9
+     },
+     {
+      "turn": 4,
+      "prompt_tokens_p50": 2498,
+      "cached_tokens_p50": 2455,
+      "hit_rate": 0.9795,
+      "ttft_ms_p50": 25.0,
+      "ttft_ms_p99": 34.2
+     },
+     {
+      "turn": 5,
+      "prompt_tokens_p50": 2645,
+      "cached_tokens_p50": 2562,
+      "hit_rate": 0.9156,
+      "ttft_ms_p50": 27.9,
+      "ttft_ms_p99": 49.3
+     },
+     {
+      "turn": 6,
+      "prompt_tokens_p50": 2785,
+      "cached_tokens_p50": 2723,
+      "hit_rate": 0.9239,
+      "ttft_ms_p50": 29.0,
+      "ttft_ms_p99": 48.2
+     }
+    ]
+   },
+   "server_log": [
+    "[2026-11-10 11:59:42] Attention backend not specified. Use fa3 backend by default.",
+    "[2026-11-10 12:00:03] Memory baseline taken. mem usage=0.00 GB",
+    "[2026-11-10 12:00:12] Load weight end. elapsed=6.63 s, type=LlamaForCausalLM, avail mem=63.47 GB, mem usage=15.02 GB.",
+    "[2026-11-10 12:00:16] KV Cache is allocated. dtype: torch.bfloat16, #tokens: 32768, K size: 2.00 GB, V size: 2.00 GB",
+    "[2026-11-10 12:00:26] Capture target prefill CUDA graph end. elapsed=10.05 s, mem usage=1.45 GB, avail mem=57.80 GB.",
+    "[2026-11-10 12:00:30] Capture target decode CUDA graph end. bs=[1, 2, 4, 8, 12, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248, 256], elapsed=3.59 s, mem usage=0.07 GB, avail mem=57.73 GB.",
+    "[2026-11-10 12:00:30] max_total_num_tokens=32768, chunked_prefill_size=8192, max_prefill_tokens=16384, max_running_requests=2048, context_len=8192, available_gpu_mem=57.73 GB"
+   ]
+  },
+  {
+   "config": "pool 16384",
+   "flags": [
+    "--max-total-tokens",
+    "16384"
+   ],
+   "startup_s": 63.0,
+   "pool_tokens": 16384,
+   "chat": {
+    "requests": 288,
+    "seconds": 26.4,
+    "prompt_tokens": 698168,
+    "cached_tokens": 600032,
+    "hit_rate": 0.8594,
+    "completion_tokens": 29129,
+    "ttft_ms_p50": 30.0,
+    "ttft_ms_p99": 328.8,
+    "preemptions": 0,
+    "by_turn": [
+     {
+      "turn": 1,
+      "prompt_tokens_p50": 2063,
+      "cached_tokens_p50": 2026,
+      "hit_rate": 0.9822,
+      "ttft_ms_p50": 24.9,
+      "ttft_ms_p99": 30.2
+     },
+     {
+      "turn": 2,
+      "prompt_tokens_p50": 2209,
+      "cached_tokens_p50": 2166,
+      "hit_rate": 0.9795,
+      "ttft_ms_p50": 26.2,
+      "ttft_ms_p99": 30.8
+     },
+     {
+      "turn": 3,
+      "prompt_tokens_p50": 2353,
+      "cached_tokens_p50": 2026,
+      "hit_rate": 0.9143,
+      "ttft_ms_p50": 27.5,
+      "ttft_ms_p99": 36.4
+     },
+     {
+      "turn": 4,
+      "prompt_tokens_p50": 2492,
+      "cached_tokens_p50": 2026,
+      "hit_rate": 0.8311,
+      "ttft_ms_p50": 34.0,
+      "ttft_ms_p99": 45.9
+     },
+     {
+      "turn": 5,
+      "prompt_tokens_p50": 2638,
+      "cached_tokens_p50": 2026,
+      "hit_rate": 0.7675,
+      "ttft_ms_p50": 36.4,
+      "ttft_ms_p99": 319.1
+     },
+     {
+      "turn": 6,
+      "prompt_tokens_p50": 2779,
+      "cached_tokens_p50": 2026,
+      "hit_rate": 0.7394,
+      "ttft_ms_p50": 40.2,
+      "ttft_ms_p99": 444.7
+     }
+    ]
+   },
+   "server_log": [
+    "[2026-11-10 12:01:22] Attention backend not specified. Use fa3 backend by default.",
+    "[2026-11-10 12:01:42] Memory baseline taken. mem usage=0.00 GB",
+    "[2026-11-10 12:01:51] Load weight end. elapsed=6.38 s, type=LlamaForCausalLM, avail mem=63.47 GB, mem usage=15.02 GB.",
+    "[2026-11-10 12:01:55] KV Cache is allocated. dtype: torch.bfloat16, #tokens: 16384, K size: 1.00 GB, V size: 1.00 GB",
+    "[2026-11-10 12:02:05] Capture target prefill CUDA graph end. elapsed=10.37 s, mem usage=1.45 GB, avail mem=59.80 GB.",
+    "[2026-11-10 12:02:09] Capture target decode CUDA graph end. bs=[1, 2, 4, 8, 12, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248, 256], elapsed=3.65 s, mem usage=0.07 GB, avail mem=59.73 GB.",
+    "[2026-11-10 12:02:09] max_total_num_tokens=16384, chunked_prefill_size=8192, max_prefill_tokens=16384, max_running_requests=2048, context_len=8192, available_gpu_mem=59.73 GB"
+   ]
+  },
+  {
+   "config": "cache on, lpm",
+   "flags": [
+    "--schedule-policy",
+    "lpm"
+   ],
+   "startup_s": 67.0,
+   "pool_tokens": 410558,
+   "burst": {
+    "requests": 64,
+    "seconds": 0.4,
+    "prompt_tokens": 195200,
+    "cached_tokens": 189000,
+    "hit_rate": 0.9682,
+    "requests_with_no_hit": 1,
+    "ttft_ms_p50": 220.0,
+    "ttft_ms_max": 233.9,
+    "prefill_batches": [
+     {
+      "requests": 1,
+      "computed": 3050,
+      "cached": 0
+     },
+     {
+      "requests": 63,
+      "computed": 3150,
+      "cached": 189000
+     }
+    ]
+   },
+   "server_log": [
+    "[2026-11-10 12:03:07] Attention backend not specified. Use fa3 backend by default.",
+    "[2026-11-10 12:03:28] Memory baseline taken. mem usage=0.00 GB",
+    "[2026-11-10 12:03:37] Load weight end. elapsed=6.88 s, type=LlamaForCausalLM, avail mem=63.47 GB, mem usage=15.02 GB.",
+    "[2026-11-10 12:03:41] KV Cache is allocated. dtype: torch.bfloat16, #tokens: 410558, K size: 25.06 GB, V size: 25.06 GB",
+    "[2026-11-10 12:03:51] Capture target prefill CUDA graph end. elapsed=10.18 s, mem usage=1.45 GB, avail mem=11.64 GB.",
+    "[2026-11-10 12:03:55] Capture target decode CUDA graph end. bs=[1, 2, 4, 8, 12, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248, 256], elapsed=3.62 s, mem usage=0.05 GB, avail mem=11.59 GB.",
+    "[2026-11-10 12:03:55] max_total_num_tokens=410558, chunked_prefill_size=8192, max_prefill_tokens=16384, max_running_requests=4096, context_len=8192, available_gpu_mem=11.59 GB"
+   ]
+  }
+ ]
+}
