@@ -216,8 +216,8 @@ const PARTS = [
     dir: 'infra',
     title: 'Serving engines',
     description:
-      'An inference engine built from scratch, with a paged KV cache, continuous batching under a token budget, chunked prefill, preemption and an OpenAI-compatible server, measured against vLLM.',
-    chapters: ['mini-inference-engine'],
+      'An inference engine built from scratch, with a paged KV cache, continuous batching under a token budget, chunked prefill, preemption and an OpenAI-compatible server, measured against vLLM. Then vLLM itself: one request traced through its processes, its scheduler and block pool read against yours, and its main settings measured.',
+    chapters: ['mini-inference-engine', 'inside-vllm'],
   },
 ]
 
@@ -330,6 +330,7 @@ const WIDGET_NAMES = new Set([
   'pareto-picker',
   'sparsity-pattern',
   'paged-kv-allocator',
+  'request-trace',
 ])
 
 function widgetNode(name, where) {

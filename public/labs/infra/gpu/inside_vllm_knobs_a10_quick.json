@@ -1,0 +1,269 @@
+{
+ "model": "unsloth/Llama-3.2-1B-Instruct",
+ "gpu": "NVIDIA A10",
+ "vllm": "0.32.0",
+ "num_seqs": 64,
+ "configs": [
+  {
+   "config": "defaults",
+   "flags": [],
+   "startup_s": 164.1,
+   "kv_blocks": 34744,
+   "block_size": 16,
+   "kv_capacity_tokens": 555904,
+   "startup_log": [
+    "Using LBNHC KV cache layout.",
+    "Available KV cache memory: 16.96 GiB",
+    "CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9200 is equivalent to --gpu-memory-utilization=0.9076 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.9324. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.",
+    "GPU KV cache size: 555,904 tokens, Maximum concurrency for 4,096 tokens per request: 135.72x",
+    "Free memory on device (21.83/22.06 GiB) on startup. Desired GPU memory utilization is (0.92, 20.29 GiB). Actual usage is 2.56 GiB for consumed memory (weights + non-torch), 0.77 GiB for peak activation, and 0.15 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=17895063000` (16.67 GiB) to fit into requested memory, or `--kv-cache-memory=19541285376` (18.2 GiB)",
+    "init engine (profile, create kv cache, warmup model) took 107.74 s (compilation: 13.49 s)"
+   ],
+   "burst": {
+    "seconds": 10.82,
+    "output_tokens": 34510,
+    "output_tok_s": 3189.2,
+    "ttft_ms_p50": 769,
+    "ttft_ms_p99": 1550,
+    "ms_per_token_p50": 11.4,
+    "chunk_gap_ms_p99": 77.6,
+    "chunk_gap_ms_max": 85.4,
+    "preemptions": 0
+   },
+   "shared_prefix": {
+    "first_request_ttft_ms": 115,
+    "other_63": {
+     "seconds": 0.53,
+     "output_tokens": 1008,
+     "output_tok_s": 1884.3,
+     "ttft_ms_p50": 318,
+     "ttft_ms_p99": 329,
+     "ms_per_token_p50": 12.5,
+     "chunk_gap_ms_p99": 109.2,
+     "chunk_gap_ms_max": 109.3
+    },
+    "prefix_cache_queries_tokens": 195200,
+    "prefix_cache_hits_tokens": 188496
+   }
+  },
+  {
+   "config": "max_num_seqs=16",
+   "flags": [
+    "--max-num-seqs",
+    "16"
+   ],
+   "startup_s": 48.0,
+   "kv_blocks": 35460,
+   "block_size": 16,
+   "kv_capacity_tokens": 567360,
+   "startup_log": [
+    "Using LBNHC KV cache layout.",
+    "Available KV cache memory: 17.31 GiB",
+    "CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9200 is equivalent to --gpu-memory-utilization=0.9177 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.9223. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.",
+    "GPU KV cache size: 567,360 tokens, Maximum concurrency for 4,096 tokens per request: 138.52x",
+    "Free memory on device (21.83/22.06 GiB) on startup. Desired GPU memory utilization is (0.92, 20.29 GiB). Actual usage is 2.43 GiB for consumed memory (weights + non-torch), 0.55 GiB for peak activation, and 0.04 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=18396376024` (17.13 GiB) to fit into requested memory, or `--kv-cache-memory=20042598400` (18.67 GiB",
+    "init engine (profile, create kv cache, warmup model) took 22.15 s (compilation: 12.87 s)"
+   ],
+   "burst": {
+    "seconds": 20.91,
+    "output_tokens": 34510,
+    "output_tok_s": 1650.7,
+    "ttft_ms_p50": 6920,
+    "ttft_ms_p99": 14927,
+    "ms_per_token_p50": 8.0,
+    "chunk_gap_ms_p99": 25.7,
+    "chunk_gap_ms_max": 70.2,
+    "preemptions": 0
+   }
+  },
+  {
+   "config": "max_num_seqs=64",
+   "flags": [
+    "--max-num-seqs",
+    "64"
+   ],
+   "startup_s": 50.0,
+   "kv_blocks": 35280,
+   "block_size": 16,
+   "kv_capacity_tokens": 564480,
+   "startup_log": [
+    "Using LBNHC KV cache layout.",
+    "Available KV cache memory: 17.23 GiB",
+    "CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9200 is equivalent to --gpu-memory-utilization=0.9152 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.9248. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.",
+    "GPU KV cache size: 564,480 tokens, Maximum concurrency for 4,096 tokens per request: 137.81x",
+    "Free memory on device (21.83/22.06 GiB) on startup. Desired GPU memory utilization is (0.92, 20.29 GiB). Actual usage is 2.46 GiB for consumed memory (weights + non-torch), 0.6 GiB for peak activation, and 0.06 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=18272644056` (17.02 GiB) to fit into requested memory, or `--kv-cache-memory=19918866432` (18.55 GiB)",
+    "init engine (profile, create kv cache, warmup model) took 23.32 s (compilation: 12.68 s)"
+   ],
+   "burst": {
+    "seconds": 10.83,
+    "output_tokens": 34510,
+    "output_tok_s": 3187.1,
+    "ttft_ms_p50": 828,
+    "ttft_ms_p99": 1554,
+    "ms_per_token_p50": 11.5,
+    "chunk_gap_ms_p99": 78.1,
+    "chunk_gap_ms_max": 86.6,
+    "preemptions": 0
+   }
+  },
+  {
+   "config": "max_num_batched_tokens=1024",
+   "flags": [
+    "--max-num-batched-tokens",
+    "1024"
+   ],
+   "startup_s": 56.0,
+   "kv_blocks": 34768,
+   "block_size": 16,
+   "kv_capacity_tokens": 556288,
+   "startup_log": [
+    "non-default args: {'model_tag': 'unsloth/Llama-3.2-1B-Instruct', 'model': 'unsloth/Llama-3.2-1B-Instruct', 'max_model_len': 4096, 'max_num_batched_tokens': 1024}",
+    "Chunked prefill is enabled with max_num_batched_tokens=1024.",
+    "Using LBNHC KV cache layout.",
+    "Available KV cache memory: 16.98 GiB",
+    "CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9200 is equivalent to --gpu-memory-utilization=0.9076 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.9324. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.",
+    "GPU KV cache size: 556,288 tokens, Maximum concurrency for 4,096 tokens per request: 135.81x",
+    "Free memory on device (21.83/22.06 GiB) on startup. Desired GPU memory utilization is (0.92, 20.29 GiB). Actual usage is 2.55 GiB for consumed memory (weights + non-torch), 0.76 GiB for peak activation, and 0.15 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=17907650008` (16.68 GiB) to fit into requested memory, or `--kv-cache-memory=19553872384` (18.21 GiB",
+    "init engine (profile, create kv cache, warmup model) took 29.03 s (compilation: 12.24 s)"
+   ],
+   "burst": {
+    "seconds": 10.97,
+    "output_tokens": 34510,
+    "output_tok_s": 3144.7,
+    "ttft_ms_p50": 854,
+    "ttft_ms_p99": 1807,
+    "ms_per_token_p50": 11.6,
+    "chunk_gap_ms_p99": 48.9,
+    "chunk_gap_ms_max": 54.3,
+    "preemptions": 0
+   }
+  },
+  {
+   "config": "max_num_batched_tokens=16384",
+   "flags": [
+    "--max-num-batched-tokens",
+    "16384"
+   ],
+   "startup_s": 54.0,
+   "kv_blocks": 33848,
+   "block_size": 16,
+   "kv_capacity_tokens": 541568,
+   "startup_log": [
+    "non-default args: {'model_tag': 'unsloth/Llama-3.2-1B-Instruct', 'model': 'unsloth/Llama-3.2-1B-Instruct', 'max_model_len': 4096, 'max_num_batched_tokens': 16384}",
+    "Chunked prefill is enabled with max_num_batched_tokens=16384.",
+    "Using LBNHC KV cache layout.",
+    "Available KV cache memory: 16.53 GiB",
+    "CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9200 is equivalent to --gpu-memory-utilization=0.9075 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.9325. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.",
+    "GPU KV cache size: 541,568 tokens, Maximum concurrency for 4,096 tokens per request: 132.22x",
+    "Free memory on device (21.83/22.06 GiB) on startup. Desired GPU memory utilization is (0.92, 20.29 GiB). Actual usage is 2.55 GiB for consumed memory (weights + non-torch), 1.21 GiB for peak activation, and 0.15 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=17425272280` (16.23 GiB) to fit into requested memory, or `--kv-cache-memory=19071494656` (17.76 GiB",
+    "init engine (profile, create kv cache, warmup model) took 27.07 s (compilation: 12.86 s)"
+   ],
+   "burst": {
+    "seconds": 10.74,
+    "output_tokens": 34510,
+    "output_tok_s": 3212.1,
+    "ttft_ms_p50": 971,
+    "ttft_ms_p99": 1367,
+    "ms_per_token_p50": 10.8,
+    "chunk_gap_ms_p99": 11.5,
+    "chunk_gap_ms_max": 538.0,
+    "preemptions": 0
+   }
+  },
+  {
+   "config": "gpu_memory_utilization=0.2",
+   "flags": [
+    "--gpu-memory-utilization",
+    "0.2"
+   ],
+   "startup_s": 42.0,
+   "kv_blocks": 2998,
+   "block_size": 16,
+   "kv_capacity_tokens": 47968,
+   "startup_log": [
+    "Using LBNHC KV cache layout.",
+    "Available KV cache memory: 1.46 GiB",
+    "CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.2000 is equivalent to --gpu-memory-utilization=0.1876 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.2124. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.",
+    "GPU KV cache size: 47,968 tokens, Maximum concurrency for 4,096 tokens per request: 11.71x",
+    "Free memory on device (21.83/22.06 GiB) on startup. Desired GPU memory utilization is (0.2, 4.41 GiB). Actual usage is 2.56 GiB for consumed memory (weights + non-torch), 0.39 GiB for peak activation, and 0.15 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=1251274855` (1.17 GiB) to fit into requested memory, or `--kv-cache-memory=19950111232` (18.58 GiB) to",
+    "init engine (profile, create kv cache, warmup model) took 14.98 s (compilation: 0.20 s)"
+   ],
+   "burst": {
+    "seconds": 10.85,
+    "output_tokens": 34510,
+    "output_tok_s": 3181.6,
+    "ttft_ms_p50": 767,
+    "ttft_ms_p99": 1553,
+    "ms_per_token_p50": 11.5,
+    "chunk_gap_ms_p99": 77.2,
+    "chunk_gap_ms_max": 91.9,
+    "preemptions": 1
+   }
+  },
+  {
+   "config": "gpu_memory_utilization=0.2, max_num_seqs=64",
+   "flags": [
+    "--gpu-memory-utilization",
+    "0.2",
+    "--max-num-seqs",
+    "64"
+   ],
+   "startup_s": 34.0,
+   "kv_blocks": 3534,
+   "block_size": 16,
+   "kv_capacity_tokens": 56544,
+   "startup_log": [
+    "Using LBNHC KV cache layout.",
+    "Available KV cache memory: 1.73 GiB",
+    "CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.2000 is equivalent to --gpu-memory-utilization=0.1952 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.2048. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.",
+    "GPU KV cache size: 56,544 tokens, Maximum concurrency for 4,096 tokens per request: 13.80x",
+    "Free memory on device (21.83/22.06 GiB) on startup. Desired GPU memory utilization is (0.2, 4.41 GiB). Actual usage is 2.46 GiB for consumed memory (weights + non-torch), 0.22 GiB for peak activation, and 0.06 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=1628855911` (1.52 GiB) to fit into requested memory, or `--kv-cache-memory=20327692288` (18.93 GiB) to",
+    "init engine (profile, create kv cache, warmup model) took 7.44 s (compilation: 0.22 s)"
+   ],
+   "burst": {
+    "seconds": 10.83,
+    "output_tokens": 34510,
+    "output_tok_s": 3186.6,
+    "ttft_ms_p50": 768,
+    "ttft_ms_p99": 1554,
+    "ms_per_token_p50": 11.5,
+    "chunk_gap_ms_p99": 78.2,
+    "chunk_gap_ms_max": 89.0,
+    "preemptions": 0
+   }
+  },
+  {
+   "config": "prefix caching off",
+   "flags": [
+    "--no-enable-prefix-caching"
+   ],
+   "startup_s": 38.0,
+   "kv_blocks": 35523,
+   "block_size": 16,
+   "kv_capacity_tokens": 568368,
+   "startup_log": [
+    "Using LBNHC KV cache layout.",
+    "Available KV cache memory: 17.35 GiB",
+    "CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9200 is equivalent to --gpu-memory-utilization=0.9076 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.9324. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.",
+    "GPU KV cache size: 568,368 tokens, Maximum concurrency for 4,096 tokens per request: 138.76x",
+    "Free memory on device (21.83/22.06 GiB) on startup. Desired GPU memory utilization is (0.92, 20.29 GiB). Actual usage is 2.56 GiB for consumed memory (weights + non-torch), 0.39 GiB for peak activation, and 0.15 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=18303888856` (17.05 GiB) to fit into requested memory, or `--kv-cache-memory=19950111232` (18.58 GiB",
+    "init engine (profile, create kv cache, warmup model) took 11.39 s (compilation: 0.75 s)"
+   ],
+   "shared_prefix": {
+    "first_request_ttft_ms": 119,
+    "other_63": {
+     "seconds": 7.81,
+     "output_tokens": 1008,
+     "output_tok_s": 129.0,
+     "ttft_ms_p50": 3910,
+     "ttft_ms_p99": 7662,
+     "ms_per_token_p50": 82.1,
+     "chunk_gap_ms_p99": 87.0,
+     "chunk_gap_ms_max": 88.5
+    },
+    "prefix_cache_queries_tokens": 0,
+    "prefix_cache_hits_tokens": 0
+   }
+  }
+ ]
+}

@@ -40,6 +40,7 @@ uv pip install -r requirements.txt
 | 4.5 | `gpu/sparse_matmul.py` | A 2:4 sparse matmul against the dense one | torch, on an NVIDIA GPU |
 | 3.1 | `gpu/decode_runtime.py` | Part 3's GPU lab: a decode step with a static cache, CUDA graphs and torch.compile, and the caching allocator; see `gpu/README.md` | torch, transformers, on an NVIDIA GPU |
 | 5.1 | `gpu/engine_bench.py`, `gpu/profile_engine.py` | nano_engine's tests on a GPU, then its throughput against vLLM's, and the chunked-prefill stall benchmark | the `vllm` image (which also provides the FlashAttention kernel nano_engine uses on CUDA), on an NVIDIA GPU |
+| 5.2 | `gpu/inside_vllm.py` | One request traced through a vLLM server function by function, then throughput and latency for different `max_num_seqs`, `max_num_batched_tokens`, `gpu_memory_utilization` and prefix caching | the `vllm` image, on an NVIDIA GPU |
 | 1.2, 1.3 | `gpu/decode_sweep.py`, `gpu/moe_decode_sweep.py` | Measured decode step times with vLLM | vllm, on an NVIDIA GPU |
 
 The chapters print the output each script gave, on an Apple M2 MacBook with 8 GB of memory for the Mac scripts and on Modal H100 and A10 GPUs for the GPU scripts, so you can compare your numbers with them.
