@@ -210,6 +210,15 @@ const PARTS = [
     description: 'Number formats from FP32 to NVFP4, the arithmetic of quantization, the algorithms that produce quantized checkpoints, how to measure what they cost in quality, and when pruning or distillation is worth it instead.',
     chapters: ['number-formats', 'quantization-math', 'ptq-algorithms', 'quality-eval', 'other-compression'],
   },
+  {
+    id: 'infra-serving',
+    handbook: 'infra',
+    dir: 'infra',
+    title: 'Serving engines',
+    description:
+      'An inference engine built from scratch, with a paged KV cache, continuous batching under a token budget, chunked prefill, preemption and an OpenAI-compatible server, measured against vLLM.',
+    chapters: ['mini-inference-engine'],
+  },
 ]
 
 /** Folders under content/ that hold a handbook's chapters, besides content/ itself. */
@@ -320,6 +329,7 @@ const WIDGET_NAMES = new Set([
   'outlier-migration',
   'pareto-picker',
   'sparsity-pattern',
+  'paged-kv-allocator',
 ])
 
 function widgetNode(name, where) {

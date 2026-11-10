@@ -45,8 +45,10 @@ TIMEOUT = {"run": 30 * 60, "run_with_toolkit": 30 * 60, "run_with_vllm": 60 * 60
 
 IGNORE = ["modal_costs.jsonl", "gcp_costs.jsonl", "credits.json", "runs", "images", "__pycache__"]
 # The four images, built from images/*.Dockerfile; each file says what it holds and why.
+# Each image also gets ../nano_engine, the engine chapter 5.1 builds, as /labs/nano_engine.
 image, toolkit, vllm_image, quant_image = (
     modal.Image.from_dockerfile(HERE / "images" / f"{name}.Dockerfile").add_local_dir(HERE, "/labs", ignore=IGNORE)
+    .add_local_dir(HERE.parent / "nano_engine", "/labs/nano_engine", ignore=["__pycache__"])
     for name in ("base", "toolkit", "vllm", "quant")
 )
 app = modal.App("inference-handbook-labs")

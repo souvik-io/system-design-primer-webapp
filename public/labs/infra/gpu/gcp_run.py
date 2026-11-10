@@ -181,6 +181,8 @@ def upload(vm: dict, project: str, workdir: Path) -> None:
         for p in HERE.iterdir():
             if p.name not in SKIP:
                 tar.add(p, arcname=p.name)
+        # The engine chapter 5.1 builds lives one folder up; the GPU labs import it from here.
+        tar.add(HERE.parent / "nano_engine", arcname="nano_engine", filter=lambda t: None if "__pycache__" in t.name else t)
     gcloud("compute", "scp", str(bundle), f"{vm['name']}:labs.tgz", f"--zone={vm['zone']}", "--quiet",
            "--strict-host-key-checking=no", project=project)
     bundle.unlink()

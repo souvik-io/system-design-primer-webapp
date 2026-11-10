@@ -32,6 +32,7 @@ const WIDGETS: Record<string, ComponentType> = {
   'outlier-migration': lazy(() => import('./OutlierMigration')),
   'pareto-picker': lazy(() => import('./ParetoPicker')),
   'sparsity-pattern': lazy(() => import('./SparsityPattern')),
+  'paged-kv-allocator': lazy(() => import('./PagedKvAllocator')),
 }
 
 export function Widgets({ root, chapter }: { root: RefObject<HTMLElement | null>; chapter: unknown }) {

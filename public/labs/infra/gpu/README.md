@@ -62,6 +62,8 @@ Which platform to use: Modal starts in seconds, bills per second and has H100s w
 | `w4a16_matmul.py` | 4.2 | H100 (Modal, with and without `--vllm`), L4 (Google Cloud) | W4A16 kernels (unfused, tinygemm, Triton, Marlin with `--vllm`) against FP8 and INT8 W8A8, batch 1 to 4,096 |
 | `quantize_and_eval.py` | 4.3, 4.4 | H100 (Modal, `--quant`) | Llama 3.1 8B quantized seven ways with llm-compressor, each served in vLLM: memory, speed and quality |
 | `sparse_matmul.py` | 4.5 | H100 (Modal), L4 (Google Cloud) | A 2:4 sparse matmul (cuSPARSELt and CUTLASS) against dense BF16 |
+| `engine_bench.py` | 5.1 | H100 (Modal, `--vllm`), A10 with `--args "--quick"` | nano_engine's tests on the GPU, its throughput against vLLM with and without CUDA graphs, and the chunked-prefill stall benchmark; imports `../nano_engine`, which both launchers copy next to the scripts |
+| `profile_engine.py` | 5.1 | H100 (Modal, `--vllm`) | nano_engine's decode step with 256 sequences: step times, caching-allocator retries (`--default-allocator` to compare) and a PyTorch profile |
 
 The two vLLM scripts call vLLM's Python API and were written against vLLM 0.32.0. On Modal, add `--vllm` to run them in an image with vLLM installed, built on NVIDIA's CUDA 13.0 development image because FlashInfer, vLLM's default sampler, compiles some kernels with `nvcc` on first use; that function also reserves 4 CPU cores and 32 GiB of memory. Elsewhere, `pip install vllm` on the GPU machine. Each run took about 10 minutes of H100 time, about $0.65, most of it downloading the weights and compiling the models.
 
