@@ -1,0 +1,1176 @@
+{
+ "vllm": "0.32.0",
+ "target": "unsloth/Meta-Llama-3.1-8B-Instruct",
+ "gpu": "NVIDIA A10",
+ "configs": [
+  {
+   "config": "off",
+   "speculative_config": null,
+   "startup_s": 226.1,
+   "kv_pool_tokens": 29792,
+   "runs": [
+    {
+     "workload": "chat",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 35.0,
+     "output_tokens": 1020,
+     "output_tok_s": 29.1,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 29.2,
+     "ttft_ms_p50": 42.7,
+     "spec": {}
+    },
+    {
+     "workload": "chat",
+     "concurrency": 16,
+     "requests": 32,
+     "seconds": 18.67,
+     "output_tokens": 8047,
+     "output_tok_s": 431.0,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 27.7,
+     "ttft_ms_p50": 127.4,
+     "spec": {}
+    },
+    {
+     "workload": "code",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 42.47,
+     "output_tokens": 1224,
+     "output_tok_s": 28.8,
+     "prompt_tokens_p50": 374,
+     "completion_tokens_p50": 306,
+     "request_decode_tok_s_p50": 29.1,
+     "ttft_ms_p50": 126.5,
+     "spec": {}
+    },
+    {
+     "workload": "code",
+     "concurrency": 16,
+     "requests": 32,
+     "seconds": 25.43,
+     "output_tokens": 9729,
+     "output_tok_s": 382.6,
+     "prompt_tokens_p50": 367,
+     "completion_tokens_p50": 306,
+     "request_decode_tok_s_p50": 25.5,
+     "ttft_ms_p50": 475.4,
+     "spec": {}
+    },
+    {
+     "workload": "chat_t1",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 37.42,
+     "output_tokens": 1024,
+     "output_tok_s": 27.4,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 29.0,
+     "ttft_ms_p50": 42.6,
+     "spec": {}
+    }
+   ],
+   "server_log": [
+    "(EngineCore pid=100) INFO 11-11 04:57:54 [core.py:133] Initializing a V1 LLM engine (v0.32.0) with config: model='unsloth/Meta-Llama-3.1-8B-Instruct', speculative_config=None, tokenizer='unsloth/Meta-Llama-3.1-8B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_rev"
+   ]
+  },
+  {
+   "config": "ngram",
+   "speculative_config": {
+    "method": "ngram",
+    "num_speculative_tokens": 5,
+    "prompt_lookup_min": 2,
+    "prompt_lookup_max": 5
+   },
+   "startup_s": 90.0,
+   "kv_pool_tokens": 29088,
+   "runs": [
+    {
+     "workload": "chat",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 34.6,
+     "output_tokens": 1017,
+     "output_tok_s": 29.4,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 29.5,
+     "ttft_ms_p50": 41.9,
+     "spec": {
+      "drafts": 947,
+      "draft_tokens": 4735,
+      "accepted_tokens": 66,
+      "mean_acceptance_length": 1.07,
+      "draft_acceptance_rate": 0.0139,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.0391,
+       0.018,
+       0.0084,
+       0.0032,
+       0.0011
+      ]
+     },
+     "answers_identical_to_off": 0
+    },
+    {
+     "workload": "chat",
+     "concurrency": 16,
+     "requests": 32,
+     "seconds": 21.91,
+     "output_tokens": 8046,
+     "output_tok_s": 367.2,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 23.7,
+     "ttft_ms_p50": 115.8,
+     "spec": {
+      "drafts": 7508,
+      "draft_tokens": 37540,
+      "accepted_tokens": 508,
+      "mean_acceptance_length": 1.068,
+      "draft_acceptance_rate": 0.0135,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.0397,
+       0.0147,
+       0.0068,
+       0.0037,
+       0.0028
+      ]
+     }
+    },
+    {
+     "workload": "code",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 10.38,
+     "output_tokens": 1223,
+     "output_tok_s": 117.9,
+     "prompt_tokens_p50": 374,
+     "completion_tokens_p50": 306,
+     "request_decode_tok_s_p50": 122.7,
+     "ttft_ms_p50": 95.6,
+     "spec": {
+      "drafts": 271,
+      "draft_tokens": 1355,
+      "accepted_tokens": 948,
+      "mean_acceptance_length": 4.498,
+      "draft_acceptance_rate": 0.6996,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.738,
+       0.7011,
+       0.6937,
+       0.6827,
+       0.6827
+      ]
+     },
+     "answers_identical_to_off": 3
+    },
+    {
+     "workload": "code",
+     "concurrency": 16,
+     "requests": 32,
+     "seconds": 8.95,
+     "output_tokens": 9729,
+     "output_tok_s": 1087.0,
+     "prompt_tokens_p50": 367,
+     "completion_tokens_p50": 306,
+     "request_decode_tok_s_p50": 85.2,
+     "ttft_ms_p50": 407.6,
+     "spec": {
+      "drafts": 2023,
+      "draft_tokens": 10115,
+      "accepted_tokens": 7674,
+      "mean_acceptance_length": 4.793,
+      "draft_acceptance_rate": 0.7587,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.8067,
+       0.7588,
+       0.7538,
+       0.7375,
+       0.7365
+      ]
+     }
+    },
+    {
+     "workload": "chat_t1",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 36.43,
+     "output_tokens": 987,
+     "output_tok_s": 27.1,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 28.9,
+     "ttft_ms_p50": 41.9,
+     "spec": {
+      "drafts": 935,
+      "draft_tokens": 4675,
+      "accepted_tokens": 48,
+      "mean_acceptance_length": 1.051,
+      "draft_acceptance_rate": 0.0103,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.0321,
+       0.0096,
+       0.0053,
+       0.0032,
+       0.0011
+      ]
+     }
+    }
+   ],
+   "server_log": [
+    "(APIServer pid=452) INFO 11-11 05:05:35 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.29, Accepted throughput: 3.93 tokens/s, Drafted throughput: 68.34 tokens/s, Accepted: 46 tokens, Drafted: 800 tokens, Per-position acceptance rate: 0.081, 0.056, 0.050, 0.050, 0.050, Avg Draft ac",
+    "(APIServer pid=452) INFO 11-11 05:05:45 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.07, Accepted throughput: 2.00 tokens/s, Drafted throughput: 136.49 tokens/s, Accepted: 20 tokens, Drafted: 1365 tokens, Per-position acceptance rate: 0.033, 0.018, 0.011, 0.007, 0.004, Avg Draft ",
+    "(APIServer pid=452) INFO 11-11 05:05:55 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.05, Accepted throughput: 1.30 tokens/s, Drafted throughput: 136.99 tokens/s, Accepted: 13 tokens, Drafted: 1370 tokens, Per-position acceptance rate: 0.040, 0.007, 0.000, 0.000, 0.000, Avg Draft ",
+    "(APIServer pid=452) INFO 11-11 05:06:05 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.07, Accepted throughput: 2.00 tokens/s, Drafted throughput: 136.98 tokens/s, Accepted: 20 tokens, Drafted: 1370 tokens, Per-position acceptance rate: 0.040, 0.018, 0.011, 0.004, 0.000, Avg Draft ",
+    "(APIServer pid=452) INFO 11-11 05:06:15 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.04, Accepted throughput: 9.60 tokens/s, Drafted throughput: 1120.49 tokens/s, Accepted: 96 tokens, Drafted: 11205 tokens, Per-position acceptance rate: 0.025, 0.008, 0.005, 0.003, 0.002, Avg Draf",
+    "(APIServer pid=452) INFO 11-11 05:06:25 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.05, Accepted throughput: 17.70 tokens/s, Drafted throughput: 1759.79 tokens/s, Accepted: 177 tokens, Drafted: 17600 tokens, Per-position acceptance rate: 0.032, 0.010, 0.004, 0.003, 0.002, Avg Dr",
+    "(APIServer pid=452) INFO 11-11 05:06:35 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.26, Accepted throughput: 48.29 tokens/s, Drafted throughput: 939.88 tokens/s, Accepted: 483 tokens, Drafted: 9400 tokens, Per-position acceptance rate: 0.099, 0.057, 0.039, 0.031, 0.030, Avg Draf",
+    "(APIServer pid=452) INFO 11-11 05:06:45 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 4.51, Accepted throughput: 71.19 tokens/s, Drafted throughput: 101.49 tokens/s, Accepted: 712 tokens, Drafted: 1015 tokens, Per-position acceptance rate: 0.739, 0.704, 0.695, 0.685, 0.685, Avg Draf",
+    "(APIServer pid=452) INFO 11-11 05:06:55 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 4.80, Accepted throughput: 767.27 tokens/s, Drafted throughput: 1010.83 tokens/s, Accepted: 7674 tokens, Drafted: 10110 tokens, Per-position acceptance rate: 0.807, 0.759, 0.754, 0.738, 0.737, Avg ",
+    "(APIServer pid=452) INFO 11-11 05:07:05 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.06, Accepted throughput: 1.40 tokens/s, Drafted throughput: 113.99 tokens/s, Accepted: 14 tokens, Drafted: 1140 tokens, Per-position acceptance rate: 0.048, 0.009, 0.004, 0.000, 0.000, Avg Draft ",
+    "(APIServer pid=452) INFO 11-11 05:07:15 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.06, Accepted throughput: 1.70 tokens/s, Drafted throughput: 135.50 tokens/s, Accepted: 17 tokens, Drafted: 1355 tokens, Per-position acceptance rate: 0.030, 0.018, 0.007, 0.007, 0.000, Avg Draft ",
+    "(APIServer pid=452) INFO 11-11 05:07:25 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.05, Accepted throughput: 1.40 tokens/s, Drafted throughput: 135.49 tokens/s, Accepted: 14 tokens, Drafted: 1355 tokens, Per-position acceptance rate: 0.030, 0.007, 0.007, 0.004, 0.004, Avg Draft "
+   ]
+  },
+  {
+   "config": "suffix",
+   "speculative_config": {
+    "method": "suffix",
+    "num_speculative_tokens": 16
+   },
+   "startup_s": 96.0,
+   "kv_pool_tokens": 31088,
+   "runs": [
+    {
+     "workload": "chat",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 31.44,
+     "output_tokens": 1014,
+     "output_tok_s": 32.2,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 33.0,
+     "ttft_ms_p50": 40.8,
+     "spec": {
+      "drafts": 579,
+      "draft_tokens": 826,
+      "accepted_tokens": 135,
+      "mean_acceptance_length": 1.233,
+      "draft_acceptance_rate": 0.1634,
+      "draft_tokens_per_draft": 1.427,
+      "accepted_through_position": [
+       0.1623,
+       0.0484,
+       0.0138,
+       0.0052,
+       0.0035,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "answers_identical_to_off": 0
+    },
+    {
+     "workload": "chat",
+     "concurrency": 16,
+     "requests": 32,
+     "seconds": 17.57,
+     "output_tokens": 8056,
+     "output_tok_s": 458.5,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 30.1,
+     "ttft_ms_p50": 94.2,
+     "spec": {
+      "drafts": 5264,
+      "draft_tokens": 8586,
+      "accepted_tokens": 1731,
+      "mean_acceptance_length": 1.329,
+      "draft_acceptance_rate": 0.2016,
+      "draft_tokens_per_draft": 1.631,
+      "accepted_through_position": [
+       0.2437,
+       0.0598,
+       0.0148,
+       0.0049,
+       0.0032,
+       0.0017,
+       0.0004,
+       0.0002,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "workload": "code",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 5.02,
+     "output_tokens": 1223,
+     "output_tok_s": 243.5,
+     "prompt_tokens_p50": 374,
+     "completion_tokens_p50": 306,
+     "request_decode_tok_s_p50": 287.9,
+     "ttft_ms_p50": 96.8,
+     "spec": {
+      "drafts": 122,
+      "draft_tokens": 1178,
+      "accepted_tokens": 1093,
+      "mean_acceptance_length": 9.959,
+      "draft_acceptance_rate": 0.9278,
+      "draft_tokens_per_draft": 9.656,
+      "accepted_through_position": [
+       0.9262,
+       0.8689,
+       0.8525,
+       0.8115,
+       0.7541,
+       0.7459,
+       0.7295,
+       0.6721,
+       0.6721,
+       0.6475,
+       0.6475,
+       0.6311,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "answers_identical_to_off": 3
+    },
+    {
+     "workload": "code",
+     "concurrency": 16,
+     "requests": 32,
+     "seconds": 7.2,
+     "output_tokens": 9729,
+     "output_tok_s": 1351.1,
+     "prompt_tokens_p50": 367,
+     "completion_tokens_p50": 306,
+     "request_decode_tok_s_p50": 113.8,
+     "ttft_ms_p50": 530.1,
+     "spec": {
+      "drafts": 1043,
+      "draft_tokens": 9769,
+      "accepted_tokens": 8737,
+      "mean_acceptance_length": 9.377,
+      "draft_acceptance_rate": 0.8944,
+      "draft_tokens_per_draft": 9.366,
+      "accepted_through_position": [
+       0.9166,
+       0.8581,
+       0.8226,
+       0.7737,
+       0.7469,
+       0.7133,
+       0.6951,
+       0.6328,
+       0.6088,
+       0.5513,
+       0.5369,
+       0.5206,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "workload": "chat_t1",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 28.96,
+     "output_tokens": 1024,
+     "output_tok_s": 35.4,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 35.6,
+     "ttft_ms_p50": 42.2,
+     "spec": {
+      "drafts": 710,
+      "draft_tokens": 1202,
+      "accepted_tokens": 231,
+      "mean_acceptance_length": 1.325,
+      "draft_acceptance_rate": 0.1922,
+      "draft_tokens_per_draft": 1.693,
+      "accepted_through_position": [
+       0.2451,
+       0.0648,
+       0.0127,
+       0.0014,
+       0.0014,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    }
+   ],
+   "server_log": [
+    "(EngineCore pid=700) INFO 11-11 05:08:12 [gpu_model_runner.py:5071] Loading drafter model...",
+    "(EngineCore pid=700) WARNING 11-11 05:09:11 [vllm.py:2276] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_speculat",
+    "(APIServer pid=676) INFO 11-11 05:09:23 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.59, Accepted throughput: 5.93 tokens/s, Drafted throughput: 16.27 tokens/s, Accepted: 70 tokens, Drafted: 192 tokens, Per-position acceptance rate: 0.203, 0.059, 0.059, 0.042, 0.034, 0.034, 0.034",
+    "(APIServer pid=676) INFO 11-11 05:09:33 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.26, Accepted throughput: 4.80 tokens/s, Drafted throughput: 26.30 tokens/s, Accepted: 48 tokens, Drafted: 263 tokens, Per-position acceptance rate: 0.167, 0.059, 0.016, 0.011, 0.005, 0.000, 0.000",
+    "(APIServer pid=676) INFO 11-11 05:09:43 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.28, Accepted throughput: 5.20 tokens/s, Drafted throughput: 28.40 tokens/s, Accepted: 52 tokens, Drafted: 284 tokens, Per-position acceptance rate: 0.180, 0.058, 0.026, 0.005, 0.005, 0.000, 0.000",
+    "(APIServer pid=676) INFO 11-11 05:09:53 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.36, Accepted throughput: 28.90 tokens/s, Drafted throughput: 124.08 tokens/s, Accepted: 289 tokens, Drafted: 1241 tokens, Per-position acceptance rate: 0.241, 0.068, 0.028, 0.011, 0.010, 0.006, 0",
+    "(APIServer pid=676) INFO 11-11 05:10:03 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.32, Accepted throughput: 99.59 tokens/s, Drafted throughput: 503.13 tokens/s, Accepted: 996 tokens, Drafted: 5032 tokens, Per-position acceptance rate: 0.237, 0.061, 0.013, 0.004, 0.002, 0.001, 0",
+    "(APIServer pid=676) INFO 11-11 05:10:13 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.75, Accepted throughput: 116.38 tokens/s, Drafted throughput: 323.06 tokens/s, Accepted: 1164 tokens, Drafted: 3231 tokens, Per-position acceptance rate: 0.286, 0.093, 0.052, 0.043, 0.039, 0.038,",
+    "(APIServer pid=676) INFO 11-11 05:10:23 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 9.45, Accepted throughput: 901.31 tokens/s, Drafted throughput: 1003.51 tokens/s, Accepted: 9013 tokens, Drafted: 10035 tokens, Per-position acceptance rate: 0.918, 0.858, 0.827, 0.778, 0.750, 0.72",
+    "(APIServer pid=676) INFO 11-11 05:10:33 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.85, Accepted throughput: 19.00 tokens/s, Drafted throughput: 53.39 tokens/s, Accepted: 190 tokens, Drafted: 534 tokens, Per-position acceptance rate: 0.287, 0.143, 0.081, 0.063, 0.063, 0.040, 0.0",
+    "(APIServer pid=676) INFO 11-11 05:10:43 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.32, Accepted throughput: 7.70 tokens/s, Drafted throughput: 39.60 tokens/s, Accepted: 77 tokens, Drafted: 396 tokens, Per-position acceptance rate: 0.236, 0.072, 0.008, 0.004, 0.004, 0.000, 0.000",
+    "(APIServer pid=676) INFO 11-11 05:10:53 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.30, Accepted throughput: 7.40 tokens/s, Drafted throughput: 40.20 tokens/s, Accepted: 74 tokens, Drafted: 402 tokens, Per-position acceptance rate: 0.244, 0.045, 0.012, 0.000, 0.000, 0.000, 0.000"
+   ]
+  },
+  {
+   "config": "eagle3 k=3",
+   "speculative_config": {
+    "method": "eagle3",
+    "model": "RedHatAI/Llama-3.1-8B-Instruct-speculator.eagle3",
+    "num_speculative_tokens": 3
+   },
+   "startup_s": 126.1,
+   "kv_pool_tokens": 10032,
+   "runs": [
+    {
+     "workload": "chat",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 16.56,
+     "output_tokens": 984,
+     "output_tok_s": 59.4,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 60.2,
+     "ttft_ms_p50": 82.2,
+     "spec": {
+      "drafts": 403,
+      "draft_tokens": 1209,
+      "accepted_tokens": 578,
+      "mean_acceptance_length": 2.434,
+      "draft_acceptance_rate": 0.4781,
+      "draft_tokens_per_draft": 3.0,
+      "accepted_through_position": [
+       0.7097,
+       0.4392,
+       0.2854
+      ]
+     },
+     "answers_identical_to_off": 0
+    },
+    {
+     "workload": "chat",
+     "concurrency": 16,
+     "requests": 32,
+     "seconds": 10.57,
+     "output_tokens": 8013,
+     "output_tok_s": 757.9,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 53.5,
+     "ttft_ms_p50": 170.6,
+     "spec": {
+      "drafts": 3283,
+      "draft_tokens": 9849,
+      "accepted_tokens": 4727,
+      "mean_acceptance_length": 2.44,
+      "draft_acceptance_rate": 0.4799,
+      "draft_tokens_per_draft": 3.0,
+      "accepted_through_position": [
+       0.692,
+       0.4618,
+       0.286
+      ]
+     }
+    },
+    {
+     "workload": "code",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 14.62,
+     "output_tokens": 1224,
+     "output_tok_s": 83.7,
+     "prompt_tokens_p50": 374,
+     "completion_tokens_p50": 306,
+     "request_decode_tok_s_p50": 87.0,
+     "ttft_ms_p50": 139.6,
+     "spec": {
+      "drafts": 346,
+      "draft_tokens": 1038,
+      "accepted_tokens": 886,
+      "mean_acceptance_length": 3.561,
+      "draft_acceptance_rate": 0.8536,
+      "draft_tokens_per_draft": 3.0,
+      "accepted_through_position": [
+       0.9249,
+       0.8497,
+       0.7861
+      ]
+     },
+     "answers_identical_to_off": 4
+    },
+    {
+     "workload": "code",
+     "concurrency": 16,
+     "requests": 32,
+     "seconds": 11.06,
+     "output_tokens": 9729,
+     "output_tok_s": 879.4,
+     "prompt_tokens_p50": 367,
+     "completion_tokens_p50": 306,
+     "request_decode_tok_s_p50": 64.2,
+     "ttft_ms_p50": 532.4,
+     "spec": {
+      "drafts": 2677,
+      "draft_tokens": 8031,
+      "accepted_tokens": 7093,
+      "mean_acceptance_length": 3.65,
+      "draft_acceptance_rate": 0.8832,
+      "draft_tokens_per_draft": 3.0,
+      "accepted_through_position": [
+       0.944,
+       0.8831,
+       0.8226
+      ]
+     }
+    },
+    {
+     "workload": "chat_t1",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 18.93,
+     "output_tokens": 967,
+     "output_tok_s": 51.1,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 58.8,
+     "ttft_ms_p50": 82.8,
+     "spec": {
+      "drafts": 412,
+      "draft_tokens": 1236,
+      "accepted_tokens": 560,
+      "mean_acceptance_length": 2.359,
+      "draft_acceptance_rate": 0.4531,
+      "draft_tokens_per_draft": 3.0,
+      "accepted_through_position": [
+       0.6748,
+       0.4272,
+       0.2573
+      ]
+     }
+    }
+   ],
+   "server_log": [
+    "(EngineCore pid=1033) INFO 11-11 05:12:25 [decorators.py:743] [eagle_head] saved AOT compiled function to /root/.cache/vllm/torch_compile_cache/torch_aot_compile/ae08e2895cc54f3214be77ccf48fa93cefd12ca0ade83b801ae9994637773b2d/rank_0_0/model",
+    "(EngineCore pid=1033) INFO 11-11 05:12:25 [monitor.py:62] [eagle_head] torch.compile took 3.74 s in total",
+    "(EngineCore pid=1033) INFO 11-11 05:12:25 [monitor.py:91] [eagle_head] Initial profiling/warmup run took 0.00 s",
+    "(EngineCore pid=1033) WARNING 11-11 05:13:03 [vllm.py:2276] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_specula",
+    "(APIServer pid=997) INFO 11-11 05:13:15 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.75, Accepted throughput: 19.94 tokens/s, Drafted throughput: 34.18 tokens/s, Accepted: 238 tokens, Drafted: 408 tokens, Per-position acceptance rate: 0.794, 0.566, 0.390, Avg Draft acceptance rat",
+    "(APIServer pid=997) INFO 11-11 05:13:25 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.38, Accepted throughput: 33.30 tokens/s, Drafted throughput: 72.59 tokens/s, Accepted: 333 tokens, Drafted: 726 tokens, Per-position acceptance rate: 0.682, 0.417, 0.277, Avg Draft acceptance rat",
+    "(APIServer pid=997) INFO 11-11 05:13:35 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.45, Accepted throughput: 269.14 tokens/s, Drafted throughput: 555.77 tokens/s, Accepted: 2692 tokens, Drafted: 5559 tokens, Per-position acceptance rate: 0.699, 0.464, 0.290, Avg Draft acceptance",
+    "(APIServer pid=997) INFO 11-11 05:13:45 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.48, Accepted throughput: 234.97 tokens/s, Drafted throughput: 475.44 tokens/s, Accepted: 2350 tokens, Drafted: 4755 tokens, Per-position acceptance rate: 0.700, 0.479, 0.304, Avg Draft acceptance",
+    "(APIServer pid=997) INFO 11-11 05:13:55 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 3.57, Accepted throughput: 60.39 tokens/s, Drafted throughput: 70.49 tokens/s, Accepted: 604 tokens, Drafted: 705 tokens, Per-position acceptance rate: 0.928, 0.847, 0.796, Avg Draft acceptance rat",
+    "(APIServer pid=997) INFO 11-11 05:14:05 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 3.64, Accepted throughput: 426.13 tokens/s, Drafted throughput: 484.12 tokens/s, Accepted: 4262 tokens, Drafted: 4842 tokens, Per-position acceptance rate: 0.940, 0.875, 0.825, Avg Draft acceptance",
+    "(APIServer pid=997) INFO 11-11 05:14:15 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 3.58, Accepted throughput: 298.97 tokens/s, Drafted throughput: 347.66 tokens/s, Accepted: 2990 tokens, Drafted: 3477 tokens, Per-position acceptance rate: 0.934, 0.867, 0.779, Avg Draft acceptance",
+    "(APIServer pid=997) INFO 11-11 05:14:25 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.36, Accepted throughput: 32.80 tokens/s, Drafted throughput: 72.30 tokens/s, Accepted: 328 tokens, Drafted: 723 tokens, Per-position acceptance rate: 0.668, 0.419, 0.274, Avg Draft acceptance rat"
+   ]
+  },
+  {
+   "config": "eagle3 k=5",
+   "speculative_config": {
+    "method": "eagle3",
+    "model": "RedHatAI/Llama-3.1-8B-Instruct-speculator.eagle3",
+    "num_speculative_tokens": 5
+   },
+   "startup_s": 104.1,
+   "kv_pool_tokens": 9904,
+   "runs": [
+    {
+     "workload": "chat",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 16.49,
+     "output_tokens": 989,
+     "output_tok_s": 60.0,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 61.9,
+     "ttft_ms_p50": 89.8,
+     "spec": {
+      "drafts": 367,
+      "draft_tokens": 1835,
+      "accepted_tokens": 624,
+      "mean_acceptance_length": 2.7,
+      "draft_acceptance_rate": 0.3401,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.7221,
+       0.4687,
+       0.2888,
+       0.1499,
+       0.0708
+      ]
+     },
+     "answers_identical_to_off": 0
+    },
+    {
+     "workload": "chat",
+     "concurrency": 16,
+     "requests": 32,
+     "seconds": 11.26,
+     "output_tokens": 8053,
+     "output_tok_s": 715.4,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 51.2,
+     "ttft_ms_p50": 209.3,
+     "spec": {
+      "drafts": 2970,
+      "draft_tokens": 14850,
+      "accepted_tokens": 5112,
+      "mean_acceptance_length": 2.721,
+      "draft_acceptance_rate": 0.3442,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.6936,
+       0.4677,
+       0.2902,
+       0.1714,
+       0.0983
+      ]
+     }
+    },
+    {
+     "workload": "code",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 11.97,
+     "output_tokens": 1223,
+     "output_tok_s": 102.2,
+     "prompt_tokens_p50": 374,
+     "completion_tokens_p50": 306,
+     "request_decode_tok_s_p50": 107.1,
+     "ttft_ms_p50": 148.1,
+     "spec": {
+      "drafts": 257,
+      "draft_tokens": 1285,
+      "accepted_tokens": 974,
+      "mean_acceptance_length": 4.79,
+      "draft_acceptance_rate": 0.758,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.9144,
+       0.8521,
+       0.7782,
+       0.6732,
+       0.572
+      ]
+     },
+     "answers_identical_to_off": 3
+    },
+    {
+     "workload": "code",
+     "concurrency": 16,
+     "requests": 32,
+     "seconds": 10.0,
+     "output_tokens": 9729,
+     "output_tok_s": 973.2,
+     "prompt_tokens_p50": 367,
+     "completion_tokens_p50": 306,
+     "request_decode_tok_s_p50": 73.8,
+     "ttft_ms_p50": 537.5,
+     "spec": {
+      "drafts": 1959,
+      "draft_tokens": 9795,
+      "accepted_tokens": 7832,
+      "mean_acceptance_length": 4.998,
+      "draft_acceptance_rate": 0.7996,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.952,
+       0.876,
+       0.8234,
+       0.7182,
+       0.6284
+      ]
+     }
+    },
+    {
+     "workload": "chat_t1",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 20.0,
+     "output_tokens": 1019,
+     "output_tok_s": 50.9,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 60.1,
+     "ttft_ms_p50": 90.5,
+     "spec": {
+      "drafts": 402,
+      "draft_tokens": 2010,
+      "accepted_tokens": 615,
+      "mean_acceptance_length": 2.53,
+      "draft_acceptance_rate": 0.306,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.6667,
+       0.4104,
+       0.2438,
+       0.1418,
+       0.0672
+      ]
+     }
+    }
+   ],
+   "server_log": [
+    "(EngineCore pid=1313) INFO 11-11 05:15:40 [monitor.py:62] [eagle_head] torch.compile took 3.73 s in total",
+    "(EngineCore pid=1313) INFO 11-11 05:15:40 [monitor.py:91] [eagle_head] Initial profiling/warmup run took 0.00 s",
+    "(EngineCore pid=1313) WARNING 11-11 05:16:18 [vllm.py:2276] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_specula",
+    "(APIServer pid=1290) INFO 11-11 05:16:30 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 3.09, Accepted throughput: 24.67 tokens/s, Drafted throughput: 59.16 tokens/s, Accepted: 294 tokens, Drafted: 705 tokens, Per-position acceptance rate: 0.780, 0.574, 0.376, 0.220, 0.135, Avg Draft",
+    "(APIServer pid=1290) INFO 11-11 05:16:40 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.60, Accepted throughput: 35.79 tokens/s, Drafted throughput: 111.98 tokens/s, Accepted: 358 tokens, Drafted: 1120 tokens, Per-position acceptance rate: 0.705, 0.438, 0.263, 0.134, 0.058, Avg Dra",
+    "(EngineCore pid=1313) WARNING 11-11 05:16:43 [jit_monitor.py:140] Triton kernel JIT compilation during inference: _gather_draft_sampled_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.",
+    "(APIServer pid=1290) INFO 11-11 05:16:50 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.72, Accepted throughput: 321.66 tokens/s, Drafted throughput: 933.90 tokens/s, Accepted: 3217 tokens, Drafted: 9340 tokens, Per-position acceptance rate: 0.687, 0.472, 0.293, 0.171, 0.100, Avg D",
+    "(APIServer pid=1290) INFO 11-11 05:17:00 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.87, Accepted throughput: 228.97 tokens/s, Drafted throughput: 612.43 tokens/s, Accepted: 2290 tokens, Drafted: 6125 tokens, Per-position acceptance rate: 0.720, 0.490, 0.321, 0.208, 0.131, Avg D",
+    "(APIServer pid=1290) INFO 11-11 05:17:10 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 4.68, Accepted throughput: 65.19 tokens/s, Drafted throughput: 88.49 tokens/s, Accepted: 652 tokens, Drafted: 885 tokens, Per-position acceptance rate: 0.915, 0.831, 0.757, 0.638, 0.542, Avg Draft",
+    "(APIServer pid=1290) INFO 11-11 05:17:20 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 5.00, Accepted throughput: 783.11 tokens/s, Drafted throughput: 979.39 tokens/s, Accepted: 7832 tokens, Drafted: 9795 tokens, Per-position acceptance rate: 0.952, 0.876, 0.823, 0.718, 0.628, Avg D",
+    "(APIServer pid=1290) INFO 11-11 05:17:30 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.45, Accepted throughput: 22.10 tokens/s, Drafted throughput: 75.99 tokens/s, Accepted: 221 tokens, Drafted: 760 tokens, Per-position acceptance rate: 0.618, 0.382, 0.243, 0.145, 0.066, Avg Draft",
+    "(APIServer pid=1290) INFO 11-11 05:17:40 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.56, Accepted throughput: 34.80 tokens/s, Drafted throughput: 111.49 tokens/s, Accepted: 348 tokens, Drafted: 1115 tokens, Per-position acceptance rate: 0.677, 0.430, 0.247, 0.143, 0.063, Avg Dra"
+   ]
+  },
+  {
+   "config": "draft 1B k=5",
+   "speculative_config": {
+    "method": "draft_model",
+    "model": "unsloth/Llama-3.2-1B-Instruct",
+    "num_speculative_tokens": 5
+   },
+   "startup_s": 116.1,
+   "kv_pool_tokens": 8224,
+   "runs": [
+    {
+     "workload": "chat",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 23.55,
+     "output_tokens": 1017,
+     "output_tok_s": 43.2,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 44.3,
+     "ttft_ms_p50": 136.2,
+     "spec": {
+      "drafts": 340,
+      "draft_tokens": 1700,
+      "accepted_tokens": 680,
+      "mean_acceptance_length": 3.0,
+      "draft_acceptance_rate": 0.4,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.7059,
+       0.4765,
+       0.3559,
+       0.2647,
+       0.1971
+      ]
+     },
+     "answers_identical_to_off": 0
+    },
+    {
+     "workload": "chat",
+     "concurrency": 16,
+     "requests": 32,
+     "seconds": 14.25,
+     "output_tokens": 8016,
+     "output_tok_s": 562.6,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 41.0,
+     "ttft_ms_p50": 264.7,
+     "spec": {
+      "drafts": 2513,
+      "draft_tokens": 12565,
+      "accepted_tokens": 5533,
+      "mean_acceptance_length": 3.202,
+      "draft_acceptance_rate": 0.4404,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.7334,
+       0.5352,
+       0.4087,
+       0.2984,
+       0.226
+      ]
+     }
+    },
+    {
+     "workload": "code",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 14.91,
+     "output_tokens": 1224,
+     "output_tok_s": 82.1,
+     "prompt_tokens_p50": 374,
+     "completion_tokens_p50": 306,
+     "request_decode_tok_s_p50": 87.2,
+     "ttft_ms_p50": 201.0,
+     "spec": {
+      "drafts": 206,
+      "draft_tokens": 1030,
+      "accepted_tokens": 1025,
+      "mean_acceptance_length": 5.976,
+      "draft_acceptance_rate": 0.9951,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       1.0,
+       1.0,
+       0.9951,
+       0.9903,
+       0.9903
+      ]
+     },
+     "answers_identical_to_off": 4
+    },
+    {
+     "workload": "code",
+     "concurrency": 16,
+     "requests": 32,
+     "seconds": 15.25,
+     "output_tokens": 9729,
+     "output_tok_s": 637.8,
+     "prompt_tokens_p50": 367,
+     "completion_tokens_p50": 306,
+     "request_decode_tok_s_p50": 60.1,
+     "ttft_ms_p50": 1073.2,
+     "spec": {
+      "drafts": 1636,
+      "draft_tokens": 8180,
+      "accepted_tokens": 8150,
+      "mean_acceptance_length": 5.982,
+      "draft_acceptance_rate": 0.9963,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.9994,
+       0.9988,
+       0.9969,
+       0.9939,
+       0.9927
+      ]
+     }
+    },
+    {
+     "workload": "chat_t1",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 26.84,
+     "output_tokens": 995,
+     "output_tok_s": 37.1,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 41.5,
+     "ttft_ms_p50": 137.3,
+     "spec": {
+      "drafts": 357,
+      "draft_tokens": 1785,
+      "accepted_tokens": 642,
+      "mean_acceptance_length": 2.798,
+      "draft_acceptance_rate": 0.3597,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.6639,
+       0.4454,
+       0.3165,
+       0.2101,
+       0.1625
+      ]
+     }
+    }
+   ],
+   "server_log": [
+    "(EngineCore pid=1547) INFO 11-11 05:19:06 [monitor.py:91] [draft_model] Initial profiling/warmup run took 0.01 s",
+    "(APIServer pid=1523) INFO 11-11 05:19:53 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 3.56, Accepted throughput: 18.60 tokens/s, Drafted throughput: 36.26 tokens/s, Accepted: 218 tokens, Drafted: 425 tokens, Per-position acceptance rate: 0.729, 0.565, 0.482, 0.435, 0.353, Avg Draft",
+    "(APIServer pid=1523) INFO 11-11 05:20:03 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 3.05, Accepted throughput: 29.29 tokens/s, Drafted throughput: 71.49 tokens/s, Accepted: 293 tokens, Drafted: 715 tokens, Per-position acceptance rate: 0.699, 0.497, 0.371, 0.273, 0.210, Avg Draft",
+    "(APIServer pid=1523) INFO 11-11 05:20:13 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.87, Accepted throughput: 27.30 tokens/s, Drafted throughput: 72.99 tokens/s, Accepted: 273 tokens, Drafted: 730 tokens, Per-position acceptance rate: 0.712, 0.438, 0.322, 0.226, 0.171, Avg Draft",
+    "(EngineCore pid=1547) WARNING 11-11 05:20:15 [jit_monitor.py:140] Triton kernel JIT compilation during inference: _gather_draft_sampled_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.",
+    "(APIServer pid=1523) INFO 11-11 05:20:23 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 3.18, Accepted throughput: 348.72 tokens/s, Drafted throughput: 800.83 tokens/s, Accepted: 3488 tokens, Drafted: 8010 tokens, Per-position acceptance rate: 0.727, 0.532, 0.404, 0.292, 0.222, Avg D",
+    "(APIServer pid=1523) INFO 11-11 05:20:33 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 3.35, Accepted throughput: 222.98 tokens/s, Drafted throughput: 473.96 tokens/s, Accepted: 2230 tokens, Drafted: 4740 tokens, Per-position acceptance rate: 0.755, 0.558, 0.440, 0.336, 0.263, Avg D",
+    "(APIServer pid=1523) INFO 11-11 05:20:43 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 5.98, Accepted throughput: 68.20 tokens/s, Drafted throughput: 68.50 tokens/s, Accepted: 682 tokens, Drafted: 685 tokens, Per-position acceptance rate: 1.000, 1.000, 0.993, 0.993, 0.993, Avg Draft",
+    "(APIServer pid=1523) INFO 11-11 05:20:53 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 5.98, Accepted throughput: 391.70 tokens/s, Drafted throughput: 393.00 tokens/s, Accepted: 3917 tokens, Drafted: 3930 tokens, Per-position acceptance rate: 0.999, 0.999, 0.997, 0.995, 0.994, Avg D",
+    "(APIServer pid=1523) INFO 11-11 05:21:03 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 5.98, Accepted throughput: 439.54 tokens/s, Drafted throughput: 441.43 tokens/s, Accepted: 4396 tokens, Drafted: 4415 tokens, Per-position acceptance rate: 1.000, 0.999, 0.997, 0.992, 0.991, Avg D",
+    "(APIServer pid=1523) INFO 11-11 05:21:13 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.70, Accepted throughput: 18.00 tokens/s, Drafted throughput: 53.00 tokens/s, Accepted: 180 tokens, Drafted: 530 tokens, Per-position acceptance rate: 0.689, 0.425, 0.292, 0.170, 0.123, Avg Draft",
+    "(APIServer pid=1523) INFO 11-11 05:21:23 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.79, Accepted throughput: 26.00 tokens/s, Drafted throughput: 72.50 tokens/s, Accepted: 260 tokens, Drafted: 725 tokens, Per-position acceptance rate: 0.628, 0.434, 0.310, 0.241, 0.179, Avg Draft"
+   ]
+  },
+  {
+   "config": "synthetic 1.0",
+   "speculative_config": {
+    "method": "eagle3",
+    "model": "RedHatAI/Llama-3.1-8B-Instruct-speculator.eagle3",
+    "num_speculative_tokens": 3,
+    "rejection_sample_method": "synthetic",
+    "synthetic_acceptance_length": 1.0
+   },
+   "startup_s": 70.0,
+   "kv_pool_tokens": 16896,
+   "runs": [
+    {
+     "workload": "chat",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 39.76,
+     "output_tokens": 984,
+     "output_tok_s": 24.7,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 24.8,
+     "ttft_ms_p50": 44.3,
+     "spec": {
+      "drafts": 980,
+      "draft_tokens": 2940,
+      "accepted_tokens": 0,
+      "mean_acceptance_length": 1.0,
+      "draft_acceptance_rate": 0.0,
+      "draft_tokens_per_draft": 3.0,
+      "accepted_through_position": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "workload": "chat",
+     "concurrency": 16,
+     "requests": 32,
+     "seconds": 23.82,
+     "output_tokens": 8041,
+     "output_tok_s": 337.6,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 21.7,
+     "ttft_ms_p50": 185.1,
+     "spec": {
+      "drafts": 8009,
+      "draft_tokens": 24027,
+      "accepted_tokens": 0,
+      "mean_acceptance_length": 1.0,
+      "draft_acceptance_rate": 0.0,
+      "draft_tokens_per_draft": 3.0,
+      "accepted_through_position": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    }
+   ],
+   "server_log": [
+    "(EngineCore pid=1838) INFO 11-11 05:22:15 [eagle3_utils.py:30] Using Eagle3 auxiliary layers from model: (2, 16, 29)",
+    "(EngineCore pid=1838) INFO 11-11 05:22:19 [decorators.py:319] [eagle_head] Directly load AOT compilation from path /root/.cache/vllm/torch_compile_cache/torch_aot_compile/ae08e2895cc54f3214be77ccf48fa93cefd12ca0ade83b801ae9994637773b2d/rank_0_0/model",
+    "(EngineCore pid=1838) INFO 11-11 05:22:19 [monitor.py:62] [eagle_head] torch.compile took 0.07 s in total",
+    "(EngineCore pid=1838) INFO 11-11 05:22:19 [monitor.py:91] [eagle_head] Initial profiling/warmup run took 0.00 s",
+    "(EngineCore pid=1838) WARNING 11-11 05:22:44 [vllm.py:2276] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_specula",
+    "(APIServer pid=1814) INFO 11-11 05:22:56 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.00, Accepted throughput: 0.00 tokens/s, Drafted throughput: 48.94 tokens/s, Accepted: 0 tokens, Drafted: 582 tokens, Per-position acceptance rate: 0.000, 0.000, 0.000, Avg Draft acceptance rate:",
+    "(APIServer pid=1814) INFO 11-11 05:23:06 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.00, Accepted throughput: 0.00 tokens/s, Drafted throughput: 74.09 tokens/s, Accepted: 0 tokens, Drafted: 741 tokens, Per-position acceptance rate: 0.000, 0.000, 0.000, Avg Draft acceptance rate:",
+    "(APIServer pid=1814) INFO 11-11 05:23:16 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.00, Accepted throughput: 0.00 tokens/s, Drafted throughput: 73.80 tokens/s, Accepted: 0 tokens, Drafted: 738 tokens, Per-position acceptance rate: 0.000, 0.000, 0.000, Avg Draft acceptance rate:",
+    "(APIServer pid=1814) INFO 11-11 05:23:26 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.00, Accepted throughput: 0.00 tokens/s, Drafted throughput: 74.09 tokens/s, Accepted: 0 tokens, Drafted: 741 tokens, Per-position acceptance rate: 0.000, 0.000, 0.000, Avg Draft acceptance rate:",
+    "(APIServer pid=1814) INFO 11-11 05:23:36 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.00, Accepted throughput: 0.00 tokens/s, Drafted throughput: 128.38 tokens/s, Accepted: 0 tokens, Drafted: 1284 tokens, Per-position acceptance rate: 0.000, 0.000, 0.000, Avg Draft acceptance rat",
+    "(APIServer pid=1814) INFO 11-11 05:23:46 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.00, Accepted throughput: 0.00 tokens/s, Drafted throughput: 1045.31 tokens/s, Accepted: 0 tokens, Drafted: 10455 tokens, Per-position acceptance rate: 0.000, 0.000, 0.000, Avg Draft acceptance r",
+    "(APIServer pid=1814) INFO 11-11 05:23:56 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.00, Accepted throughput: 0.00 tokens/s, Drafted throughput: 1028.02 tokens/s, Accepted: 0 tokens, Drafted: 10281 tokens, Per-position acceptance rate: 0.000, 0.000, 0.000, Avg Draft acceptance r"
+   ]
+  },
+  {
+   "config": "synthetic 2.5",
+   "speculative_config": {
+    "method": "eagle3",
+    "model": "RedHatAI/Llama-3.1-8B-Instruct-speculator.eagle3",
+    "num_speculative_tokens": 3,
+    "rejection_sample_method": "synthetic",
+    "synthetic_acceptance_length": 2.5
+   },
+   "startup_s": 68.0,
+   "kv_pool_tokens": 16896,
+   "runs": [
+    {
+     "workload": "chat",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 16.37,
+     "output_tokens": 983,
+     "output_tok_s": 60.0,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 61.4,
+     "ttft_ms_p50": 82.6,
+     "spec": {
+      "drafts": 399,
+      "draft_tokens": 1197,
+      "accepted_tokens": 583,
+      "mean_acceptance_length": 2.461,
+      "draft_acceptance_rate": 0.4871,
+      "draft_tokens_per_draft": 3.0,
+      "accepted_through_position": [
+       1.0,
+       0.4612,
+       0.0
+      ]
+     }
+    },
+    {
+     "workload": "chat",
+     "concurrency": 16,
+     "requests": 32,
+     "seconds": 10.04,
+     "output_tokens": 8071,
+     "output_tok_s": 804.0,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 53.9,
+     "ttft_ms_p50": 208.7,
+     "spec": {
+      "drafts": 3216,
+      "draft_tokens": 9648,
+      "accepted_tokens": 4848,
+      "mean_acceptance_length": 2.507,
+      "draft_acceptance_rate": 0.5025,
+      "draft_tokens_per_draft": 3.0,
+      "accepted_through_position": [
+       1.0,
+       0.5075,
+       0.0
+      ]
+     }
+    }
+   ],
+   "server_log": [
+    "(APIServer pid=1983) INFO 11-11 05:24:22 [model.py:733] Resolved architecture: Eagle3LlamaForCausalLM",
+    "(APIServer pid=1983) INFO 11-11 05:24:22 [speculative.py:1669] Overriding draft model max model len from 131072 to 8192",
+    "(APIServer pid=1983) WARNING 11-11 05:24:22 [vllm.py:2276] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_speculat",
+    "(EngineCore pid=2006) INFO 11-11 05:24:34 [core.py:133] Initializing a V1 LLM engine (v0.32.0) with config: model='unsloth/Meta-Llama-3.1-8B-Instruct', speculative_config=SpeculativeConfig(method='eagle3', model='RedHatAI/Llama-3.1-8B-Instruct-speculator.eagle3', num_spec_tokens=3), tokenizer='unslo",
+    "(EngineCore pid=2006) INFO 11-11 05:24:44 [eagle3_utils.py:30] Using Eagle3 auxiliary layers from model: (2, 16, 29)",
+    "(EngineCore pid=2006) INFO 11-11 05:24:48 [decorators.py:319] [eagle_head] Directly load AOT compilation from path /root/.cache/vllm/torch_compile_cache/torch_aot_compile/ae08e2895cc54f3214be77ccf48fa93cefd12ca0ade83b801ae9994637773b2d/rank_0_0/model",
+    "(EngineCore pid=2006) INFO 11-11 05:24:48 [monitor.py:62] [eagle_head] torch.compile took 0.06 s in total",
+    "(EngineCore pid=2006) INFO 11-11 05:24:48 [monitor.py:91] [eagle_head] Initial profiling/warmup run took 0.00 s",
+    "(EngineCore pid=2006) WARNING 11-11 05:25:12 [vllm.py:2276] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_specula",
+    "(APIServer pid=1983) INFO 11-11 05:25:24 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.48, Accepted throughput: 28.02 tokens/s, Drafted throughput: 56.71 tokens/s, Accepted: 332 tokens, Drafted: 672 tokens, Per-position acceptance rate: 1.000, 0.482, 0.000, Avg Draft acceptance ra",
+    "(APIServer pid=1983) INFO 11-11 05:25:34 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.45, Accepted throughput: 33.70 tokens/s, Drafted throughput: 69.59 tokens/s, Accepted: 337 tokens, Drafted: 696 tokens, Per-position acceptance rate: 1.000, 0.453, 0.000, Avg Draft acceptance ra",
+    "(APIServer pid=1983) INFO 11-11 05:25:44 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.51, Accepted throughput: 447.87 tokens/s, Drafted throughput: 892.14 tokens/s, Accepted: 4479 tokens, Drafted: 8922 tokens, Per-position acceptance rate: 1.000, 0.506, 0.000, Avg Draft acceptanc"
+   ]
+  },
+  {
+   "config": "synthetic 4.0",
+   "speculative_config": {
+    "method": "eagle3",
+    "model": "RedHatAI/Llama-3.1-8B-Instruct-speculator.eagle3",
+    "num_speculative_tokens": 3,
+    "rejection_sample_method": "synthetic",
+    "synthetic_acceptance_length": 4.0
+   },
+   "startup_s": 70.0,
+   "kv_pool_tokens": 16896,
+   "runs": [
+    {
+     "workload": "chat",
+     "concurrency": 1,
+     "requests": 4,
+     "seconds": 10.28,
+     "output_tokens": 985,
+     "output_tok_s": 95.8,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 255,
+     "request_decode_tok_s_p50": 98.5,
+     "ttft_ms_p50": 82.0,
+     "spec": {
+      "drafts": 247,
+      "draft_tokens": 741,
+      "accepted_tokens": 741,
+      "mean_acceptance_length": 4.0,
+      "draft_acceptance_rate": 1.0,
+      "draft_tokens_per_draft": 3.0,
+      "accepted_through_position": [
+       1.0,
+       1.0,
+       1.0
+      ]
+     }
+    },
+    {
+     "workload": "chat",
+     "concurrency": 16,
+     "requests": 32,
+     "seconds": 6.34,
+     "output_tokens": 8087,
+     "output_tok_s": 1276.1,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 86.5,
+     "ttft_ms_p50": 217.6,
+     "spec": {
+      "drafts": 2022,
+      "draft_tokens": 6066,
+      "accepted_tokens": 6066,
+      "mean_acceptance_length": 4.0,
+      "draft_acceptance_rate": 1.0,
+      "draft_tokens_per_draft": 3.0,
+      "accepted_through_position": [
+       1.0,
+       1.0,
+       1.0
+      ]
+     }
+    }
+   ],
+   "server_log": [
+    "(APIServer pid=2151) INFO 11-11 05:26:08 [model.py:733] Resolved architecture: Eagle3LlamaForCausalLM",
+    "(APIServer pid=2151) INFO 11-11 05:26:08 [speculative.py:1669] Overriding draft model max model len from 131072 to 8192",
+    "(APIServer pid=2151) WARNING 11-11 05:26:08 [vllm.py:2276] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_speculat",
+    "(EngineCore pid=2175) INFO 11-11 05:26:20 [core.py:133] Initializing a V1 LLM engine (v0.32.0) with config: model='unsloth/Meta-Llama-3.1-8B-Instruct', speculative_config=SpeculativeConfig(method='eagle3', model='RedHatAI/Llama-3.1-8B-Instruct-speculator.eagle3', num_spec_tokens=3), tokenizer='unslo",
+    "(EngineCore pid=2175) INFO 11-11 05:26:29 [eagle3_utils.py:30] Using Eagle3 auxiliary layers from model: (2, 16, 29)",
+    "(EngineCore pid=2175) INFO 11-11 05:26:35 [decorators.py:319] [eagle_head] Directly load AOT compilation from path /root/.cache/vllm/torch_compile_cache/torch_aot_compile/ae08e2895cc54f3214be77ccf48fa93cefd12ca0ade83b801ae9994637773b2d/rank_0_0/model",
+    "(EngineCore pid=2175) INFO 11-11 05:26:35 [monitor.py:62] [eagle_head] torch.compile took 0.06 s in total",
+    "(EngineCore pid=2175) INFO 11-11 05:26:35 [monitor.py:91] [eagle_head] Initial profiling/warmup run took 0.00 s",
+    "(EngineCore pid=2175) WARNING 11-11 05:26:59 [vllm.py:2276] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_specula",
+    "(APIServer pid=2151) INFO 11-11 05:27:11 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 4.00, Accepted throughput: 52.80 tokens/s, Drafted throughput: 52.80 tokens/s, Accepted: 627 tokens, Drafted: 627 tokens, Per-position acceptance rate: 1.000, 1.000, 1.000, Avg Draft acceptance ra",
+    "(APIServer pid=2151) INFO 11-11 05:27:21 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 4.00, Accepted throughput: 540.87 tokens/s, Drafted throughput: 540.87 tokens/s, Accepted: 5409 tokens, Drafted: 5409 tokens, Per-position acceptance rate: 1.000, 1.000, 1.000, Avg Draft acceptanc"
+   ]
+  }
+ ]
+}
