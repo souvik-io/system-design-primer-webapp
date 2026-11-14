@@ -36,6 +36,8 @@ const WIDGETS: Record<string, ComponentType> = {
   'request-trace': lazy(() => import('./RequestTrace')),
   'radix-tree': lazy(() => import('./RadixTree')),
   'speculation-simulator': lazy(() => import('./SpeculationSimulator')),
+  'sampling-filters': lazy(() => import('./SamplingFilters')),
+  'grammar-mask': lazy(() => import('./GrammarMask')),
 }
 
 export function Widgets({ root, chapter }: { root: RefObject<HTMLElement | null>; chapter: unknown }) {

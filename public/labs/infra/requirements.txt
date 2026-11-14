@@ -9,3 +9,4 @@ safetensors
 huggingface_hub
 fastapi
 uvicorn
+xgrammar==0.2.8

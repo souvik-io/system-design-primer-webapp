@@ -1,0 +1,181 @@
+{
+ "vllm": "0.32.0",
+ "xgrammar": "0.2.8",
+ "flashinfer": "0.7.0.post1",
+ "model": "unsloth/Meta-Llama-3.1-8B-Instruct",
+ "gpu": "NVIDIA H100 80GB HBM3",
+ "cpus": 20,
+ "sampling": {
+  "runs": [
+   {
+    "setting": "greedy",
+    "params": {
+     "temperature": 0
+    },
+    "concurrency": 1,
+    "requests": 4,
+    "errors": 0,
+    "seconds": 6.58,
+    "output_tokens": 1024,
+    "output_tok_s": 155.7,
+    "ttft_ms_p50": 13.4,
+    "ttft_ms_p99": 14.5,
+    "tpot_ms_p50": 6.39,
+    "first_error": null
+   },
+   {
+    "setting": "greedy",
+    "params": {
+     "temperature": 0
+    },
+    "concurrency": 64,
+    "requests": 128,
+    "errors": 0,
+    "seconds": 4.04,
+    "output_tokens": 32768,
+    "output_tok_s": 8114.9,
+    "ttft_ms_p50": 100.5,
+    "ttft_ms_p99": 122.2,
+    "tpot_ms_p50": 7.49,
+    "first_error": null
+   },
+   {
+    "setting": "greedy",
+    "params": {
+     "temperature": 0
+    },
+    "concurrency": 256,
+    "requests": 512,
+    "errors": 0,
+    "seconds": 7.0,
+    "output_tokens": 131072,
+    "output_tok_s": 18728.9,
+    "ttft_ms_p50": 372.4,
+    "ttft_ms_p99": 973.4,
+    "tpot_ms_p50": 11.97,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, top-p 0.9, seeded",
+    "params": {
+     "temperature": 1.0,
+     "top_p": 0.9,
+     "seed": 1
+    },
+    "concurrency": 1,
+    "requests": 4,
+    "errors": 0,
+    "seconds": 8.19,
+    "output_tokens": 1024,
+    "output_tok_s": 125.1,
+    "ttft_ms_p50": 13.7,
+    "ttft_ms_p99": 1575.4,
+    "tpot_ms_p50": 6.45,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, top-p 0.9, seeded",
+    "params": {
+     "temperature": 1.0,
+     "top_p": 0.9,
+     "seed": 1
+    },
+    "concurrency": 64,
+    "requests": 128,
+    "errors": 0,
+    "seconds": 8.7,
+    "output_tokens": 32768,
+    "output_tok_s": 3767.0,
+    "ttft_ms_p50": 1594.3,
+    "ttft_ms_p99": 3111.5,
+    "tpot_ms_p50": 7.82,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, top-p 0.9, seeded",
+    "params": {
+     "temperature": 1.0,
+     "top_p": 0.9,
+     "seed": 1
+    },
+    "concurrency": 256,
+    "requests": 512,
+    "errors": 0,
+    "seconds": 10.14,
+    "output_tokens": 131072,
+    "output_tok_s": 12926.7,
+    "ttft_ms_p50": 754.8,
+    "ttft_ms_p99": 1497.2,
+    "tpot_ms_p50": 13.05,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, top-p 0.9, seeded, again",
+    "params": {
+     "temperature": 1.0,
+     "top_p": 0.9,
+     "seed": 1
+    },
+    "concurrency": 1,
+    "requests": 4,
+    "errors": 0,
+    "seconds": 6.63,
+    "output_tokens": 1024,
+    "output_tok_s": 154.4,
+    "ttft_ms_p50": 13.5,
+    "ttft_ms_p99": 16.2,
+    "tpot_ms_p50": 6.45,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, top-p 0.9, seeded, again",
+    "params": {
+     "temperature": 1.0,
+     "top_p": 0.9,
+     "seed": 1
+    },
+    "concurrency": 64,
+    "requests": 128,
+    "errors": 0,
+    "seconds": 4.2,
+    "output_tokens": 32768,
+    "output_tok_s": 7800.5,
+    "ttft_ms_p50": 93.2,
+    "ttft_ms_p99": 105.5,
+    "tpot_ms_p50": 7.84,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, top-p 0.9, seeded, again",
+    "params": {
+     "temperature": 1.0,
+     "top_p": 0.9,
+     "seed": 1
+    },
+    "concurrency": 256,
+    "requests": 512,
+    "errors": 0,
+    "seconds": 7.43,
+    "output_tokens": 131072,
+    "output_tok_s": 17629.9,
+    "ttft_ms_p50": 382.0,
+    "ttft_ms_p99": 972.6,
+    "tpot_ms_p50": 12.71,
+    "first_error": null
+   }
+  ],
+  "startup_s": 196.1,
+  "server_log": [
+   "(EngineCore pid=98) INFO 11-14 18:05:45 [core.py:133] Initializing a V1 LLM engine (v0.32.0) with config: model='unsloth/Meta-Llama-3.1-8B-Instruct', speculative_config=None, tokenizer='unsloth/Meta-Llama-3.1-8B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_revision=main, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=4096, download_dir=None, load_",
+   "(EngineCore pid=98) WARNING 11-14 18:05:46 [flashinfer.py:143] FlashInfer's precompiled kernels are missing or do not match flashinfer-python 0.7.0.post1 (flashinfer-cubin not installed, flashinfer-jit-cache not installed). FlashInfer then downloads and compiles kernels at startup, which can take several minutes, or fails to import mismatched ones. Run `vllm download-kernels` in this Python enviro",
+   "(EngineCore pid=98) INFO 11-14 18:05:49 [cuda.py:506] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+   "(EngineCore pid=98) INFO 11-14 18:06:42 [topk_topp_sampler.py:124] Using FlashInfer for top-p & top-k sampling.",
+   "(EngineCore pid=98) INFO 11-14 18:07:06 [kernel_warmup.py:460] Using FlashInfer autotune cache file: /root/.cache/vllm/flashinfer_autotune_cache/0.7.0.post1/90a/67d15ef692018d2e68906eb7afd11f3bbf4e52ae06795781e09529adcdf7ff02/autotune_configs_dp0_rank0.json",
+   "2026-11-14 18:07:06,537 - INFO - autotuner.py:1046 - flashinfer.jit: [Autotuner]: Autotuning process starts ...",
+   "(EngineCore pid=98) INFO 11-14 18:07:06 [kernel_warmup.py:367] Running FlashInfer autotune with 8192 tokens and token buckets (1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 768, 1024, 1280, 1536, 1792, 2048, 2560, 3072, 3584, 4096, 8192).",
+   "2026-11-14 18:07:06,569 - INFO - autotuner.py:1069 - flashinfer.jit: [Autotuner]: Autotuning process ends",
+   "2026-11-14 18:07:08,449 - INFO - core.py:564 - flashinfer.jit: Building JIT module sampling; this can take several minutes on first use.",
+   "(EngineCore pid=98) WARNING 11-14 18:08:45 [jit_monitor.py:140] Triton kernel JIT compilation during inference: _gumbel_sample_kernel. This causes a latency spike; consider extending warmup to cover this shape/config."
+  ]
+ }
+}

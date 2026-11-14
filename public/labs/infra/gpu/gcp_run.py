@@ -256,7 +256,12 @@ def main() -> None:
     ap.add_argument("--list", action="store_true", help="list VMs started by this script")
     ap.add_argument("--cleanup", action="store_true", help="delete every VM started by this script")
     ap.add_argument("--allow-over-budget", action="store_true")
-    a = ap.parse_args()
+    # argparse refuses a value that starts with "--", so `--args "--quick"` would be an error; join it as --args=...
+    argv = sys.argv[1:]
+    if "--args" in argv[:-1]:
+        i = argv.index("--args")
+        argv[i : i + 2] = [f"--args={argv[i + 1]}"]
+    a = ap.parse_args(argv)
 
     project = a.project or budget.load_credits().get("gcp_project") or \
         subprocess.run(["gcloud", "config", "get-value", "project"], capture_output=True, text=True).stdout.strip()
