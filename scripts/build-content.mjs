@@ -233,6 +233,14 @@ const PARTS = [
     description: 'How C++ turns source files into a program, and the syntax that differs from Python, then memory, pointers and undefined behavior.',
     chapters: ['cpp-toolchain', 'cpp-syntax', 'cpp-memory', 'cpp-pointers', 'cpp-undefined-behavior', 'cpp-log-analyzer'],
   },
+  {
+    id: 'cpp-ownership',
+    handbook: 'cpp',
+    dir: 'cpp',
+    title: 'Ownership and abstraction',
+    description: 'Classes whose destructors release what they own, and moves that hand large data from one owner to the next without copying it.',
+    chapters: ['cpp-raii', 'cpp-copy-move'],
+  },
 ]
 
 /** Folders under content/ that hold a handbook's chapters, besides content/ itself. */
@@ -364,6 +372,8 @@ const WIDGET_NAMES = new Set([
   'tensor-strides',
   'ub-detective',
   'latency-percentiles',
+  'raii-stepper',
+  'copy-or-move',
 ])
 
 function widgetNode(name, where) {

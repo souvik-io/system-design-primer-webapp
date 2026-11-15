@@ -44,6 +44,8 @@ const WIDGETS: Record<string, ComponentType> = {
   'tensor-strides': lazy(() => import('./TensorStrides')),
   'ub-detective': lazy(() => import('./UBDetective')),
   'latency-percentiles': lazy(() => import('./LatencyPercentiles')),
+  'raii-stepper': lazy(() => import('./RaiiStepper')),
+  'copy-or-move': lazy(() => import('./CopyOrMove')),
 }
 
 export function Widgets({ root, chapter }: { root: RefObject<HTMLElement | null>; chapter: unknown }) {
