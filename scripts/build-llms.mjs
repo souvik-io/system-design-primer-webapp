@@ -42,12 +42,24 @@ const shell = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8')
 if (!shell.includes('<div id="root"></div>')) throw new Error('dist/index.html has already been prerendered. Run `npm run build` again.')
 
 const SITE_NAME = 'System Design Handbook'
-// The second course on the site, at /infra (parts with handbook: 'infra' in the manifest).
-const INFRA_NAME = 'AI Infrastructure Engineer Handbook'
-const INFRA_DESCRIPTION =
-  'Inference from kernels to clusters: how models run on GPUs, how serving engines schedule them, and how to make them fast and cheap. Each chapter has a lab.'
-const bookName = (part) => (part.handbook === 'infra' ? INFRA_NAME : SITE_NAME)
-const bookHome = (part) => (part.handbook === 'infra' ? '/infra' : '/')
+// The other courses on the site, each at its own home page (parts with that handbook id in the manifest).
+// Keep in step with HANDBOOKS in src/lib/content.ts.
+const COURSES = {
+  infra: {
+    name: 'AI Infrastructure Engineer Handbook',
+    home: '/infra',
+    description:
+      'Inference from kernels to clusters: how models run on GPUs, how serving engines schedule them, and how to make them fast and cheap. Each chapter has a lab.',
+  },
+  cpp: {
+    name: 'C++ for AI Infrastructure Engineers',
+    home: '/cpp',
+    description:
+      'From your first CMake build to CUDA kernels, for engineers who know Python: memory, ownership, performance, concurrency and the GPU, ending with an LLM inference engine you write yourself.',
+  },
+}
+const bookName = (part) => COURSES[part.handbook]?.name ?? SITE_NAME
+const bookHome = (part) => COURSES[part.handbook]?.home ?? '/'
 const DESCRIPTION =
   'A free course in system design, from the interview method to databases, caches and worked designs, with progress tracking and flashcards.'
 
@@ -167,7 +179,7 @@ for (const [i, c] of chapters.entries()) {
 // ---------------------------------------------------------------------------
 // Index pages
 
-const tracked = chapters.filter((c) => !c.untracked && c.part.handbook !== 'infra')
+const tracked = chapters.filter((c) => !c.untracked && !COURSES[c.part.handbook])
 const intro =
   `A free, open-source course in designing large-scale systems, in ${tracked.length} chapters: how to run a system design interview, ` +
   `the core trade-offs, building blocks from DNS to databases and caches, deeper concepts such as consistent hashing and consensus, ` +
@@ -180,7 +192,7 @@ llms.push(
 for (const part of manifest.parts) {
   const optional = part.untracked
   llms.push(
-    `## ${optional ? 'Optional' : part.handbook === 'infra' ? `${INFRA_NAME}: ${part.title}` : part.title}`,
+    `## ${optional ? 'Optional' : COURSES[part.handbook] ? `${COURSES[part.handbook].name}: ${part.title}` : part.title}`,
     part.chapters.map((c) => `- [${c.title}](${abs(`/learn/${c.id}.md`)})${c.summary ? `: ${c.summary}` : ''}`).join('\n'),
   )
 }
@@ -194,24 +206,27 @@ const partList = (parts) =>
         .map((c) => `<li><a href="/learn/${c.id}">${esc(c.title)}</a>${c.summary ? `: ${esc(c.summary)}` : ''}</li>`)
         .join('')}</ul></section>`,
   )
-const infraParts = manifest.parts.filter((p) => p.handbook === 'infra')
-fs.writeFileSync(
-  path.join(DIST, 'infra.html'),
-  page({
-    urlPath: '/infra',
-    title: INFRA_NAME,
-    description: INFRA_DESCRIPTION,
-    body: [nav, `<h1>${INFRA_NAME}</h1>`, `<p>${esc(INFRA_DESCRIPTION)}</p>`, ...partList(infraParts)].join('\n'),
-  }),
-)
+for (const [id, course] of Object.entries(COURSES)) {
+  fs.writeFileSync(
+    path.join(DIST, `${course.home.slice(1)}.html`),
+    page({
+      urlPath: course.home,
+      title: course.name,
+      description: course.description,
+      body: [nav, `<h1>${course.name}</h1>`, `<p>${esc(course.description)}</p>`, ...partList(manifest.parts.filter((p) => p.handbook === id))].join(
+        '\n',
+      ),
+    }),
+  )
+}
 
 const home = [
   nav,
   `<h1>${SITE_NAME}</h1>`,
   `<p>${esc(intro)}</p>`,
-  `<p><a href="/infra">${INFRA_NAME}</a>: ${esc(INFRA_DESCRIPTION)}</p>`,
+  ...Object.values(COURSES).map((course) => `<p><a href="${course.home}">${course.name}</a>: ${esc(course.description)}</p>`),
   ...manifest.parts
-    .filter((p) => p.handbook !== 'infra')
+    .filter((p) => !COURSES[p.handbook])
     .map(
       (part) =>
         `<section id="${part.id}"><h2>${esc(part.title)}</h2><p>${esc(part.description)}</p><ul>${part.chapters
@@ -233,7 +248,7 @@ fs.writeFileSync(
   }),
 )
 
-const urls = ['/', '/infra', '/flashcards', ...chapters.map((c) => `/learn/${c.id}`)]
+const urls = ['/', ...Object.values(COURSES).map((c) => c.home), '/flashcards', ...chapters.map((c) => `/learn/${c.id}`)]
 fs.writeFileSync(path.join(DIST, 'robots.txt'), `User-agent: *\nAllow: /\n${SITE ? `\nSitemap: ${SITE}/sitemap.xml\n` : ''}`)
 if (SITE) {
   const today = new Date().toISOString().slice(0, 10)

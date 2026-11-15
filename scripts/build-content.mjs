@@ -219,6 +219,11 @@ const PARTS = [
       'An inference engine built from scratch, with a paged KV cache, continuous batching under a token budget, chunked prefill, preemption and an OpenAI-compatible server, measured against vLLM. Then vLLM itself: one request traced through its processes, its scheduler and block pool read against yours, and its main settings measured. Then prefix caching: the radix tree of SGLang next to the hashed blocks of vLLM, and both engines measured on a multi-turn chat workload. Then speculative decoding: the acceptance rule, drafters from prompt lookup to EAGLE-3, and vLLM measured with six of them from 1 request in flight to 128. Then the last step of every step: the sampler, what top-p costs and how engines avoid sorting, and structured output, from a token mask built by hand to XGrammar inside vLLM.',
     chapters: ['mini-inference-engine', 'inside-vllm', 'sglang-prefix-caching', 'speculative-decoding', 'structured-output'],
   },
+
+  // C++ for AI Infrastructure Engineers, a third course at /cpp. Its chapters live in content/cpp/ and it has its own
+  // home page, sidebar and progress. content/cpp/SYLLABUS.md is the plan; the part ids below must match PLANNED in
+  // src/pages/CppHomePage.tsx (cpp-ground-rules, cpp-ownership, cpp-performance, cpp-concurrency, cpp-systems-glue,
+  // cpp-cuda, cpp-capstone), which lists the parts not published yet.
 ]
 
 /** Folders under content/ that hold a handbook's chapters, besides content/ itself. */

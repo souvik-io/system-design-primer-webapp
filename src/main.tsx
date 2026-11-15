@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router'
 import { Layout } from './components/Layout'
 import { HomePage } from './pages/HomePage'
 import { InfraHomePage } from './pages/InfraHomePage'
+import { CppHomePage } from './pages/CppHomePage'
 import { ChapterPage } from './pages/ChapterPage'
 import { NotFound } from './pages/NotFound'
 import { FlashcardsPage } from './pages/FlashcardsPage'
@@ -17,6 +18,7 @@ const router = createBrowserRouter([
     children: [
       { path: '/', element: <HomePage /> },
       { path: '/infra', element: <InfraHomePage /> },
+      { path: '/cpp', element: <CppHomePage /> },
       { path: '/learn/:chapterId', element: <ChapterPage /> },
       { path: '/flashcards', element: <FlashcardsPage /> },
       { path: '/flashcards/:deckId', element: <StudyPage /> },

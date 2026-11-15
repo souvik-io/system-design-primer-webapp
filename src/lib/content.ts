@@ -11,7 +11,7 @@ export type ChapterMeta = {
   /** Reference material that doesn't count toward progress */
   untracked?: boolean
 }
-export type HandbookId = 'system-design' | 'infra'
+export type HandbookId = 'system-design' | 'infra' | 'cpp'
 export type Part = {
   id: string
   handbook: HandbookId
@@ -37,7 +37,7 @@ export type Deck = { id: string; title: string; cards: Card[] }
 
 export const parts: Part[] = (manifestJson.parts as Part[]).filter((p) => p.chapters.length > 0)
 
-/** The site holds two courses. Each has its own home page, sidebar, progress and chapter order. */
+/** The site holds three courses. Each has its own home page, sidebar, progress and chapter order. */
 export const HANDBOOKS: Record<HandbookId, { title: string; short: string; home: string; description: string }> = {
   'system-design': {
     title: 'System Design Handbook',
@@ -51,6 +51,13 @@ export const HANDBOOKS: Record<HandbookId, { title: string; short: string; home:
     home: '/infra',
     description:
       'Inference from kernels to clusters: how models run on GPUs, how serving engines schedule them, and how to make them fast and cheap. Each chapter has a lab.',
+  },
+  cpp: {
+    title: 'C++ for AI Infrastructure Engineers',
+    short: 'C++ and CUDA',
+    home: '/cpp',
+    description:
+      'From your first CMake build to CUDA kernels, for engineers who know Python: memory, ownership, performance, concurrency and the GPU, ending with an LLM inference engine you write yourself.',
   },
 }
 
