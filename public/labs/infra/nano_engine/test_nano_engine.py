@@ -145,6 +145,53 @@ def test_parallel_sampling_shares_prompt_blocks():
     assert llm.engine.stats["cow_copies"] == 2
 
 
+def test_exponential_race_draws_from_the_distribution():
+    from .sampler import sample
+    probs = torch.tensor([0.5, 0.3, 0.15, 0.05])
+    seqs = [seq(3, temperature=1.0)]
+    draws = sample(probs.log()[None], seqs, torch.Generator().manual_seed(0), draws=40000)[0]
+    freq = torch.bincount(draws, minlength=4).float() / 40000
+    assert torch.allclose(freq, probs, atol=0.01), freq
+
+
+def test_filters_and_penalties():
+    from .sampler import apply_penalties, filter_tail
+    logits = torch.tensor([[4.0, 3.0, 2.0, 1.0, -1.0]])
+    kept = lambda **kw: (filter_tail(logits.clone(), [seq(3, **kw)]) > float("-inf")).int().tolist()[0]
+    assert kept(top_k=2) == [1, 1, 0, 0, 0]
+    p = torch.softmax(logits, -1)[0]                            # 0.64, 0.24, 0.09, 0.03, 0.004
+    assert kept(top_p=0.8) == [1, 1, 0, 0, 0]                   # 0.64 < 0.8, 0.64 + 0.24 reaches it
+    assert kept(min_p=0.1) == [1, 1, 1, 0, 0] and p[2] > 0.1 * p[0] > p[3]
+    s = seq(3, repetition_penalty=2.0, frequency_penalty=0.5, presence_penalty=0.25)
+    s.token_ids = [0, 4, 0] + [1, 1, 4]                         # prompt 0, 4, 0; output 1, 1, 4
+    out = logits.clone()
+    apply_penalties(out, [s])
+    # token 0: prompt only, positive, halved. token 1: output twice, 3/2 - 2*0.5 - 0.25. token 4: negative, doubled, once.
+    assert torch.allclose(out, torch.tensor([[2.0, 0.25, 2.0, 1.0, -2.75]]))
+
+
+def test_json_schema_output_always_parses():
+    import json
+    from .engine import LLM
+    schema = {"type": "object", "properties": {"name": {"type": "string", "maxLength": 20},
+                                               "age": {"type": "integer"}, "pets": {"type": "array", "maxItems": 3,
+                                                                                    "items": {"type": "string", "maxLength": 12}}},
+              "required": ["name", "age", "pets"], "additionalProperties": False}
+    prompts = ["Describe a person as JSON.", "Make up a character with a name, an age and some pets."]
+    for jump_forward in (False, True):
+        llm = LLM(MODEL, device="cpu", kv_cache_gib=0.1, max_model_len=512, jump_forward=jump_forward)
+        tok = llm.tokenizer
+        ids = [tok.encode(tok.apply_chat_template([{"role": "user", "content": p}], add_generation_prompt=True,
+                                                  tokenize=False), add_special_tokens=False) for p in prompts]
+        out = llm.generate(ids, SamplingParams(temperature=1.0, max_tokens=120, n=2, json_schema=schema))
+        for group in out:
+            for o in group:
+                x = json.loads(tok.decode(o, skip_special_tokens=True))
+                assert set(x) == {"name", "age", "pets"} and isinstance(x["age"], int) and len(x["pets"]) <= 3
+        if jump_forward:
+            assert llm.engine.structured.stats["jump_forward_tokens"] > 0
+
+
 def test_flash_matches_torch():
     if not torch.cuda.is_available():
         return

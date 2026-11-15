@@ -112,9 +112,23 @@ def build_app(engine: LLMEngine, model_name: str) -> FastAPI:
     tok = engine.tokenizer
 
     def params_from(body: dict) -> SamplingParams:
+        # Structured output, as OpenAI's API asks for it: response_format {"type": "json_schema", "json_schema":
+        # {"name": ..., "schema": {...}}} or {"type": "json_object"}; and as vLLM's extension does, for the kinds
+        # OpenAI has no field for: "structured_outputs": {"regex": ...} or {"grammar": ...}.
+        fmt, extra = body.get("response_format") or {}, body.get("structured_outputs") or {}
+        schema = None
+        if fmt.get("type") == "json_schema":
+            schema = fmt["json_schema"]["schema"]
+        elif fmt.get("type") == "json_object":
+            schema = "object"
         return SamplingParams(temperature=body.get("temperature", 1.0), top_p=body.get("top_p", 1.0),
+                              top_k=body.get("top_k", 0), min_p=body.get("min_p", 0.0),
+                              repetition_penalty=body.get("repetition_penalty", 1.0),
+                              frequency_penalty=body.get("frequency_penalty", 0.0),
+                              presence_penalty=body.get("presence_penalty", 0.0),
                               max_tokens=body.get("max_tokens") or body.get("max_completion_tokens") or 256,
-                              n=body.get("n", 1), ignore_eos=body.get("ignore_eos", False))
+                              n=body.get("n", 1), ignore_eos=body.get("ignore_eos", False),
+                              json_schema=extra.get("json", schema), regex=extra.get("regex"), grammar=extra.get("grammar"))
 
     async def complete(body: dict, prompt: list[int], chat: bool):
         rid = f"{'chatcmpl' if chat else 'cmpl'}-{uuid.uuid4().hex}"
@@ -192,9 +206,10 @@ def main() -> None:
     ap.add_argument("--kv-cache-gib", type=float, default=1.0)
     ap.add_argument("--max-num-seqs", type=int, default=256)
     ap.add_argument("--max-num-batched-tokens", type=int, default=2048)
+    ap.add_argument("--jump-forward", action="store_true", help="structured output: skip sampling forced tokens")
     a = ap.parse_args()
     engine = LLMEngine(EngineConfig(model=a.model, device=a.device, max_model_len=a.max_model_len,
-                                    kv_cache_gib=a.kv_cache_gib,
+                                    kv_cache_gib=a.kv_cache_gib, jump_forward=a.jump_forward,
                                     scheduler=SchedulerConfig(a.max_num_seqs, a.max_num_batched_tokens)))
     print(f"nano_engine: {a.model} on {a.device}, {engine.blocks.num_blocks} KV blocks of {engine.config.block_size} tokens")
     uvicorn.run(build_app(engine, a.model), host=a.host, port=a.port, log_level="warning")

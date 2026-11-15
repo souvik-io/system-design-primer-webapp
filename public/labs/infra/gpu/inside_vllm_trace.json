@@ -116,7 +116,7 @@
      "dur_ms": 0.593,
      "where": "engine core / MainThread",
      "name": "Scheduler.schedule",
-     "note": "2006 tokens for 1 requests"
+     "note": "2006 tokens for 1 request"
     },
     {
      "start_ms": 10.777,
@@ -172,21 +172,21 @@
      "dur_ms": 0.132,
      "where": "engine core / MainThread",
      "name": "Scheduler.schedule",
-     "note": "1 tokens for 1 requests"
+     "note": "1 token for 1 request"
     },
     {
      "start_ms": 63.775,
      "dur_ms": 0.031,
      "where": "engine core / MainThread",
      "name": "KVCacheManager.allocate_slots",
-     "note": "1 new tokens, 0 new blocks"
+     "note": "1 new token, 0 new blocks"
     },
     {
      "start_ms": 63.939,
      "dur_ms": 1.324,
      "where": "engine core / MainThread",
      "name": "GPUModelRunner.execute_model (V2)",
-     "note": "1 tokens"
+     "note": "1 token"
     },
     {
      "start_ms": 64.162,
@@ -228,7 +228,7 @@
      "dur_ms": 0.134,
      "where": "engine core / MainThread",
      "name": "Scheduler.update_from_output",
-     "note": "outputs for 1 requests"
+     "note": "outputs for 1 request"
     },
     {
      "start_ms": 82.777,
@@ -242,21 +242,21 @@
      "dur_ms": 0.155,
      "where": "engine core / MainThread",
      "name": "Scheduler.schedule",
-     "note": "1 tokens for 1 requests"
+     "note": "1 token for 1 request"
     },
     {
      "start_ms": 82.812,
      "dur_ms": 0.028,
      "where": "engine core / MainThread",
      "name": "KVCacheManager.allocate_slots",
-     "note": "1 new tokens, 0 new blocks"
+     "note": "1 new token, 0 new blocks"
     },
     {
      "start_ms": 83.005,
      "dur_ms": 1.544,
      "where": "engine core / MainThread",
      "name": "GPUModelRunner.execute_model (V2)",
-     "note": "1 tokens"
+     "note": "1 token"
     },
     {
      "start_ms": 83.099,
@@ -284,7 +284,7 @@
      "dur_ms": 0.909,
      "where": "API server / MainThread",
      "name": "OutputProcessor.process_outputs: detokenize",
-     "note": "1 request outputs"
+     "note": "outputs for 1 request"
     },
     {
      "start_ms": 84.022,
@@ -458,7 +458,7 @@
      "dur_ms": 0.57,
      "where": "engine core / MainThread",
      "name": "Scheduler.schedule",
-     "note": "21 tokens for 1 requests"
+     "note": "21 tokens for 1 request"
     },
     {
      "start_ms": 7.845,
@@ -521,21 +521,21 @@
      "dur_ms": 0.209,
      "where": "engine core / MainThread",
      "name": "Scheduler.schedule",
-     "note": "1 tokens for 1 requests"
+     "note": "1 token for 1 request"
     },
     {
      "start_ms": 24.575,
      "dur_ms": 0.054,
      "where": "engine core / MainThread",
      "name": "KVCacheManager.allocate_slots",
-     "note": "1 new tokens, 0 new blocks"
+     "note": "1 new token, 0 new blocks"
     },
     {
      "start_ms": 24.835,
      "dur_ms": 2.015,
      "where": "engine core / MainThread",
      "name": "GPUModelRunner.execute_model (V2)",
-     "note": "1 tokens"
+     "note": "1 token"
     },
     {
      "start_ms": 25.212,
@@ -577,7 +577,7 @@
      "dur_ms": 0.193,
      "where": "engine core / MainThread",
      "name": "Scheduler.update_from_output",
-     "note": "outputs for 1 requests"
+     "note": "outputs for 1 request"
     },
     {
      "start_ms": 28.776,
@@ -591,21 +591,21 @@
      "dur_ms": 0.182,
      "where": "engine core / MainThread",
      "name": "Scheduler.schedule",
-     "note": "1 tokens for 1 requests"
+     "note": "1 token for 1 request"
     },
     {
      "start_ms": 28.812,
      "dur_ms": 0.039,
      "where": "engine core / MainThread",
      "name": "KVCacheManager.allocate_slots",
-     "note": "1 new tokens, 0 new blocks"
+     "note": "1 new token, 0 new blocks"
     },
     {
      "start_ms": 29.069,
      "dur_ms": 2.365,
      "where": "engine core / MainThread",
      "name": "GPUModelRunner.execute_model (V2)",
-     "note": "1 tokens"
+     "note": "1 token"
     },
     {
      "start_ms": 29.192,
@@ -626,7 +626,7 @@
      "dur_ms": 0.806,
      "where": "API server / MainThread",
      "name": "OutputProcessor.process_outputs: detokenize",
-     "note": "1 request outputs"
+     "note": "outputs for 1 request"
     },
     {
      "start_ms": 29.827,

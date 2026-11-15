@@ -1,0 +1,460 @@
+{
+ "vllm": "0.32.0",
+ "target": "unsloth/Meta-Llama-3.1-8B-Instruct",
+ "gpu": "NVIDIA H100 80GB HBM3",
+ "configs": [
+  {
+   "config": "off",
+   "speculative_config": null,
+   "startup_s": 270.2,
+   "kv_pool_tokens": 451056,
+   "runs": [
+    {
+     "workload": "chat",
+     "concurrency": 1,
+     "requests": 6,
+     "seconds": 9.81,
+     "output_tokens": 1519,
+     "output_tok_s": 154.8,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 155.8,
+     "ttft_ms_p50": 17.7,
+     "spec": {}
+    },
+    {
+     "workload": "chat",
+     "concurrency": 8,
+     "requests": 16,
+     "seconds": 3.42,
+     "output_tokens": 4003,
+     "output_tok_s": 1168.9,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 253,
+     "request_decode_tok_s_p50": 151.9,
+     "ttft_ms_p50": 34.4,
+     "spec": {}
+    },
+    {
+     "workload": "chat",
+     "concurrency": 32,
+     "requests": 64,
+     "seconds": 3.72,
+     "output_tokens": 16312,
+     "output_tok_s": 4379.3,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 143.9,
+     "ttft_ms_p50": 83.5,
+     "spec": {}
+    },
+    {
+     "workload": "chat",
+     "concurrency": 128,
+     "requests": 256,
+     "seconds": 5.04,
+     "output_tokens": 64675,
+     "output_tok_s": 12834.8,
+     "prompt_tokens_p50": 64,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 113.8,
+     "ttft_ms_p50": 252.8,
+     "spec": {}
+    },
+    {
+     "workload": "code",
+     "concurrency": 1,
+     "requests": 6,
+     "seconds": 12.13,
+     "output_tokens": 1845,
+     "output_tok_s": 152.1,
+     "prompt_tokens_p50": 373,
+     "completion_tokens_p50": 306,
+     "request_decode_tok_s_p50": 153.9,
+     "ttft_ms_p50": 21.7,
+     "spec": {}
+    },
+    {
+     "workload": "code",
+     "concurrency": 8,
+     "requests": 16,
+     "seconds": 4.36,
+     "output_tokens": 4855,
+     "output_tok_s": 1113.9,
+     "prompt_tokens_p50": 366,
+     "completion_tokens_p50": 306,
+     "request_decode_tok_s_p50": 147.0,
+     "ttft_ms_p50": 52.6,
+     "spec": {}
+    },
+    {
+     "workload": "code",
+     "concurrency": 32,
+     "requests": 64,
+     "seconds": 5.13,
+     "output_tokens": 19358,
+     "output_tok_s": 3770.2,
+     "prompt_tokens_p50": 368,
+     "completion_tokens_p50": 304,
+     "request_decode_tok_s_p50": 130.7,
+     "ttft_ms_p50": 160.5,
+     "spec": {}
+    },
+    {
+     "workload": "code",
+     "concurrency": 128,
+     "requests": 256,
+     "seconds": 8.28,
+     "output_tokens": 77470,
+     "output_tok_s": 9351.4,
+     "prompt_tokens_p50": 367,
+     "completion_tokens_p50": 304,
+     "request_decode_tok_s_p50": 89.1,
+     "ttft_ms_p50": 687.5,
+     "spec": {}
+    },
+    {
+     "workload": "chat_t1",
+     "concurrency": 1,
+     "requests": 6,
+     "seconds": 11.99,
+     "output_tokens": 1536,
+     "output_tok_s": 128.1,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 154.6,
+     "ttft_ms_p50": 17.0,
+     "spec": {}
+    },
+    {
+     "workload": "chat_t1",
+     "concurrency": 32,
+     "requests": 64,
+     "seconds": 9.06,
+     "output_tokens": 16112,
+     "output_tok_s": 1778.5,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 137.8,
+     "ttft_ms_p50": 1809.8,
+     "spec": {}
+    }
+   ],
+   "server_log": [
+    "(EngineCore pid=97) INFO 11-11 05:31:35 [core.py:133] Initializing a V1 LLM engine (v0.32.0) with config: model='unsloth/Meta-Llama-3.1-8B-Instruct', speculative_config=None, tokenizer='unsloth/Meta-Llama-3.1-8B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_revi"
+   ]
+  },
+  {
+   "config": "ngram gpu",
+   "speculative_config": {
+    "method": "ngram_gpu",
+    "num_speculative_tokens": 5,
+    "prompt_lookup_min": 2,
+    "prompt_lookup_max": 5
+   },
+   "startup_s": 96.1,
+   "kv_pool_tokens": 450240,
+   "runs": [
+    {
+     "workload": "chat",
+     "concurrency": 1,
+     "requests": 6,
+     "seconds": 9.39,
+     "output_tokens": 1519,
+     "output_tok_s": 161.8,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 165.0,
+     "ttft_ms_p50": 17.5,
+     "spec": {
+      "drafts": 1424,
+      "draft_tokens": 7120,
+      "accepted_tokens": 89,
+      "mean_acceptance_length": 1.062,
+      "draft_acceptance_rate": 0.0125,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.0344,
+       0.0169,
+       0.0077,
+       0.0021,
+       0.0014
+      ]
+     },
+     "answers_identical_to_off": 6,
+     "answers_shared_prefix": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "workload": "chat",
+     "concurrency": 8,
+     "requests": 16,
+     "seconds": 3.34,
+     "output_tokens": 3985,
+     "output_tok_s": 1192.3,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 249,
+     "request_decode_tok_s_p50": 154.7,
+     "ttft_ms_p50": 36.4,
+     "spec": {
+      "drafts": 3744,
+      "draft_tokens": 18720,
+      "accepted_tokens": 226,
+      "mean_acceptance_length": 1.06,
+      "draft_acceptance_rate": 0.0121,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.0345,
+       0.0139,
+       0.0072,
+       0.0032,
+       0.0016
+      ]
+     }
+    },
+    {
+     "workload": "chat",
+     "concurrency": 32,
+     "requests": 64,
+     "seconds": 4.11,
+     "output_tokens": 16284,
+     "output_tok_s": 3964.6,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 134.2,
+     "ttft_ms_p50": 60.5,
+     "spec": {
+      "drafts": 14844,
+      "draft_tokens": 74220,
+      "accepted_tokens": 1392,
+      "mean_acceptance_length": 1.094,
+      "draft_acceptance_rate": 0.0188,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.0536,
+       0.0207,
+       0.01,
+       0.0059,
+       0.0036
+      ]
+     }
+    },
+    {
+     "workload": "chat",
+     "concurrency": 128,
+     "requests": 256,
+     "seconds": 10.71,
+     "output_tokens": 64713,
+     "output_tok_s": 6042.0,
+     "prompt_tokens_p50": 64,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 49.9,
+     "ttft_ms_p50": 143.9,
+     "spec": {
+      "drafts": 59486,
+      "draft_tokens": 297430,
+      "accepted_tokens": 5009,
+      "mean_acceptance_length": 1.084,
+      "draft_acceptance_rate": 0.0168,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.0473,
+       0.019,
+       0.0092,
+       0.0052,
+       0.0035
+      ]
+     }
+    },
+    {
+     "workload": "code",
+     "concurrency": 1,
+     "requests": 6,
+     "seconds": 2.82,
+     "output_tokens": 1845,
+     "output_tok_s": 654.6,
+     "prompt_tokens_p50": 373,
+     "completion_tokens_p50": 306,
+     "request_decode_tok_s_p50": 685.8,
+     "ttft_ms_p50": 21.2,
+     "spec": {
+      "drafts": 411,
+      "draft_tokens": 2055,
+      "accepted_tokens": 1428,
+      "mean_acceptance_length": 4.474,
+      "draft_acceptance_rate": 0.6949,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.7299,
+       0.6959,
+       0.691,
+       0.6788,
+       0.6788
+      ]
+     },
+     "answers_identical_to_off": 6,
+     "answers_shared_prefix": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "workload": "code",
+     "concurrency": 8,
+     "requests": 16,
+     "seconds": 1.11,
+     "output_tokens": 4854,
+     "output_tok_s": 4382.9,
+     "prompt_tokens_p50": 366,
+     "completion_tokens_p50": 306,
+     "request_decode_tok_s_p50": 682.9,
+     "ttft_ms_p50": 44.8,
+     "spec": {
+      "drafts": 999,
+      "draft_tokens": 4995,
+      "accepted_tokens": 3839,
+      "mean_acceptance_length": 4.843,
+      "draft_acceptance_rate": 0.7686,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.8138,
+       0.7708,
+       0.7658,
+       0.7467,
+       0.7457
+      ]
+     }
+    },
+    {
+     "workload": "code",
+     "concurrency": 32,
+     "requests": 64,
+     "seconds": 1.69,
+     "output_tokens": 19358,
+     "output_tok_s": 11478.6,
+     "prompt_tokens_p50": 368,
+     "completion_tokens_p50": 304,
+     "request_decode_tok_s_p50": 474.3,
+     "ttft_ms_p50": 102.1,
+     "spec": {
+      "drafts": 4005,
+      "draft_tokens": 20025,
+      "accepted_tokens": 15289,
+      "mean_acceptance_length": 4.817,
+      "draft_acceptance_rate": 0.7635,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.8107,
+       0.7648,
+       0.7596,
+       0.7413,
+       0.7411
+      ]
+     }
+    },
+    {
+     "workload": "code",
+     "concurrency": 128,
+     "requests": 256,
+     "seconds": 4.97,
+     "output_tokens": 77470,
+     "output_tok_s": 15577.3,
+     "prompt_tokens_p50": 367,
+     "completion_tokens_p50": 304,
+     "request_decode_tok_s_p50": 159.0,
+     "ttft_ms_p50": 423.4,
+     "spec": {
+      "drafts": 15951,
+      "draft_tokens": 79755,
+      "accepted_tokens": 61263,
+      "mean_acceptance_length": 4.841,
+      "draft_acceptance_rate": 0.7681,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.8139,
+       0.7699,
+       0.7649,
+       0.7462,
+       0.7458
+      ]
+     }
+    },
+    {
+     "workload": "chat_t1",
+     "concurrency": 1,
+     "requests": 6,
+     "seconds": 11.21,
+     "output_tokens": 1495,
+     "output_tok_s": 133.4,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 160.5,
+     "ttft_ms_p50": 19.2,
+     "spec": {
+      "drafts": 1397,
+      "draft_tokens": 6985,
+      "accepted_tokens": 92,
+      "mean_acceptance_length": 1.066,
+      "draft_acceptance_rate": 0.0132,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.0387,
+       0.0136,
+       0.0064,
+       0.0036,
+       0.0036
+      ]
+     }
+    },
+    {
+     "workload": "chat_t1",
+     "concurrency": 32,
+     "requests": 64,
+     "seconds": 10.76,
+     "output_tokens": 16039,
+     "output_tok_s": 1490.7,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 123.6,
+     "ttft_ms_p50": 1719.3,
+     "spec": {
+      "drafts": 15007,
+      "draft_tokens": 75035,
+      "accepted_tokens": 977,
+      "mean_acceptance_length": 1.065,
+      "draft_acceptance_rate": 0.013,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.0391,
+       0.0154,
+       0.0061,
+       0.0029,
+       0.0015
+      ]
+     }
+    }
+   ],
+   "server_log": [
+    "(EngineCore pid=485) INFO 11-11 05:37:13 [core.py:133] Initializing a V1 LLM engine (v0.32.0) with config: model='unsloth/Meta-Llama-3.1-8B-Instruct', speculative_config=SpeculativeConfig(method='ngram_gpu', model='unsloth/Meta-Llama-3.1-8B-Instruct', num_spec_tokens=5), tokenizer='unsloth/Meta-Llam",
+    "(APIServer pid=460) INFO 11-11 05:38:26 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.10, Accepted throughput: 7.92 tokens/s, Drafted throughput: 380.44 tokens/s, Accepted: 92 tokens, Drafted: 4420 tokens, Per-position acceptance rate: 0.049, 0.024, 0.012, 0.010, 0.009, Avg Draft ",
+    "(APIServer pid=460) INFO 11-11 05:38:36 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.06, Accepted throughput: 26.80 tokens/s, Drafted throughput: 2190.70 tokens/s, Accepted: 268 tokens, Drafted: 21910 tokens, Per-position acceptance rate: 0.034, 0.015, 0.008, 0.003, 0.002, Avg Dr",
+    "(APIServer pid=460) INFO 11-11 05:38:46 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.08, Accepted throughput: 291.91 tokens/s, Drafted throughput: 17912.90 tokens/s, Accepted: 2922 tokens, Drafted: 179305 tokens, Per-position acceptance rate: 0.047, 0.018, 0.008, 0.005, 0.003, Av",
+    "(APIServer pid=460) INFO 11-11 05:38:56 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.11, Accepted throughput: 430.21 tokens/s, Drafted throughput: 19348.90 tokens/s, Accepted: 4302 tokens, Drafted: 193485 tokens, Per-position acceptance rate: 0.054, 0.025, 0.014, 0.010, 0.008, Av",
+    "(APIServer pid=460) INFO 11-11 05:39:06 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 4.96, Accepted throughput: 2903.56 tokens/s, Drafted throughput: 3668.81 tokens/s, Accepted: 29041 tokens, Drafted: 36695 tokens, Per-position acceptance rate: 0.824, 0.792, 0.789, 0.776, 0.776, Av",
+    "(APIServer pid=460) INFO 11-11 05:39:16 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 4.65, Accepted throughput: 5199.18 tokens/s, Drafted throughput: 7126.05 tokens/s, Accepted: 51995 tokens, Drafted: 71265 tokens, Per-position acceptance rate: 0.782, 0.732, 0.726, 0.705, 0.704, Av",
+    "(APIServer pid=460) INFO 11-11 05:39:26 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.06, Accepted throughput: 5.20 tokens/s, Drafted throughput: 471.46 tokens/s, Accepted: 52 tokens, Drafted: 4715 tokens, Per-position acceptance rate: 0.032, 0.012, 0.005, 0.003, 0.003, Avg Draft ",
+    "(APIServer pid=460) INFO 11-11 05:39:36 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.07, Accepted throughput: 97.68 tokens/s, Drafted throughput: 7502.12 tokens/s, Accepted: 977 tokens, Drafted: 75035 tokens, Per-position acceptance rate: 0.039, 0.015, 0.006, 0.003, 0.002, Avg Dr"
+   ]
+  }
+ ]
+}

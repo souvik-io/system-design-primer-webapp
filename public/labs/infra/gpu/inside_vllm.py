@@ -44,6 +44,11 @@ PORT = 8000
 URL = f"http://127.0.0.1:{PORT}"
 TRACE_FILE = "/tmp/vllm_trace.jsonl"
 
+def n(count: int, word: str) -> str:
+    """'1 token', '2 tokens'."""
+    return f"{count} {word}{'' if count == 1 else 's'}"
+
+
 # (module, class, method, label, function that turns (args, kwargs, return value) into a short note)
 TARGETS = [
     # The API server process.
@@ -54,7 +59,7 @@ TARGETS = [
     ("vllm.v1.serial_utils", "MsgpackEncoder", "encode", "msgpack encode", None),
     ("vllm.v1.serial_utils", "MsgpackDecoder", "decode", "msgpack decode", None),
     ("vllm.v1.engine.output_processor", "OutputProcessor", "process_outputs", "OutputProcessor.process_outputs: detokenize",
-     lambda a, k, r: f"{len(a[1])} request outputs"),
+     lambda a, k, r: f"outputs for {n(len(a[1]), 'request')}"),
     # The engine core process.
     ("vllm.v1.serial_utils", "MsgpackEncoder", "encode_into", "msgpack encode", None),
     ("vllm.v1.engine.core", "EngineCore", "preprocess_add_request", "core: preprocess_add_request (block hashes)", None),
@@ -64,12 +69,12 @@ TARGETS = [
     ("vllm.v1.engine.core", "EngineCore", "step", "EngineCore.step", None),
     ("vllm.v1.engine.core", "EngineCore", "step_with_batch_queue", "EngineCore.step_with_batch_queue", None),
     ("vllm.v1.core.sched.scheduler", "Scheduler", "schedule", "Scheduler.schedule",
-     lambda a, k, r: f"{r.total_num_scheduled_tokens} tokens for {len(r.num_scheduled_tokens)} requests"),
+     lambda a, k, r: f"{n(r.total_num_scheduled_tokens, 'token')} for {n(len(r.num_scheduled_tokens), 'request')}"),
     ("vllm.v1.core.kv_cache_manager", "KVCacheManager", "get_computed_blocks", "KVCacheManager.get_computed_blocks",
      lambda a, k, r: f"prefix cache hit: {r[1]} of {a[1].num_tokens} tokens"),
     ("vllm.v1.core.kv_cache_manager", "KVCacheManager", "allocate_slots", "KVCacheManager.allocate_slots",
-     lambda a, k, r: f"{a[2] if len(a) > 2 else k.get('num_new_tokens')} new tokens, "
-                     + ("no room" if r is None else f"{sum(len(g) for g in r.blocks)} new blocks")),
+     lambda a, k, r: n(a[2] if len(a) > 2 else k.get('num_new_tokens'), "new token") + ", "
+                     + ("no room" if r is None else n(sum(len(g) for g in r.blocks), "new block"))),
     ("vllm.v1.worker.gpu.model_runner", "GPUModelRunner", "execute_model", "GPUModelRunner.execute_model (V2)",
      lambda a, k, r: f"{a[1].total_num_scheduled_tokens} tokens"),
     ("vllm.v1.worker.gpu.model_runner", "GPUModelRunner", "sample_tokens", "GPUModelRunner.sample_tokens (V2)", None),
@@ -82,7 +87,7 @@ TARGETS = [
      lambda a, k, r: f"{a[1].total_num_scheduled_tokens} tokens"),
     ("vllm.v1.worker.gpu_model_runner", "GPUModelRunner", "sample_tokens", "GPUModelRunner.sample_tokens (V1)", None),
     ("vllm.v1.core.sched.scheduler", "Scheduler", "update_from_output", "Scheduler.update_from_output",
-     lambda a, k, r: f"outputs for {sum(len(v.outputs) for v in r.values())} requests"),
+     lambda a, k, r: f"outputs for {n(sum(len(v.outputs) for v in r.values()), 'request')}"),
 ]
 
 

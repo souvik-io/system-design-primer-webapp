@@ -248,6 +248,7 @@ def main() -> None:
     ap.add_argument("--toolkit", action="store_true", help="use images/toolkit.Dockerfile (nvcc, Nsight)")
     ap.add_argument("--vllm", action="store_true", help="use images/vllm.Dockerfile")
     ap.add_argument("--quant", action="store_true", help="use images/quant.Dockerfile (vLLM and llm-compressor)")
+    ap.add_argument("--sglang", action="store_true", help="use images/sglang.Dockerfile")
     ap.add_argument("--on-demand", action="store_true", help="normal price instead of Spot; cannot be reclaimed")
     ap.add_argument("--max-hours", type=float, default=1.0, help="Google deletes the VM after this long (default 1)")
     ap.add_argument("--keep", action="store_true", help="leave the VM running for SSH until --max-hours or --cleanup")
@@ -255,7 +256,12 @@ def main() -> None:
     ap.add_argument("--list", action="store_true", help="list VMs started by this script")
     ap.add_argument("--cleanup", action="store_true", help="delete every VM started by this script")
     ap.add_argument("--allow-over-budget", action="store_true")
-    a = ap.parse_args()
+    # argparse refuses a value that starts with "--", so `--args "--quick"` would be an error; join it as --args=...
+    argv = sys.argv[1:]
+    if "--args" in argv[:-1]:
+        i = argv.index("--args")
+        argv[i : i + 2] = [f"--args={argv[i + 1]}"]
+    a = ap.parse_args(argv)
 
     project = a.project or budget.load_credits().get("gcp_project") or \
         subprocess.run(["gcloud", "config", "get-value", "project"], capture_output=True, text=True).stdout.strip()
@@ -283,7 +289,7 @@ def main() -> None:
     rate = hourly(a.gpu, spot)
     budget.check("gcp", rate * a.max_hours, a.allow_over_budget)
 
-    kind = "quant" if a.quant else "vllm" if a.vllm else "toolkit" if a.toolkit else "base"
+    kind = "sglang" if a.sglang else "quant" if a.quant else "vllm" if a.vllm else "toolkit" if a.toolkit else "base"
     stem = Path(a.script).stem if a.script else "session"
     stamp = time.strftime("%Y%m%d-%H%M%S")
     name = f"lab-{stem}-{a.gpu}-{stamp}".lower().replace("_", "-").replace(":", "x")[:63]

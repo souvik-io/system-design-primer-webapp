@@ -15,6 +15,7 @@ import torch  # noqa: E402
 
 from .kv_cache import BlockManager
 from .model import AttnMeta, load
+from .sampler import sample
 from .scheduler import Batch, Scheduler, SchedulerConfig
 from .sequence import SamplingParams, Sequence, Status
 
@@ -32,6 +33,8 @@ class EngineConfig:
     max_model_len: int = 4096
     scheduler: SchedulerConfig = field(default_factory=SchedulerConfig)
     seed: int = 0
+    jump_forward: bool = False            # structured output: append the tokens a grammar forces without sampling
+    json_any_whitespace: bool = False     # structured output: let a JSON schema's output contain free whitespace
 
 
 @dataclass
@@ -70,7 +73,19 @@ class LLMEngine:
         self.scheduler = Scheduler(c.scheduler, self.blocks)
         self.generator = torch.Generator(device=self.device).manual_seed(c.seed)
         self.requests: dict[str, list[Sequence]] = {}
-        self.stats = {"steps": 0, "preemptions": 0, "cow_copies": 0, "tokens_run": 0}
+        self.stats = {"steps": 0, "preemptions": 0, "cow_copies": 0, "tokens_run": 0, "sample_s": 0.0}
+        self._structured = None
+
+    @property
+    def structured(self):
+        """Structured output (structured.py), set up when the first request with a constraint arrives, so that the
+        engine runs without xgrammar installed."""
+        if self._structured is None:
+            from .structured import StructuredOutput
+            self._structured = StructuredOutput(self.tokenizer, self.model.lm_head.shape[0], sorted(self.eos_ids),
+                                                jump_forward=self.config.jump_forward,
+                                                any_whitespace=self.config.json_any_whitespace)
+        return self._structured
 
     def _blocks_that_fit(self, bytes_per_block: int) -> int:
         """On CUDA, like vLLM: run the largest batch the scheduler allows on dummy inputs, measure the peak memory,
@@ -100,6 +115,8 @@ class LLMEngine:
         if len(prompt) + params.max_tokens > self.config.max_model_len:
             raise ValueError(f"prompt ({len(prompt)}) + max_tokens ({params.max_tokens}) exceeds max_model_len")
         seq = Sequence(request_id, prompt, params)
+        if params.constraint:
+            self.structured.attach(seq)
         self.requests[request_id] = [seq]
         self.scheduler.add(seq)
 
@@ -118,6 +135,8 @@ class LLMEngine:
             return []
         samplers = [s for s, n in zip(batch.seqs, batch.num_tokens) if s.num_computed + n == s.num_tokens]
         logits = self._run(batch, samplers)
+        if self._structured is not None:
+            self._structured.mask(logits, samplers)
         for seq, n in zip(batch.seqs, batch.num_tokens):
             seq.num_computed += n
         outputs = []
@@ -136,6 +155,8 @@ class LLMEngine:
             child = Sequence(parent.request_id, parent.token_ids, parent.params, index=i)
             child.num_prompt_tokens, child.num_computed, child.forked = parent.num_prompt_tokens, parent.num_computed, True
             child.status = Status.RUNNING
+            if parent.matcher is not None:         # the grammar state too, before the parent takes its token
+                child.matcher = parent.matcher.fork()
             self.blocks.fork(parent, child)        # share every block; copy-on-write later
             self.scheduler.running.append(child)
             self.requests[parent.request_id].append(child)
@@ -143,12 +164,23 @@ class LLMEngine:
         return children
 
     def _append(self, seq: Sequence, tokens: list[int]) -> StepOutput:
+        if seq.matcher is not None:
+            for t in tokens:
+                self.structured.accept(seq, t)
         seq.token_ids += tokens
         reason = None
         if not seq.params.ignore_eos and tokens[-1] in self.eos_ids:
             reason = "stop"
         elif len(seq.output_ids) >= seq.params.max_tokens:
             reason = "length"
+        elif seq.matcher is not None and self.config.jump_forward:
+            # Tokens the grammar forces are added now and run through the model together in the next step, as a
+            # chunk: the scheduler runs every token not yet in the KV cache and samples after the last of them.
+            forced = self.structured.forced_tokens(seq, seq.params.max_tokens - len(seq.output_ids))
+            seq.token_ids += forced
+            tokens = tokens + forced
+            if len(seq.output_ids) >= seq.params.max_tokens:
+                reason = "length"
         if reason:
             self.scheduler.finish(seq, reason)
         return StepOutput(seq, tokens, reason is not None)
@@ -184,26 +216,13 @@ class LLMEngine:
                           torch.tensor(logits_rows, dtype=torch.long, device=dev))
 
     def _sample(self, logits: torch.Tensor, seqs: list[Sequence]) -> list[list[int]]:
-        """One token per sequence, or n for a sequence about to fork. Greedy where temperature is 0; otherwise
-        temperature, then top-p, then a random draw."""
+        """One token per sequence, or n for a sequence about to fork (sampler.py)."""
         if not seqs:
             return []
+        t = time.perf_counter()
         draws = max(1 if s.forked else s.params.n for s in seqs)
-        temps = [s.params.temperature for s in seqs]
-        greedy = logits.argmax(-1, keepdim=True).expand(-1, draws)
-        if max(temps) == 0:
-            tokens = greedy.tolist()
-        else:
-            temp = torch.tensor(temps, device=logits.device)[:, None]
-            probs = torch.softmax(logits / temp.clamp(min=1e-5), dim=-1)
-            if min(s.params.top_p for s in seqs) < 1:                 # sorting the vocabulary is the slow part
-                top_p = torch.tensor([s.params.top_p for s in seqs], device=logits.device)[:, None]
-                sorted_p, order = probs.sort(dim=-1, descending=True)
-                sorted_p[(sorted_p.cumsum(-1) - sorted_p) > top_p] = 0   # keep the smallest set reaching top_p
-                drawn = order.gather(-1, torch.multinomial(sorted_p, draws, replacement=True, generator=self.generator))
-            else:
-                drawn = torch.multinomial(probs, draws, replacement=True, generator=self.generator)
-            tokens = torch.where(temp == 0, greedy, drawn).tolist()
+        tokens = sample(logits, seqs, self.generator, draws).tolist()
+        self.stats["sample_s"] += time.perf_counter() - t
         return [row[: 1 if s.forked else s.params.n] for s, row in zip(seqs, tokens)]
 
 

@@ -136,6 +136,9 @@ Start applying around week 26 to 28; interview prep (Part 10) runs alongside the
 | 4.5 | `other-compression.md` | Drafted 2026-11-08 as "Pruning and distillation". `pruning.py`: magnitude vs Wanda, unstructured vs 2:4 on SmolLM2 (Wanda 2:4 +512%, far worse than INT4). `gpu/sparse_matmul.py`: 2:4 slower than dense on an H100 at every size; 1.6-1.7x on an L4 only at small batches. Widget `sparsity-pattern` |
 | 5.1 | `mini-inference-engine.md` | Drafted 2026-11-10. `nano_engine/` (about 650 lines of core) matches Hugging Face token for token; on a Modal H100 with Llama 3.1 8B it reaches 4,997 output tok/s against vLLM's 8,189 (1.64x). Widget `paged-kv-allocator` |
 | 5.2 | `inside-vllm.md` | Drafted 2026-11-10 against vLLM 0.32.0 source. `gpu/inside_vllm.py` traces a request through `vllm serve` (first token 85.8 ms for a 2,022-token prompt, 31.1 ms with a prefix-cache hit; decode step 6.6 ms) and sweeps five settings on an H100 (8,332 tok/s at defaults; 172 preemptions at `gpu_memory_utilization=0.3`). The lab's contribution task is left to the reader, with a reading map as the reference. Widget `request-trace` |
+| 5.3 | `sglang-prefix-caching.md` | Drafted 2026-11-10 against SGLang 0.5.23 and vLLM 0.32.0 source. `prefix_cache_sim.py` implements a radix-tree cache and a hashed-block cache from scratch and replays three workloads through both (within 3 points of each other at every pool size; longest-prefix-first scheduling 93% against 21% for arrival order with a pool that holds one task). `gpu/prefix_cache_bench.py` runs 48 six-turn conversations on each engine on a Modal H100 (new `sglang` image): 98.3% of prompt tokens cached on SGLang and 97.9% on vLLM, median first token 25 and 35 ms against 243 and 199 ms without a cache, 85.9% and 85.1% with the pool cut to 16,384 tokens. Widget `radix-tree` |
+| 5.4 | `speculative-decoding.md` | Drafted 2026-11-11 against vLLM 0.32.0 source. `spec_decode_sim.py` checks the acceptance rule (sampled and greedy drafts) against direct sampling and replays a prompt-lookup proposer over real Llama 3.1 8B answers. `gpu/spec_decode_bench.py` serves the 8B model with prompt lookup (CPU and GPU), suffix decoding, the Red Hat EAGLE-3 head at k = 3 and 5, a 1B draft model and three synthetic-acceptance servers on a Modal H100 at 1 to 128 requests in flight (26 min, $1.68, plus two follow-ups of $0.60) and on an A10 with `--quick`: EAGLE-3 k = 3 is 2.03x at one request and 1.17x at 128 on chat, k = 5 falls to 0.92x at 128, suffix decoding 6.1x on code edits, the 1B draft model 0.66x on chat (its step costs 0.75 of a target pass on an H100), and a pass that verifies 3 draft tokens costs 1.21 plain passes at one request and 2.07 at 128. The dynamic draft-length schedule worked up to 32 requests and failed a request at 128. The vLLM image now installs Arctic Inference. Widget `speculation-simulator` |
+| 5.5 | `structured-output.md` | Drafted 2026-11-14 against vLLM 0.32.0 and xgrammar 0.2.8. `constrained_decoding.py` compiles a JSON schema into an 86-state character automaton and masks SmolLM2's 49,152 tokens by walking them (7 to 83 ms a step) and from a precomputed index (0.1 ms; built in 0.7 s); free decoding matched the schema 0 times in 12, constrained 12. nano_engine gained `sampler.py` (penalties, temperature, min-p, top-k, top-p, exponential-race draw) and `structured.py` (xgrammar, jump-forward); `structured_bench.py` on 48 orders: schema-valid 0 free, 29 constrained (19 looped to max_tokens), 45 with `maxItems`, 42 with jump-forward, which forced 38% of tokens. `gpu/sampling_bench.py` on a Modal H100 (11 min, $0.72): full-sort top-p 4.3 ms at batch 256 against 0.67 ms for vLLM's Triton kernel and 0.31 ms for FlashInfer; sampling settings within noise at the server; xgrammar no per-token cost up to 256 in flight, guidance +30% and outlines 9 times at 256. Widgets `sampling-filters` and `grammar-mask` |
 
 Part 2 runs its GPU labs on Modal through `public/labs/infra/gpu/modal_run.py`, which logs each run's cost to `modal_costs.jsonl` (gitignored). The handbook's planned cheap GPU was the L4, but Modal had no L4 capacity for over an hour on 2026-10-31, so Part 2 uses the A10 (24 GB GDDR6, 600 GB/s, 125 TFLOPS dense BF16, no FP8) as its low-end GPU. An L4 was available on 2026-11-01, and `gpu_probe.py` was run on it to check chapter 2.1's L4 figures. Part 2's GPU runs cost about $0.25 in total, plus about $0.10 for the 2026-11-01 re-runs (profiling, Nsight Systems, the L4 probe). Deck `infra-kernels` covers Part 2 (29 cards). Part 2 widgets: `warp-access`, `occupancy`, `matmul-tiling`, `warp-reduce`, `online-softmax`, `decode-timeline`.
 
@@ -327,7 +330,8 @@ Every lab script is a downloadable file in `public/labs/infra/` (served at `/lab
 
 ### 5.5 Structured output and sampling
 - Sampling kernels (top-k, top-p, min-p, penalties) and their cost; constrained decoding with grammars (xgrammar, Outlines) and its overhead.
-- **Lab [Mac]:** add JSON-schema-constrained decoding to `nano-engine` using a grammar library.
+- **Simulation:** "Sampling filters" on real next-token distributions, and "Grammar mask" stepping through a real constrained answer.
+- **Lab [Mac], [1 GPU]:** a constrained decoder from scratch (automaton, naive mask, index), xgrammar and jump-forward in `nano_engine`, then the sampling kernels and vLLM's structured-output backends measured on an H100. Reference included.
 
 ### 5.6 TensorRT-LLM and Triton Inference Server (short)
 - In-flight batching, engine builds, plugins; when teams pick it; how Triton Inference Server fits under NVIDIA Dynamo.
@@ -490,8 +494,10 @@ Existing widgets to reuse: `kv-cache-calculator`, `batching-simulator`.
 | Bit/format explorer, built as `bit-explorer` | 4.1 | 2 |
 | Paged KV allocator, built as `paged-kv-allocator` | 5.1 | 1 |
 | Request trace through vLLM (added), built as `request-trace` from a real trace | 5.2 | 1 |
-| Radix tree prefix cache | 5.3 | 2 |
-| Speculative decoding simulator | 5.4 | 2 |
+| Radix tree prefix cache, built as `radix-tree` | 5.3 | 2 |
+| Speculative decoding simulator, built as `speculation-simulator` | 5.4 | 2 |
+| Sampling filters on real distributions (added), built as `sampling-filters` | 5.5 | 2 |
+| Grammar mask, step by step (added), built as `grammar-mask` from a real run | 5.5 | 2 |
 | Ring all-reduce | 6.1 | 2 |
 | Parallelism planner | 6.2 | 1 |
 | Expert router, built for 1.3; EP traffic view still to do | 1.3, 6.3 | 2 |

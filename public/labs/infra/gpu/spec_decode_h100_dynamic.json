@@ -1,0 +1,266 @@
+{
+ "vllm": "0.32.0",
+ "target": "unsloth/Meta-Llama-3.1-8B-Instruct",
+ "gpu": "NVIDIA H100 80GB HBM3",
+ "configs": [
+  {
+   "config": "off",
+   "speculative_config": null,
+   "startup_s": 278.2,
+   "kv_pool_tokens": 451056,
+   "runs": [
+    {
+     "workload": "chat",
+     "concurrency": 1,
+     "requests": 6,
+     "seconds": 9.82,
+     "output_tokens": 1514,
+     "output_tok_s": 154.2,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 155.2,
+     "ttft_ms_p50": 17.1,
+     "spec": {}
+    },
+    {
+     "workload": "chat",
+     "concurrency": 8,
+     "requests": 16,
+     "seconds": 3.43,
+     "output_tokens": 4000,
+     "output_tok_s": 1166.4,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 252,
+     "request_decode_tok_s_p50": 151.5,
+     "ttft_ms_p50": 40.4,
+     "spec": {}
+    },
+    {
+     "workload": "chat",
+     "concurrency": 32,
+     "requests": 64,
+     "seconds": 3.77,
+     "output_tokens": 16230,
+     "output_tok_s": 4307.2,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 143.4,
+     "ttft_ms_p50": 96.8,
+     "spec": {}
+    },
+    {
+     "workload": "chat",
+     "concurrency": 128,
+     "requests": 256,
+     "seconds": 4.97,
+     "output_tokens": 64762,
+     "output_tok_s": 13030.0,
+     "prompt_tokens_p50": 64,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 113.9,
+     "ttft_ms_p50": 231.4,
+     "spec": {}
+    },
+    {
+     "workload": "code",
+     "concurrency": 1,
+     "requests": 6,
+     "seconds": 12.01,
+     "output_tokens": 1845,
+     "output_tok_s": 153.6,
+     "prompt_tokens_p50": 373,
+     "completion_tokens_p50": 306,
+     "request_decode_tok_s_p50": 154.6,
+     "ttft_ms_p50": 19.6,
+     "spec": {}
+    },
+    {
+     "workload": "code",
+     "concurrency": 8,
+     "requests": 16,
+     "seconds": 4.31,
+     "output_tokens": 4855,
+     "output_tok_s": 1125.2,
+     "prompt_tokens_p50": 366,
+     "completion_tokens_p50": 306,
+     "request_decode_tok_s_p50": 147.7,
+     "ttft_ms_p50": 44.9,
+     "spec": {}
+    },
+    {
+     "workload": "code",
+     "concurrency": 32,
+     "requests": 64,
+     "seconds": 5.07,
+     "output_tokens": 19359,
+     "output_tok_s": 3820.1,
+     "prompt_tokens_p50": 368,
+     "completion_tokens_p50": 304,
+     "request_decode_tok_s_p50": 130.5,
+     "ttft_ms_p50": 116.5,
+     "spec": {}
+    },
+    {
+     "workload": "code",
+     "concurrency": 128,
+     "requests": 256,
+     "seconds": 8.26,
+     "output_tokens": 77468,
+     "output_tok_s": 9383.4,
+     "prompt_tokens_p50": 367,
+     "completion_tokens_p50": 304,
+     "request_decode_tok_s_p50": 88.3,
+     "ttft_ms_p50": 624.2,
+     "spec": {}
+    },
+    {
+     "workload": "chat_t1",
+     "concurrency": 1,
+     "requests": 6,
+     "seconds": 11.4,
+     "output_tokens": 1458,
+     "output_tok_s": 127.9,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 154.0,
+     "ttft_ms_p50": 17.8,
+     "spec": {}
+    },
+    {
+     "workload": "chat_t1",
+     "concurrency": 32,
+     "requests": 64,
+     "seconds": 7.17,
+     "output_tokens": 16127,
+     "output_tok_s": 2248.9,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 139.3,
+     "ttft_ms_p50": 1780.4,
+     "spec": {}
+    }
+   ],
+   "server_log": [
+    "(EngineCore pid=98) INFO 11-11 05:40:17 [core.py:133] Initializing a V1 LLM engine (v0.32.0) with config: model='unsloth/Meta-Llama-3.1-8B-Instruct', speculative_config=None, tokenizer='unsloth/Meta-Llama-3.1-8B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_revi"
+   ]
+  },
+  {
+   "config": "eagle3 dynamic",
+   "speculative_config": {
+    "method": "eagle3",
+    "model": "RedHatAI/Llama-3.1-8B-Instruct-speculator.eagle3",
+    "num_speculative_tokens": 5,
+    "num_speculative_tokens_per_batch_size": [
+     [
+      1,
+      16,
+      5
+     ],
+     [
+      17,
+      64,
+      3
+     ],
+     [
+      65,
+      1024,
+      1
+     ]
+    ]
+   },
+   "error": "at concurrency 128 a request ended without a usage record (TypeError: 'NoneType' object is not subscriptable in the client); the runs before it are kept",
+   "runs": [
+    {
+     "workload": "chat",
+     "concurrency": 1,
+     "requests": 6,
+     "seconds": 4.89,
+     "output_tokens": 1519,
+     "output_tok_s": 310.4,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 318.1,
+     "ttft_ms_p50": 21.1,
+     "spec": {
+      "drafts": 571,
+      "draft_tokens": 2855,
+      "accepted_tokens": 956,
+      "mean_acceptance_length": 2.674,
+      "draft_acceptance_rate": 0.3349,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.7058,
+       0.4571,
+       0.2855,
+       0.1541,
+       0.0718
+      ]
+     },
+     "answers_identical_to_off": 2,
+     "answers_shared_prefix": [
+      0.271,
+      1.0,
+      1.0,
+      0.11,
+      0.262,
+      0.022
+     ]
+    },
+    {
+     "workload": "chat",
+     "concurrency": 8,
+     "requests": 16,
+     "seconds": 1.82,
+     "output_tokens": 4021,
+     "output_tok_s": 2204.0,
+     "prompt_tokens_p50": 62,
+     "completion_tokens_p50": 252,
+     "request_decode_tok_s_p50": 317.7,
+     "ttft_ms_p50": 45.2,
+     "spec": {
+      "drafts": 1480,
+      "draft_tokens": 7400,
+      "accepted_tokens": 2557,
+      "mean_acceptance_length": 2.728,
+      "draft_acceptance_rate": 0.3455,
+      "draft_tokens_per_draft": 5.0,
+      "accepted_through_position": [
+       0.6959,
+       0.4757,
+       0.2993,
+       0.1615,
+       0.0953
+      ]
+     }
+    },
+    {
+     "workload": "chat",
+     "concurrency": 32,
+     "requests": 64,
+     "seconds": 2.14,
+     "output_tokens": 16267,
+     "output_tok_s": 7594.8,
+     "prompt_tokens_p50": 63,
+     "completion_tokens_p50": 256,
+     "request_decode_tok_s_p50": 271.2,
+     "ttft_ms_p50": 76.5,
+     "spec": {
+      "drafts": 6736,
+      "draft_tokens": 20346,
+      "accepted_tokens": 9554,
+      "mean_acceptance_length": 2.418,
+      "draft_acceptance_rate": 0.4696,
+      "draft_tokens_per_draft": 3.02,
+      "accepted_through_position": [
+       0.6876,
+       0.4497,
+       0.2775,
+       0.0025,
+       0.001
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}

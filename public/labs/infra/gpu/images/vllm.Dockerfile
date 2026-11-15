@@ -11,4 +11,7 @@ RUN apt-get update \
 RUN python3 -m venv /opt/venv
 ENV PATH=/opt/venv/bin:$PATH
 RUN pip install --no-cache-dir vllm==0.32.0
+# Suffix decoding, one of vLLM's speculative decoding methods (chapter 5.4), is implemented in Snowflake's Arctic
+# Inference, which vLLM imports only when that method is chosen. The package has no dependencies of its own.
+RUN pip install --no-cache-dir arctic-inference==0.3.0
 WORKDIR /labs

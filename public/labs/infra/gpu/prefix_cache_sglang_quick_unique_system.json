@@ -1,0 +1,94 @@
+{
+ "engine": "sglang",
+ "version": "0.5.23",
+ "model": "unsloth/Llama-3.2-1B-Instruct",
+ "gpu": "NVIDIA A10",
+ "kv_bytes_per_token": 32768,
+ "unique_system": true,
+ "conversations": 16,
+ "turns": 4,
+ "configs": [
+  {
+   "config": "cache on",
+   "flags": [],
+   "startup_s": 119.1,
+   "pool_tokens": 410465,
+   "burst": {
+    "requests": 64,
+    "seconds": 0.61,
+    "prompt_tokens": 195200,
+    "cached_tokens": 189000,
+    "hit_rate": 0.9682,
+    "requests_with_no_hit": 1,
+    "ttft_ms_p50": 305.5,
+    "ttft_ms_max": 321.0,
+    "prefill_batches": [
+     {
+      "requests": 1,
+      "computed": 3050,
+      "cached": 0
+     },
+     {
+      "requests": 63,
+      "computed": 3150,
+      "cached": 189000
+     }
+    ]
+   },
+   "chat": {
+    "requests": 64,
+    "seconds": 16.6,
+    "prompt_tokens": 145598,
+    "cached_tokens": 110914,
+    "hit_rate": 0.7618,
+    "completion_tokens": 6231,
+    "ttft_ms_p50": 25.8,
+    "ttft_ms_p99": 348.6,
+    "preemptions": 0,
+    "by_turn": [
+     {
+      "turn": 1,
+      "prompt_tokens_p50": 2067,
+      "cached_tokens_p50": 27,
+      "hit_rate": 0.0131,
+      "ttft_ms_p50": 103.9,
+      "ttft_ms_p99": 348.6
+     },
+     {
+      "turn": 2,
+      "prompt_tokens_p50": 2216,
+      "cached_tokens_p50": 2175,
+      "hit_rate": 0.9807,
+      "ttft_ms_p50": 25.8,
+      "ttft_ms_p99": 35.6
+     },
+     {
+      "turn": 3,
+      "prompt_tokens_p50": 2363,
+      "cached_tokens_p50": 2320,
+      "hit_rate": 0.9819,
+      "ttft_ms_p50": 23.6,
+      "ttft_ms_p99": 26.5
+     },
+     {
+      "turn": 4,
+      "prompt_tokens_p50": 2520,
+      "cached_tokens_p50": 2477,
+      "hit_rate": 0.9828,
+      "ttft_ms_p50": 24.6,
+      "ttft_ms_p99": 30.7
+     }
+    ]
+   },
+   "server_log": [
+    "[2026-11-10 12:18:18] Attention backend not specified. Use flashinfer backend by default.",
+    "[2026-11-10 12:18:40] Memory baseline taken. mem usage=0.00 GB",
+    "[2026-11-10 12:18:51] Load weight end. elapsed=9.65 s, type=LlamaForCausalLM, avail mem=19.41 GB, mem usage=2.35 GB.",
+    "[2026-11-10 12:18:55] KV Cache is allocated. dtype: torch.bfloat16, #tokens: 410465, K size: 6.26 GB, V size: 6.26 GB",
+    "[2026-11-10 12:19:50] Capture target prefill CUDA graph end. elapsed=55.02 s, mem usage=0.47 GB, avail mem=5.83 GB.",
+    "[2026-11-10 12:19:51] Capture target decode CUDA graph end. bs=[1, 2, 4, 8, 12, 16, 24, 32, 40, 48], elapsed=1.26 s, mem usage=0.12 GB, avail mem=5.71 GB.",
+    "[2026-11-10 12:19:51] max_total_num_tokens=410465, chunked_prefill_size=4096, max_prefill_tokens=16384, max_running_requests=4096, context_len=8192, available_gpu_mem=5.71 GB"
+   ]
+  }
+ ]
+}

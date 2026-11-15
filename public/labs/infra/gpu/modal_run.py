@@ -7,6 +7,7 @@
 #   modal run modal_run.py --script decode_runtime.py --gpu 'H100!' --cpu 4   # reserve 4 CPU cores
 #   modal run modal_run.py --script decode_sweep.py --gpu 'H100!' --vllm   # the image with vLLM installed
 #   modal run modal_run.py --script quantize_and_eval.py --gpu L4 --quant  # vLLM plus llm-compressor
+#   modal run modal_run.py --script prefix_cache_bench.py --gpu 'H100!' --sglang   # the image with SGLang installed
 #
 # gcp_run.py runs the same scripts on a Google Cloud VM with the same options, and both build their containers
 # from the Dockerfiles in images/, so a run on either platform uses the same software.
@@ -41,15 +42,16 @@ HERE = Path(__file__).parent
 # Dollars per GPU-second from https://modal.com/pricing (October 2026). CPU and memory add a little on top.
 PRICE = {"T4": 0.000164, "L4": 0.000222, "A10": 0.000306, "A100-40GB": 0.000583, "A100-80GB": 0.000694,
          "L40S": 0.000542, "H100": 0.001097, "H200": 0.001261, "B200": 0.001736}
-TIMEOUT = {"run": 30 * 60, "run_with_toolkit": 30 * 60, "run_with_vllm": 60 * 60, "run_with_quant": 3 * 60 * 60}      # seconds, per function
+TIMEOUT = {"run": 30 * 60, "run_with_toolkit": 30 * 60, "run_with_vllm": 60 * 60, "run_with_quant": 3 * 60 * 60,
+           "run_with_sglang": 60 * 60}      # seconds, per function
 
 IGNORE = ["modal_costs.jsonl", "gcp_costs.jsonl", "credits.json", "runs", "images", "__pycache__"]
-# The four images, built from images/*.Dockerfile; each file says what it holds and why.
+# The five images, built from images/*.Dockerfile; each file says what it holds and why.
 # Each image also gets ../nano_engine, the engine chapter 5.1 builds, as /labs/nano_engine.
-image, toolkit, vllm_image, quant_image = (
+image, toolkit, vllm_image, quant_image, sglang_image = (
     modal.Image.from_dockerfile(HERE / "images" / f"{name}.Dockerfile").add_local_dir(HERE, "/labs", ignore=IGNORE)
     .add_local_dir(HERE.parent / "nano_engine", "/labs/nano_engine", ignore=["__pycache__"])
-    for name in ("base", "toolkit", "vllm", "quant")
+    for name in ("base", "toolkit", "vllm", "quant", "sglang")
 )
 app = modal.App("inference-handbook-labs")
 
@@ -91,16 +93,22 @@ def run_with_quant(script: str, args: list[str]) -> tuple[float, int, dict[str, 
     return _run(script, args)
 
 
+# SGLang gets the same resources as vLLM, so the two engines are compared on equal terms.
+@app.function(image=sglang_image, gpu="H100", cpu=4.0, memory=32 * 1024, timeout=TIMEOUT["run_with_sglang"])
+def run_with_sglang(script: str, args: list[str]) -> tuple[float, int, dict[str, bytes]]:
+    return _run(script, args)
+
+
 @app.local_entrypoint()
 def main(script: str, gpu: str = "A10", args: str = "", toolkit: bool = False, vllm: bool = False, quant: bool = False,
-         cpu: float = 0.0, allow_over_budget: bool = False) -> None:
+         sglang: bool = False, cpu: float = 0.0, allow_over_budget: bool = False) -> None:
     import sys
     sys.path.insert(0, str(HERE))
     import budget          # imported here so that only the local side needs it
 
-    name = "run_with_quant" if quant else "run_with_vllm" if vllm else "run_with_toolkit" if toolkit else "run"
+    name = "run_with_sglang" if sglang else "run_with_quant" if quant else "run_with_vllm" if vllm else "run_with_toolkit" if toolkit else "run"
     fn = {"run": run, "run_with_toolkit": run_with_toolkit, "run_with_vllm": run_with_vllm,
-          "run_with_quant": run_with_quant}[name]
+          "run_with_quant": run_with_quant, "run_with_sglang": run_with_sglang}[name]
     price = PRICE.get(gpu.split(":")[0].rstrip("!"))
     count = int(gpu.split(":")[1]) if ":" in gpu else 1
     worst = TIMEOUT[name] * price * count if price else 0.0

@@ -1,0 +1,1008 @@
+{
+ "vllm": "0.32.0",
+ "xgrammar": "0.2.8",
+ "flashinfer": "0.7.0.post1",
+ "model": "unsloth/Meta-Llama-3.1-8B-Instruct",
+ "gpu": "NVIDIA H100 80GB HBM3",
+ "cpus": 20,
+ "kernels": [
+  {
+   "batch": 1,
+   "us": {
+    "argmax (greedy)": 34.6,
+    "softmax + torch.multinomial": 123.1,
+    "softmax + exponential race": 73.9,
+    "Gumbel-max": 53.6,
+    "min-p 0.1 mask": 77.5,
+    "top-k 50 mask (torch.topk)": 95.8,
+    "top-p 0.9 mask (full sort)": 134.6,
+    "top-p 0.9 mask (vLLM Triton)": 176.6,
+    "top-k 50 + top-p 0.9 mask (vLLM Triton)": 201.2,
+    "top-p 0.9 sample (FlashInfer)": 66.3,
+    "top-k 50 + top-p 0.9 sample (FlashInfer)": 127.1,
+    "clone of the logits (for scale)": 12.7,
+    "grammar bitmask applied (xgrammar)": 40.2
+   }
+  },
+  {
+   "batch": 8,
+   "us": {
+    "argmax (greedy)": 34.8,
+    "softmax + torch.multinomial": 121.2,
+    "softmax + exponential race": 78.6,
+    "Gumbel-max": 52.1,
+    "min-p 0.1 mask": 81.1,
+    "top-k 50 mask (torch.topk)": 107.2,
+    "top-p 0.9 mask (full sort)": 394.0,
+    "top-p 0.9 mask (vLLM Triton)": 176.2,
+    "top-k 50 + top-p 0.9 mask (vLLM Triton)": 211.9,
+    "top-p 0.9 sample (FlashInfer)": 84.5,
+    "top-k 50 + top-p 0.9 sample (FlashInfer)": 143.7,
+    "clone of the logits (for scale)": 12.7,
+    "grammar bitmask applied (xgrammar)": 40.2
+   }
+  },
+  {
+   "batch": 64,
+   "us": {
+    "argmax (greedy)": 35.2,
+    "softmax + torch.multinomial": 223.4,
+    "softmax + exponential race": 159.8,
+    "Gumbel-max": 125.0,
+    "min-p 0.1 mask": 182.3,
+    "top-k 50 mask (torch.topk)": 252.2,
+    "top-p 0.9 mask (full sort)": 1262.5,
+    "top-p 0.9 mask (vLLM Triton)": 581.9,
+    "top-k 50 + top-p 0.9 mask (vLLM Triton)": 211.3,
+    "top-p 0.9 sample (FlashInfer)": 136.0,
+    "top-k 50 + top-p 0.9 sample (FlashInfer)": 249.0,
+    "clone of the logits (for scale)": 30.3,
+    "grammar bitmask applied (xgrammar)": 62.9
+   }
+  },
+  {
+   "batch": 256,
+   "us": {
+    "argmax (greedy)": 60.5,
+    "softmax + torch.multinomial": 559.9,
+    "softmax + exponential race": 431.3,
+    "Gumbel-max": 350.4,
+    "min-p 0.1 mask": 521.4,
+    "top-k 50 mask (torch.topk)": 778.6,
+    "top-p 0.9 mask (full sort)": 4293.2,
+    "top-p 0.9 mask (vLLM Triton)": 672.1,
+    "top-k 50 + top-p 0.9 mask (vLLM Triton)": 391.4,
+    "top-p 0.9 sample (FlashInfer)": 310.0,
+    "top-k 50 + top-p 0.9 sample (FlashInfer)": 585.2,
+    "clone of the logits (for scale)": 94.7,
+    "grammar bitmask applied (xgrammar)": 218.3
+   }
+  },
+  {
+   "batch": 512,
+   "us": {
+    "argmax (greedy)": 97.8,
+    "softmax + torch.multinomial": 1034.8,
+    "softmax + exponential race": 823.2,
+    "Gumbel-max": 655.9,
+    "min-p 0.1 mask": 1001.4,
+    "top-k 50 mask (torch.topk)": 1433.5,
+    "top-p 0.9 mask (full sort)": 8443.7,
+    "top-p 0.9 mask (vLLM Triton)": 1279.9,
+    "top-k 50 + top-p 0.9 mask (vLLM Triton)": 753.7,
+    "top-p 0.9 sample (FlashInfer)": 554.9,
+    "top-k 50 + top-p 0.9 sample (FlashInfer)": 1089.4,
+    "clone of the logits (for scale)": 180.8,
+    "grammar bitmask applied (xgrammar)": 415.3
+   }
+  }
+ ],
+ "sampling": {
+  "runs": [
+   {
+    "setting": "greedy",
+    "params": {
+     "temperature": 0
+    },
+    "concurrency": 1,
+    "requests": 4,
+    "errors": 0,
+    "seconds": 6.42,
+    "output_tokens": 1024,
+    "output_tok_s": 159.6,
+    "ttft_ms_p50": 13.8,
+    "ttft_ms_p99": 13.9,
+    "tpot_ms_p50": 6.24,
+    "first_error": null
+   },
+   {
+    "setting": "greedy",
+    "params": {
+     "temperature": 0
+    },
+    "concurrency": 64,
+    "requests": 128,
+    "errors": 0,
+    "seconds": 3.95,
+    "output_tokens": 32768,
+    "output_tok_s": 8287.1,
+    "ttft_ms_p50": 105.4,
+    "ttft_ms_p99": 129.4,
+    "tpot_ms_p50": 7.3,
+    "first_error": null
+   },
+   {
+    "setting": "greedy",
+    "params": {
+     "temperature": 0
+    },
+    "concurrency": 256,
+    "requests": 512,
+    "errors": 0,
+    "seconds": 8.03,
+    "output_tokens": 131072,
+    "output_tok_s": 16319.0,
+    "ttft_ms_p50": 439.4,
+    "ttft_ms_p99": 1091.9,
+    "tpot_ms_p50": 13.68,
+    "first_error": null
+   },
+   {
+    "setting": "T=1",
+    "params": {
+     "temperature": 1.0
+    },
+    "concurrency": 1,
+    "requests": 4,
+    "errors": 0,
+    "seconds": 6.43,
+    "output_tokens": 1024,
+    "output_tok_s": 159.2,
+    "ttft_ms_p50": 13.8,
+    "ttft_ms_p99": 24.0,
+    "tpot_ms_p50": 6.24,
+    "first_error": null
+   },
+   {
+    "setting": "T=1",
+    "params": {
+     "temperature": 1.0
+    },
+    "concurrency": 64,
+    "requests": 128,
+    "errors": 0,
+    "seconds": 3.93,
+    "output_tokens": 32768,
+    "output_tok_s": 8341.9,
+    "ttft_ms_p50": 100.0,
+    "ttft_ms_p99": 116.1,
+    "tpot_ms_p50": 7.27,
+    "first_error": null
+   },
+   {
+    "setting": "T=1",
+    "params": {
+     "temperature": 1.0
+    },
+    "concurrency": 256,
+    "requests": 512,
+    "errors": 0,
+    "seconds": 8.33,
+    "output_tokens": 131072,
+    "output_tok_s": 15732.2,
+    "ttft_ms_p50": 537.6,
+    "ttft_ms_p99": 1166.4,
+    "tpot_ms_p50": 14.16,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, top-p 0.9",
+    "params": {
+     "temperature": 1.0,
+     "top_p": 0.9
+    },
+    "concurrency": 1,
+    "requests": 4,
+    "errors": 0,
+    "seconds": 6.46,
+    "output_tokens": 1024,
+    "output_tok_s": 158.5,
+    "ttft_ms_p50": 13.3,
+    "ttft_ms_p99": 24.7,
+    "tpot_ms_p50": 6.27,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, top-p 0.9",
+    "params": {
+     "temperature": 1.0,
+     "top_p": 0.9
+    },
+    "concurrency": 64,
+    "requests": 128,
+    "errors": 0,
+    "seconds": 3.96,
+    "output_tokens": 32768,
+    "output_tok_s": 8281.6,
+    "ttft_ms_p50": 98.5,
+    "ttft_ms_p99": 114.8,
+    "tpot_ms_p50": 7.34,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, top-p 0.9",
+    "params": {
+     "temperature": 1.0,
+     "top_p": 0.9
+    },
+    "concurrency": 256,
+    "requests": 512,
+    "errors": 0,
+    "seconds": 8.68,
+    "output_tokens": 131072,
+    "output_tok_s": 15096.7,
+    "ttft_ms_p50": 601.1,
+    "ttft_ms_p99": 1207.5,
+    "tpot_ms_p50": 13.92,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, top-k 50",
+    "params": {
+     "temperature": 1.0,
+     "top_k": 50
+    },
+    "concurrency": 1,
+    "requests": 4,
+    "errors": 0,
+    "seconds": 6.46,
+    "output_tokens": 1024,
+    "output_tok_s": 158.4,
+    "ttft_ms_p50": 13.5,
+    "ttft_ms_p99": 24.8,
+    "tpot_ms_p50": 6.27,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, top-k 50",
+    "params": {
+     "temperature": 1.0,
+     "top_k": 50
+    },
+    "concurrency": 64,
+    "requests": 128,
+    "errors": 0,
+    "seconds": 3.95,
+    "output_tokens": 32768,
+    "output_tok_s": 8303.6,
+    "ttft_ms_p50": 90.7,
+    "ttft_ms_p99": 110.5,
+    "tpot_ms_p50": 7.34,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, top-k 50",
+    "params": {
+     "temperature": 1.0,
+     "top_k": 50
+    },
+    "concurrency": 256,
+    "requests": 512,
+    "errors": 0,
+    "seconds": 8.03,
+    "output_tokens": 131072,
+    "output_tok_s": 16313.5,
+    "ttft_ms_p50": 528.9,
+    "ttft_ms_p99": 1093.6,
+    "tpot_ms_p50": 13.51,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, top-k 50, top-p 0.9",
+    "params": {
+     "temperature": 1.0,
+     "top_k": 50,
+     "top_p": 0.9
+    },
+    "concurrency": 1,
+    "requests": 4,
+    "errors": 0,
+    "seconds": 6.52,
+    "output_tokens": 1024,
+    "output_tok_s": 157.0,
+    "ttft_ms_p50": 14.3,
+    "ttft_ms_p99": 22.9,
+    "tpot_ms_p50": 6.33,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, top-k 50, top-p 0.9",
+    "params": {
+     "temperature": 1.0,
+     "top_k": 50,
+     "top_p": 0.9
+    },
+    "concurrency": 64,
+    "requests": 128,
+    "errors": 0,
+    "seconds": 4.0,
+    "output_tokens": 32768,
+    "output_tok_s": 8197.2,
+    "ttft_ms_p50": 89.3,
+    "ttft_ms_p99": 115.2,
+    "tpot_ms_p50": 7.44,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, top-k 50, top-p 0.9",
+    "params": {
+     "temperature": 1.0,
+     "top_k": 50,
+     "top_p": 0.9
+    },
+    "concurrency": 256,
+    "requests": 512,
+    "errors": 0,
+    "seconds": 8.32,
+    "output_tokens": 131072,
+    "output_tok_s": 15755.3,
+    "ttft_ms_p50": 673.2,
+    "ttft_ms_p99": 1198.5,
+    "tpot_ms_p50": 13.63,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, min-p 0.1",
+    "params": {
+     "temperature": 1.0,
+     "min_p": 0.1
+    },
+    "concurrency": 1,
+    "requests": 4,
+    "errors": 0,
+    "seconds": 6.77,
+    "output_tokens": 1024,
+    "output_tok_s": 151.4,
+    "ttft_ms_p50": 13.6,
+    "ttft_ms_p99": 280.7,
+    "tpot_ms_p50": 6.32,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, min-p 0.1",
+    "params": {
+     "temperature": 1.0,
+     "min_p": 0.1
+    },
+    "concurrency": 64,
+    "requests": 128,
+    "errors": 0,
+    "seconds": 4.01,
+    "output_tokens": 32768,
+    "output_tok_s": 8174.7,
+    "ttft_ms_p50": 97.0,
+    "ttft_ms_p99": 114.6,
+    "tpot_ms_p50": 7.43,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, min-p 0.1",
+    "params": {
+     "temperature": 1.0,
+     "min_p": 0.1
+    },
+    "concurrency": 256,
+    "requests": 512,
+    "errors": 0,
+    "seconds": 8.58,
+    "output_tokens": 131072,
+    "output_tok_s": 15275.6,
+    "ttft_ms_p50": 621.2,
+    "ttft_ms_p99": 1256.5,
+    "tpot_ms_p50": 14.1,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, top-p 0.9, seeded",
+    "params": {
+     "temperature": 1.0,
+     "top_p": 0.9,
+     "seed": 1
+    },
+    "concurrency": 1,
+    "requests": 4,
+    "errors": 0,
+    "seconds": 8.04,
+    "output_tokens": 1024,
+    "output_tok_s": 127.3,
+    "ttft_ms_p50": 13.0,
+    "ttft_ms_p99": 1599.9,
+    "tpot_ms_p50": 6.28,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, top-p 0.9, seeded",
+    "params": {
+     "temperature": 1.0,
+     "top_p": 0.9,
+     "seed": 1
+    },
+    "concurrency": 64,
+    "requests": 128,
+    "errors": 0,
+    "seconds": 8.81,
+    "output_tokens": 32768,
+    "output_tok_s": 3721.4,
+    "ttft_ms_p50": 1672.4,
+    "ttft_ms_p99": 3236.3,
+    "tpot_ms_p50": 7.65,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, top-p 0.9, seeded",
+    "params": {
+     "temperature": 1.0,
+     "top_p": 0.9,
+     "seed": 1
+    },
+    "concurrency": 256,
+    "requests": 512,
+    "errors": 0,
+    "seconds": 10.54,
+    "output_tokens": 131072,
+    "output_tok_s": 12435.1,
+    "ttft_ms_p50": 1221.4,
+    "ttft_ms_p99": 3065.6,
+    "tpot_ms_p50": 13.79,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, penalties",
+    "params": {
+     "temperature": 1.0,
+     "repetition_penalty": 1.1,
+     "frequency_penalty": 0.5,
+     "presence_penalty": 0.5
+    },
+    "concurrency": 1,
+    "requests": 4,
+    "errors": 0,
+    "seconds": 6.44,
+    "output_tokens": 1024,
+    "output_tok_s": 159.1,
+    "ttft_ms_p50": 13.0,
+    "ttft_ms_p99": 20.4,
+    "tpot_ms_p50": 6.25,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, penalties",
+    "params": {
+     "temperature": 1.0,
+     "repetition_penalty": 1.1,
+     "frequency_penalty": 0.5,
+     "presence_penalty": 0.5
+    },
+    "concurrency": 64,
+    "requests": 128,
+    "errors": 0,
+    "seconds": 3.95,
+    "output_tokens": 32768,
+    "output_tok_s": 8304.3,
+    "ttft_ms_p50": 96.4,
+    "ttft_ms_p99": 106.3,
+    "tpot_ms_p50": 7.33,
+    "first_error": null
+   },
+   {
+    "setting": "T=1, penalties",
+    "params": {
+     "temperature": 1.0,
+     "repetition_penalty": 1.1,
+     "frequency_penalty": 0.5,
+     "presence_penalty": 0.5
+    },
+    "concurrency": 256,
+    "requests": 512,
+    "errors": 0,
+    "seconds": 7.52,
+    "output_tokens": 131072,
+    "output_tok_s": 17430.3,
+    "ttft_ms_p50": 464.2,
+    "ttft_ms_p99": 996.1,
+    "tpot_ms_p50": 12.83,
+    "first_error": null
+   }
+  ],
+  "startup_s": 112.1,
+  "server_log": [
+   "(EngineCore pid=227) INFO 11-14 17:53:03 [core.py:133] Initializing a V1 LLM engine (v0.32.0) with config: model='unsloth/Meta-Llama-3.1-8B-Instruct', speculative_config=None, tokenizer='unsloth/Meta-Llama-3.1-8B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_revision=main, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=4096, download_dir=None, load",
+   "(EngineCore pid=227) WARNING 11-14 17:53:05 [flashinfer.py:143] FlashInfer's precompiled kernels are missing or do not match flashinfer-python 0.7.0.post1 (flashinfer-cubin not installed, flashinfer-jit-cache not installed). FlashInfer then downloads and compiles kernels at startup, which can take several minutes, or fails to import mismatched ones. Run `vllm download-kernels` in this Python envir",
+   "(EngineCore pid=227) INFO 11-14 17:53:07 [cuda.py:506] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+   "(EngineCore pid=227) INFO 11-14 17:53:38 [topk_topp_sampler.py:124] Using FlashInfer for top-p & top-k sampling.",
+   "(EngineCore pid=227) INFO 11-14 17:54:04 [kernel_warmup.py:460] Using FlashInfer autotune cache file: /root/.cache/vllm/flashinfer_autotune_cache/0.7.0.post1/90a/67d15ef692018d2e68906eb7afd11f3bbf4e52ae06795781e09529adcdf7ff02/autotune_configs_dp0_rank0.json",
+   "2026-11-14 17:54:04,397 - INFO - autotuner.py:1046 - flashinfer.jit: [Autotuner]: Autotuning process starts ...",
+   "(EngineCore pid=227) INFO 11-14 17:54:04 [kernel_warmup.py:367] Running FlashInfer autotune with 8192 tokens and token buckets (1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 768, 1024, 1280, 1536, 1792, 2048, 2560, 3072, 3584, 4096, 8192).",
+   "2026-11-14 17:54:04,428 - INFO - autotuner.py:1069 - flashinfer.jit: [Autotuner]: Autotuning process ends",
+   "(EngineCore pid=227) WARNING 11-14 17:55:52 [jit_monitor.py:140] Triton kernel JIT compilation during inference: _gumbel_sample_kernel. This causes a latency spike; consider extending warmup to cover this shape/config."
+  ]
+ },
+ "structured": {
+  "backends": [
+   {
+    "backend": "xgrammar",
+    "runs": [
+     {
+      "backend": "xgrammar",
+      "mode": "none",
+      "concurrency": 1,
+      "requests": 8,
+      "errors": 0,
+      "seconds": 4.36,
+      "output_tokens": 692,
+      "output_tok_s": 158.8,
+      "ttft_ms_p50": 15.5,
+      "ttft_ms_p99": 16.1,
+      "tpot_ms_p50": 6.2,
+      "first_error": null,
+      "parses": 8,
+      "schema": 8,
+      "fields_right_pct": 100.0,
+      "example": "{\n  \"customer\": \"Priya Moreau\",\n  \"email\": \"priya.moreau@example.com\",\n  \"items\": [\n    {\n      \"product\": \"markers\",\n      \"quantity\": 6,\n      \"unit_price\": 3.07\n    }\n  ],\n  \"express\": true\n}"
+     },
+     {
+      "backend": "xgrammar",
+      "mode": "none",
+      "concurrency": 64,
+      "requests": 128,
+      "errors": 0,
+      "seconds": 1.78,
+      "output_tokens": 11174,
+      "output_tok_s": 6266.7,
+      "ttft_ms_p50": 112.8,
+      "ttft_ms_p99": 166.1,
+      "tpot_ms_p50": 7.39,
+      "first_error": null,
+      "parses": 128,
+      "schema": 128,
+      "fields_right_pct": 100.0,
+      "example": "{\n  \"customer\": \"Ingrid Silva\",\n  \"email\": \"ingrid.silva@example.com\",\n  \"items\": [\n    {\"product\": \"pen\", \"quantity\": 1, \"unit_price\": 39.42},\n    {\"product\": \"tape\", \"quantity\": 3, \"unit_price\": 36.27}\n  ],\n  \"express\": false\n}"
+     },
+     {
+      "backend": "xgrammar",
+      "mode": "none",
+      "concurrency": 256,
+      "requests": 256,
+      "errors": 0,
+      "seconds": 1.94,
+      "output_tokens": 22231,
+      "output_tok_s": 11442.1,
+      "ttft_ms_p50": 659.3,
+      "ttft_ms_p99": 736.0,
+      "tpot_ms_p50": 14.07,
+      "first_error": null,
+      "parses": 256,
+      "schema": 256,
+      "fields_right_pct": 100.0,
+      "example": "{\n  \"customer\": \"Dana Whitfield\",\n  \"email\": \"dana.whitfield@example.com\",\n  \"items\": [\n    {\"product\": \"folders\", \"quantity\": 6, \"unit_price\": 13.62},\n    {\"product\": \"tapes\", \"quantity\": 2, \"unit_price\": 23.09}\n  ],\n  \"express\": true\n}"
+     },
+     {
+      "backend": "xgrammar",
+      "mode": "json_object",
+      "concurrency": 1,
+      "requests": 8,
+      "errors": 0,
+      "seconds": 4.44,
+      "output_tokens": 701,
+      "output_tok_s": 158.0,
+      "ttft_ms_p50": 15.5,
+      "ttft_ms_p99": 18.6,
+      "tpot_ms_p50": 6.22,
+      "first_error": null,
+      "parses": 8,
+      "schema": 8,
+      "fields_right_pct": 100.0,
+      "example": "{\n  \"customer\": \"Amara Silva\",\n  \"email\": \"amara.silva@example.com\",\n  \"items\": [\n    {\n      \"product\": \"rulers\",\n      \"quantity\": 3,\n      \"unit_price\": 7.71\n    }\n  ],\n  \"express\": false\n}"
+     },
+     {
+      "backend": "xgrammar",
+      "mode": "json_object",
+      "concurrency": 64,
+      "requests": 128,
+      "errors": 0,
+      "seconds": 1.74,
+      "output_tokens": 11104,
+      "output_tok_s": 6364.6,
+      "ttft_ms_p50": 98.0,
+      "ttft_ms_p99": 150.3,
+      "tpot_ms_p50": 7.58,
+      "first_error": null,
+      "parses": 128,
+      "schema": 128,
+      "fields_right_pct": 100.0,
+      "example": "{\n  \"customer\": \"Sofia Moreau\",\n  \"email\": \"sofia.moreau@example.com\",\n  \"items\": [\n    {\"product\": \"folders\", \"quantity\": 7, \"unit_price\": 16.14},\n    {\"product\": \"desk lamps\", \"quantity\": 9, \"unit_price\": 3.20}\n  ],\n  \"express\": true\n}"
+     },
+     {
+      "backend": "xgrammar",
+      "mode": "json_object",
+      "concurrency": 256,
+      "requests": 256,
+      "errors": 0,
+      "seconds": 1.71,
+      "output_tokens": 22223,
+      "output_tok_s": 12999.6,
+      "ttft_ms_p50": 380.6,
+      "ttft_ms_p99": 472.5,
+      "tpot_ms_p50": 13.73,
+      "first_error": null,
+      "parses": 256,
+      "schema": 256,
+      "fields_right_pct": 100.0,
+      "example": "{\n  \"customer\": \"Lukas Silva\",\n  \"email\": \"lukas.silva@example.com\",\n  \"items\": [\n    {\"product\": \"markers\", \"quantity\": 3, \"unit_price\": 15.78},\n    {\"product\": \"mouse pads\", \"quantity\": 9, \"unit_price\": 31.34}\n  ],\n  \"express\": true\n}"
+     },
+     {
+      "backend": "xgrammar",
+      "mode": "schema",
+      "concurrency": 1,
+      "requests": 8,
+      "errors": 0,
+      "seconds": 4.04,
+      "output_tokens": 636,
+      "output_tok_s": 157.5,
+      "ttft_ms_p50": 15.5,
+      "ttft_ms_p99": 20.1,
+      "tpot_ms_p50": 6.23,
+      "first_error": null,
+      "parses": 8,
+      "schema": 8,
+      "fields_right_pct": 100.0,
+      "example": "{\n  \"customer\": \"Dana Whitfield\",\n  \"email\": \"dana.whitfield@example.com\",\n  \"items\": [\n    {\"product\": \"calculator\", \"quantity\": 1, \"unit_price\": 33.69},\n    {\"product\": \"folders\", \"quantity\": 9, \"unit_price\": 37.09},\n    {\"product\": \"notebooks\", \"quantity\": 5, \"unit_price\": 30.96}\n  ],\n  \"express\""
+     },
+     {
+      "backend": "xgrammar",
+      "mode": "schema",
+      "concurrency": 64,
+      "requests": 128,
+      "errors": 0,
+      "seconds": 1.78,
+      "output_tokens": 11112,
+      "output_tok_s": 6249.3,
+      "ttft_ms_p50": 104.3,
+      "ttft_ms_p99": 152.0,
+      "tpot_ms_p50": 7.5,
+      "first_error": null,
+      "parses": 128,
+      "schema": 128,
+      "fields_right_pct": 100.0,
+      "example": "{\n  \"customer\": \"Ravi Silva\",\n  \"email\": \"ravi.silva@example.com\",\n  \"items\": [\n    {\"product\": \"folders\", \"quantity\": 3, \"unit_price\": 23.40},\n    {\"product\": \"rulers\", \"quantity\": 8, \"unit_price\": 30.54},\n    {\"product\": \"tapes\", \"quantity\": 7, \"unit_price\": 28.05}\n  ],\n  \"express\": false\n}"
+     },
+     {
+      "backend": "xgrammar",
+      "mode": "schema",
+      "concurrency": 256,
+      "requests": 256,
+      "errors": 0,
+      "seconds": 1.61,
+      "output_tokens": 21978,
+      "output_tok_s": 13614.1,
+      "ttft_ms_p50": 398.2,
+      "ttft_ms_p99": 477.8,
+      "tpot_ms_p50": 13.38,
+      "first_error": null,
+      "parses": 256,
+      "schema": 256,
+      "fields_right_pct": 100.0,
+      "example": "{\n  \"customer\": \"Mateo Tanaka\",\n  \"email\": \"mateo.tanaka@example.com\",\n  \"items\": [\n    {\"product\": \"mouse pads\", \"quantity\": 9, \"unit_price\": 21.99},\n    {\"product\": \"folders\", \"quantity\": 4, \"unit_price\": 31.91}\n  ],\n  \"express\": false\n}"
+     },
+     {
+      "backend": "xgrammar",
+      "mode": "schema, new per request",
+      "concurrency": 1,
+      "requests": 8,
+      "errors": 0,
+      "seconds": 4.19,
+      "output_tokens": 658,
+      "output_tok_s": 157.2,
+      "ttft_ms_p50": 18.3,
+      "ttft_ms_p99": 19.0,
+      "tpot_ms_p50": 6.22,
+      "first_error": null,
+      "parses": 8,
+      "schema": 8,
+      "fields_right_pct": 100.0,
+      "example": "{\n  \"customer\": \"Sofia Holm\",\n  \"email\": \"sofia.holm@example.com\",\n  \"items\": [\n    {\n      \"product\": \"pens\",\n      \"quantity\": 6,\n      \"unit_price\": 28.94\n    }\n  ],\n  \"express\": false\n}"
+     },
+     {
+      "backend": "xgrammar",
+      "mode": "schema, new per request",
+      "concurrency": 64,
+      "requests": 128,
+      "errors": 0,
+      "seconds": 1.78,
+      "output_tokens": 10891,
+      "output_tok_s": 6104.3,
+      "ttft_ms_p50": 115.9,
+      "ttft_ms_p99": 159.8,
+      "tpot_ms_p50": 7.5,
+      "first_error": null,
+      "parses": 128,
+      "schema": 128,
+      "fields_right_pct": 100.0,
+      "example": "{\n  \"customer\": \"Dana Tanaka\",\n  \"email\": \"dana.tanaka@example.com\",\n  \"items\": [\n    {\n      \"product\": \"rulers\",\n      \"quantity\": 2,\n      \"unit_price\": 37.82\n    }\n  ],\n  \"express\": false\n}"
+     },
+     {
+      "backend": "xgrammar",
+      "mode": "schema, new per request",
+      "concurrency": 256,
+      "requests": 256,
+      "errors": 0,
+      "seconds": 1.72,
+      "output_tokens": 22254,
+      "output_tok_s": 12974.8,
+      "ttft_ms_p50": 503.0,
+      "ttft_ms_p99": 628.9,
+      "tpot_ms_p50": 13.06,
+      "first_error": null,
+      "parses": 256,
+      "schema": 256,
+      "fields_right_pct": 100.0,
+      "example": "{\n  \"customer\": \"Ravi Iyer\",\n  \"email\": \"ravi.iyer@example.com\",\n  \"items\": [\n    {\"product\": \"notebooks\", \"quantity\": 2, \"unit_price\": 14.11},\n    {\"product\": \"calculators\", \"quantity\": 7, \"unit_price\": 5.76},\n    {\"product\": \"mouse pads\", \"quantity\": 9, \"unit_price\": 15.54}\n  ],\n  \"express\": false"
+     }
+    ],
+    "startup_s": 54.0,
+    "cold_schema": {
+     "first_ttft_ms": 637.5,
+     "repeat_ttft_ms": 18.1
+    },
+    "server_log": [
+     "(APIServer pid=482) INFO 11-14 17:57:13 [api_utils.py:286] non-default args: {'model_tag': 'unsloth/Meta-Llama-3.1-8B-Instruct', 'model': 'unsloth/Meta-Llama-3.1-8B-Instruct', 'max_model_len': 4096, 'generation_config': 'vllm', 'structured_outputs_config': StructuredOutputsConfig(backend='xgrammar', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_p",
+     "(EngineCore pid=506) INFO 11-14 17:57:24 [core.py:133] Initializing a V1 LLM engine (v0.32.0) with config: model='unsloth/Meta-Llama-3.1-8B-Instruct', speculative_config=None, tokenizer='unsloth/Meta-Llama-3.1-8B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_revision=main, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=4096, download_dir=None, load"
+    ]
+   },
+   {
+    "backend": "guidance",
+    "runs": [
+     {
+      "backend": "guidance",
+      "mode": "schema",
+      "concurrency": 1,
+      "requests": 8,
+      "errors": 0,
+      "seconds": 4.4,
+      "output_tokens": 692,
+      "output_tok_s": 157.3,
+      "ttft_ms_p50": 17.7,
+      "ttft_ms_p99": 18.6,
+      "tpot_ms_p50": 6.23,
+      "first_error": null,
+      "parses": 8,
+      "schema": 8,
+      "fields_right_pct": 100.0,
+      "example": "{\n  \"customer\": \"Priya Moreau\",\n  \"email\": \"priya.moreau@example.com\",\n  \"items\": [\n    {\n      \"product\": \"markers\",\n      \"quantity\": 6,\n      \"unit_price\": 3.07\n    }\n  ],\n  \"express\": true\n}"
+     },
+     {
+      "backend": "guidance",
+      "mode": "schema",
+      "concurrency": 64,
+      "requests": 128,
+      "errors": 0,
+      "seconds": 1.93,
+      "output_tokens": 11174,
+      "output_tok_s": 5787.7,
+      "ttft_ms_p50": 121.7,
+      "ttft_ms_p99": 227.5,
+      "tpot_ms_p50": 7.92,
+      "first_error": null,
+      "parses": 128,
+      "schema": 128,
+      "fields_right_pct": 100.0,
+      "example": "{\n  \"customer\": \"Ingrid Silva\",\n  \"email\": \"ingrid.silva@example.com\",\n  \"items\": [\n    {\"product\": \"pen\", \"quantity\": 1, \"unit_price\": 39.42},\n    {\"product\": \"tape\", \"quantity\": 3, \"unit_price\": 36.27}\n  ],\n  \"express\": false\n}"
+     },
+     {
+      "backend": "guidance",
+      "mode": "schema",
+      "concurrency": 256,
+      "requests": 256,
+      "errors": 0,
+      "seconds": 2.19,
+      "output_tokens": 22231,
+      "output_tok_s": 10167.3,
+      "ttft_ms_p50": 461.9,
+      "ttft_ms_p99": 556.8,
+      "tpot_ms_p50": 17.71,
+      "first_error": null,
+      "parses": 256,
+      "schema": 256,
+      "fields_right_pct": 100.0,
+      "example": "{\n  \"customer\": \"Dana Whitfield\",\n  \"email\": \"dana.whitfield@example.com\",\n  \"items\": [\n    {\"product\": \"folders\", \"quantity\": 6, \"unit_price\": 13.62},\n    {\"product\": \"tapes\", \"quantity\": 2, \"unit_price\": 23.09}\n  ],\n  \"express\": true\n}"
+     },
+     {
+      "backend": "guidance",
+      "mode": "schema, new per request",
+      "concurrency": 1,
+      "requests": 8,
+      "errors": 0,
+      "seconds": 4.46,
+      "output_tokens": 701,
+      "output_tok_s": 157.3,
+      "ttft_ms_p50": 17.9,
+      "ttft_ms_p99": 18.8,
+      "tpot_ms_p50": 6.22,
+      "first_error": null,
+      "parses": 8,
+      "schema": 8,
+      "fields_right_pct": 100.0,
+      "example": "{\n  \"customer\": \"Amara Silva\",\n  \"email\": \"amara.silva@example.com\",\n  \"items\": [\n    {\n      \"product\": \"rulers\",\n      \"quantity\": 3,\n      \"unit_price\": 7.71\n    }\n  ],\n  \"express\": false\n}"
+     },
+     {
+      "backend": "guidance",
+      "mode": "schema, new per request",
+      "concurrency": 64,
+      "requests": 64,
+      "errors": 0,
+      "seconds": 0.93,
+      "output_tokens": 5467,
+      "output_tok_s": 5885.5,
+      "ttft_ms_p50": 160.5,
+      "ttft_ms_p99": 168.4,
+      "tpot_ms_p50": 7.19,
+      "first_error": null,
+      "parses": 64,
+      "schema": 64,
+      "fields_right_pct": 100.0,
+      "example": "{\n  \"customer\": \"Sofia Moreau\",\n  \"email\": \"sofia.moreau@example.com\",\n  \"items\": [\n    {\"product\": \"folders\", \"quantity\": 7, \"unit_price\": 16.14},\n    {\"product\": \"desk lamps\", \"quantity\": 9, \"unit_price\": 3.20}\n  ],\n  \"express\": true\n}"
+     },
+     {
+      "backend": "guidance",
+      "mode": "schema, new per request",
+      "concurrency": 256,
+      "requests": 64,
+      "errors": 0,
+      "seconds": 0.93,
+      "output_tokens": 5637,
+      "output_tok_s": 6080.1,
+      "ttft_ms_p50": 162.3,
+      "ttft_ms_p99": 165.6,
+      "tpot_ms_p50": 7.17,
+      "first_error": null,
+      "parses": 64,
+      "schema": 64,
+      "fields_right_pct": 100.0,
+      "example": "{\n  \"customer\": \"Lukas Silva\",\n  \"email\": \"lukas.silva@example.com\",\n  \"items\": [\n    {\"product\": \"mouse pads\", \"quantity\": 5, \"unit_price\": 18.57},\n    {\"product\": \"stapler\", \"quantity\": 1, \"unit_price\": 14.04},\n    {\"product\": \"rulers\", \"quantity\": 8, \"unit_price\": 27.35}\n  ],\n  \"express\": false\n}"
+     }
+    ],
+    "startup_s": 54.0,
+    "cold_schema": {
+     "first_ttft_ms": 3029.6,
+     "repeat_ttft_ms": 20.3
+    },
+    "server_log": [
+     "(APIServer pid=3820) INFO 11-14 17:58:45 [api_utils.py:286] non-default args: {'model_tag': 'unsloth/Meta-Llama-3.1-8B-Instruct', 'model': 'unsloth/Meta-Llama-3.1-8B-Instruct', 'max_model_len': 4096, 'generation_config': 'vllm', 'structured_outputs_config': StructuredOutputsConfig(backend='guidance', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_",
+     "(EngineCore pid=3843) INFO 11-14 17:58:57 [core.py:133] Initializing a V1 LLM engine (v0.32.0) with config: model='unsloth/Meta-Llama-3.1-8B-Instruct', speculative_config=None, tokenizer='unsloth/Meta-Llama-3.1-8B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_revision=main, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=4096, download_dir=None, loa"
+    ]
+   },
+   {
+    "backend": "outlines",
+    "runs": [
+     {
+      "backend": "outlines",
+      "mode": "schema",
+      "concurrency": 1,
+      "requests": 8,
+      "errors": 0,
+      "seconds": 4.03,
+      "output_tokens": 632,
+      "output_tok_s": 156.8,
+      "ttft_ms_p50": 17.9,
+      "ttft_ms_p99": 18.8,
+      "tpot_ms_p50": 6.23,
+      "first_error": null,
+      "parses": 8,
+      "schema": 8,
+      "fields_right_pct": 93.8,
+      "example": "{\"customer\": \"Priya Moreau\", \"email\": \"priya.moreau@example.com\", \"items\": [{\"product\": \"markers\", \"quantity\": 6, \"unit_price\": 3.07}, {\"product\": \"express shipping\", \"quantity\": 1, \"unit_price\": 0}], \"express\": true}"
+     },
+     {
+      "backend": "outlines",
+      "mode": "schema",
+      "concurrency": 64,
+      "requests": 128,
+      "errors": 0,
+      "seconds": 5.87,
+      "output_tokens": 10192,
+      "output_tok_s": 1736.7,
+      "ttft_ms_p50": 139.9,
+      "ttft_ms_p99": 222.8,
+      "tpot_ms_p50": 36.05,
+      "first_error": null,
+      "parses": 128,
+      "schema": 128,
+      "fields_right_pct": 93.9,
+      "example": "{\"customer\": \"Ingrid Silva\", \"email\": \"ingrid.silva@example.com\", \"items\": [{\"product\": \"pen\", \"quantity\": 1, \"unit_price\": 39.42}, {\"product\": \"tape\", \"quantity\": 3, \"unit_price\": 36.27}], \"express\": false}"
+     },
+     {
+      "backend": "outlines",
+      "mode": "schema",
+      "concurrency": 256,
+      "requests": 256,
+      "errors": 0,
+      "seconds": 10.4,
+      "output_tokens": 20172,
+      "output_tok_s": 1940.3,
+      "ttft_ms_p50": 705.1,
+      "ttft_ms_p99": 1035.2,
+      "tpot_ms_p50": 128.86,
+      "first_error": null,
+      "parses": 256,
+      "schema": 256,
+      "fields_right_pct": 94.5,
+      "example": "{\"customer\": \"Dana Whitfield\", \"email\": \"dana.whitfield@example.com\", \"items\": [{\"product\": \"folders\", \"quantity\": 6, \"unit_price\": 13.62}, {\"product\": \"tapes\", \"quantity\": 2, \"unit_price\": 23.09}], \"express\": true}"
+     },
+     {
+      "backend": "outlines",
+      "mode": "schema, new per request",
+      "concurrency": 1,
+      "requests": 8,
+      "errors": 0,
+      "seconds": 3.99,
+      "output_tokens": 625,
+      "output_tok_s": 156.7,
+      "ttft_ms_p50": 18.0,
+      "ttft_ms_p99": 19.0,
+      "tpot_ms_p50": 6.24,
+      "first_error": null,
+      "parses": 8,
+      "schema": 8,
+      "fields_right_pct": 96.9,
+      "example": "{\"customer\": \"Amara Silva\", \"email\": \"amara.silva@example.com\", \"items\": [{\"product\": \"rulers\", \"quantity\": 3, \"unit_price\": 7.71}, {\"product\": \"shipping\", \"quantity\": 1, \"unit_price\": 0}], \"express\": false}"
+     },
+     {
+      "backend": "outlines",
+      "mode": "schema, new per request",
+      "concurrency": 64,
+      "requests": 64,
+      "errors": 0,
+      "seconds": 3.01,
+      "output_tokens": 5012,
+      "output_tok_s": 1664.0,
+      "ttft_ms_p50": 239.7,
+      "ttft_ms_p99": 292.8,
+      "tpot_ms_p50": 35.99,
+      "first_error": null,
+      "parses": 64,
+      "schema": 64,
+      "fields_right_pct": 93.0,
+      "example": "{\"customer\": \"Sofia Moreau\", \"email\": \"sofia.moreau@example.com\", \"items\": [{\"product\": \"folders\", \"quantity\": 7, \"unit_price\": 16.14}, {\"product\": \"desk lamps\", \"quantity\": 9, \"unit_price\": 3.2}], \"express\": true}"
+     },
+     {
+      "backend": "outlines",
+      "mode": "schema, new per request",
+      "concurrency": 256,
+      "requests": 64,
+      "errors": 0,
+      "seconds": 3.05,
+      "output_tokens": 5080,
+      "output_tok_s": 1665.7,
+      "ttft_ms_p50": 188.9,
+      "ttft_ms_p99": 295.6,
+      "tpot_ms_p50": 36.45,
+      "first_error": null,
+      "parses": 64,
+      "schema": 64,
+      "fields_right_pct": 95.7,
+      "example": "{\"customer\": \"Lukas Silva\", \"email\": \"lukas.silva@example.com\", \"items\": [{\"product\": \"mouse pads\", \"quantity\": 5, \"unit_price\": 18.57}, {\"product\": \"stapler\", \"quantity\": 1, \"unit_price\": 14.04}, {\"product\": \"rulers\", \"quantity\": 8, \"unit_price\": 27.35}], \"express\": false}"
+     }
+    ],
+    "startup_s": 60.0,
+    "cold_schema": {
+     "first_ttft_ms": 904.3,
+     "repeat_ttft_ms": 18.0
+    },
+    "server_log": [
+     "(APIServer pid=3997) INFO 11-14 18:00:04 [api_utils.py:286] non-default args: {'model_tag': 'unsloth/Meta-Llama-3.1-8B-Instruct', 'model': 'unsloth/Meta-Llama-3.1-8B-Instruct', 'max_model_len': 4096, 'generation_config': 'vllm', 'structured_outputs_config': StructuredOutputsConfig(backend='outlines', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_",
+     "(EngineCore pid=4021) INFO 11-14 18:00:17 [core.py:133] Initializing a V1 LLM engine (v0.32.0) with config: model='unsloth/Meta-Llama-3.1-8B-Instruct', speculative_config=None, tokenizer='unsloth/Meta-Llama-3.1-8B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_revision=main, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=4096, download_dir=None, loa"
+    ]
+   }
+  ]
+ }
+}
