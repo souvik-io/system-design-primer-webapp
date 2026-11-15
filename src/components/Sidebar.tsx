@@ -1,7 +1,7 @@
 import { Link, NavLink, useParams } from 'react-router'
 import clsx from 'clsx'
 import { ArrowRightLeft, Bookmark, Check, Info, Layers } from 'lucide-react'
-import { decks, HANDBOOKS, partsOf, sectionHref, sectionKey, type ChapterMeta } from '../lib/content'
+import { decks, HANDBOOKS, partsOf, sectionHref, sectionKey, type ChapterMeta, type HandbookId } from '../lib/content'
 import { useHandbook } from '../lib/handbook'
 import { useChapterProgress, useProgress } from '../lib/progress'
 import { useDueCount } from '../lib/flashcards'
@@ -13,7 +13,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const due = useDueCount(decks)
   const notesCount = useNotesCount()
   const handbook = useHandbook()
-  const other = handbook === 'infra' ? 'system-design' : 'infra'
+  const others = (Object.keys(HANDBOOKS) as HandbookId[]).filter((h) => h !== handbook)
 
   return (
     <nav aria-label="Chapters" className="px-3 py-5 text-[0.875rem]">
@@ -63,14 +63,19 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         {notesCount > 0 && <span className="ml-auto text-[0.75rem] text-muted tabular-nums">{notesCount}</span>}
       </NavLink>
 
-      <Link
-        to={HANDBOOKS[other].home}
-        onClick={onNavigate}
-        className="-mt-3 mb-5 flex items-center gap-2 rounded-md px-3 py-1.5 text-ink-2 hover:bg-rule/50 hover:text-ink"
-      >
-        <ArrowRightLeft size={15} />
-        {HANDBOOKS[other].title}
-      </Link>
+      <div className="-mt-3 mb-5">
+        {others.map((h) => (
+          <Link
+            key={h}
+            to={HANDBOOKS[h].home}
+            onClick={onNavigate}
+            className="flex items-center gap-2 rounded-md px-3 py-1.5 text-ink-2 hover:bg-rule/50 hover:text-ink"
+          >
+            <ArrowRightLeft size={15} className="shrink-0" />
+            {HANDBOOKS[h].title}
+          </Link>
+        ))}
+      </div>
 
       {partsOf(handbook).map((part) => (
         <div key={part.id} className="mb-5">

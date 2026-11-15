@@ -207,7 +207,8 @@ const PARTS = [
     handbook: 'infra',
     dir: 'infra',
     title: 'Compression',
-    description: 'Number formats from FP32 to NVFP4, the arithmetic of quantization, the algorithms that produce quantized checkpoints, how to measure what they cost in quality, and when pruning or distillation is worth it instead.',
+    description:
+      'Number formats from FP32 to NVFP4, the arithmetic of quantization, the algorithms that produce quantized checkpoints, how to measure what they cost in quality, and when pruning or distillation is worth it instead.',
     chapters: ['number-formats', 'quantization-math', 'ptq-algorithms', 'quality-eval', 'other-compression'],
   },
   {
@@ -218,6 +219,27 @@ const PARTS = [
     description:
       'An inference engine built from scratch, with a paged KV cache, continuous batching under a token budget, chunked prefill, preemption and an OpenAI-compatible server, measured against vLLM. Then vLLM itself: one request traced through its processes, its scheduler and block pool read against yours, and its main settings measured. Then prefix caching: the radix tree of SGLang next to the hashed blocks of vLLM, and both engines measured on a multi-turn chat workload. Then speculative decoding: the acceptance rule, drafters from prompt lookup to EAGLE-3, and vLLM measured with six of them from 1 request in flight to 128. Then the last step of every step: the sampler, what top-p costs and how engines avoid sorting, and structured output, from a token mask built by hand to XGrammar inside vLLM.',
     chapters: ['mini-inference-engine', 'inside-vllm', 'sglang-prefix-caching', 'speculative-decoding', 'structured-output'],
+  },
+
+  // C++ for AI Infrastructure Engineers, a third course at /cpp. Its chapters live in content/cpp/ and it has its own
+  // home page, sidebar and progress. content/cpp/SYLLABUS.md is the plan; the part ids below must match PLANNED in
+  // src/pages/CppHomePage.tsx (cpp-ground-rules, cpp-ownership, cpp-performance, cpp-concurrency, cpp-systems-glue,
+  // cpp-cuda, cpp-capstone), which lists the parts not published yet.
+  {
+    id: 'cpp-ground-rules',
+    handbook: 'cpp',
+    dir: 'cpp',
+    title: 'The ground rules',
+    description: 'How C++ turns source files into a program, and the syntax that differs from Python, then memory, pointers and undefined behavior.',
+    chapters: ['cpp-toolchain', 'cpp-syntax', 'cpp-memory', 'cpp-pointers', 'cpp-undefined-behavior', 'cpp-log-analyzer'],
+  },
+  {
+    id: 'cpp-ownership',
+    handbook: 'cpp',
+    dir: 'cpp',
+    title: 'Ownership and abstraction',
+    description: 'Classes whose destructors release what they own, and moves that hand large data from one owner to the next without copying it.',
+    chapters: ['cpp-raii', 'cpp-copy-move'],
   },
 ]
 
@@ -293,7 +315,16 @@ const DECKS = [
     id: 'infra-runtime',
     handbook: 'infra',
     title: 'The runtime layer',
-    description: 'Launch overhead, CUDA graphs, torch.compile and the caching allocator; bindings, zero copy and the GIL; and export, ONNX and TensorRT.',
+    description:
+      'Launch overhead, CUDA graphs, torch.compile and the caching allocator; bindings, zero copy and the GIL; and export, ONNX and TensorRT.',
+  },
+  // Decks for C++ for AI Infrastructure Engineers, one per part.
+  {
+    id: 'cpp-ground-rules',
+    handbook: 'cpp',
+    title: 'The ground rules',
+    description:
+      'The toolchain and linker errors, traps for Python programmers, stack and heap, layout and padding, pointers and strides, and undefined behavior.',
   },
 ]
 
@@ -335,6 +366,14 @@ const WIDGET_NAMES = new Set([
   'speculation-simulator',
   'sampling-filters',
   'grammar-mask',
+  'build-stage-quiz',
+  'integer-traps',
+  'struct-layout',
+  'tensor-strides',
+  'ub-detective',
+  'latency-percentiles',
+  'raii-stepper',
+  'copy-or-move',
 ])
 
 function widgetNode(name, where) {
@@ -455,7 +494,10 @@ async function renderSection(section, ctx) {
 function readChapter(id, dir) {
   const file = dir ? `content/${dir}/${id}.md` : `content/${id}.md`
   if (!fs.existsSync(path.join(ROOT, file))) throw new Error(`${file} doesn't exist, but PARTS lists it.`)
-  const tree = parser.parse(fs.readFileSync(path.join(ROOT, file), 'utf8'))
+  // <!-- measure: ... --> notes mark results still to be measured (content/cpp/SYLLABUS.md). They are for the author, so
+  // they are dropped here and never reach the published page.
+  const source = fs.readFileSync(path.join(ROOT, file), 'utf8').replace(/\n?<!--\s*measure:[\s\S]*?-->\n?/g, '\n')
+  const tree = parser.parse(source)
   slugHeadings(tree)
   const titleIdx = tree.children.findIndex((n) => n.type === 'heading' && n.depth === 1)
   if (titleIdx === -1) throw new Error(`${file} needs a "# Title" heading.`)

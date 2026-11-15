@@ -38,6 +38,14 @@ const WIDGETS: Record<string, ComponentType> = {
   'speculation-simulator': lazy(() => import('./SpeculationSimulator')),
   'sampling-filters': lazy(() => import('./SamplingFilters')),
   'grammar-mask': lazy(() => import('./GrammarMask')),
+  'build-stage-quiz': lazy(() => import('./BuildStageQuiz')),
+  'integer-traps': lazy(() => import('./IntegerTraps')),
+  'struct-layout': lazy(() => import('./StructLayout')),
+  'tensor-strides': lazy(() => import('./TensorStrides')),
+  'ub-detective': lazy(() => import('./UBDetective')),
+  'latency-percentiles': lazy(() => import('./LatencyPercentiles')),
+  'raii-stepper': lazy(() => import('./RaiiStepper')),
+  'copy-or-move': lazy(() => import('./CopyOrMove')),
 }
 
 export function Widgets({ root, chapter }: { root: RefObject<HTMLElement | null>; chapter: unknown }) {

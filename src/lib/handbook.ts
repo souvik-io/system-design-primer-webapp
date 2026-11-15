@@ -1,5 +1,5 @@
 import { useLocation, useParams } from 'react-router'
-import { chapterById, type HandbookId } from './content'
+import { chapterById, HANDBOOKS, type HandbookId } from './content'
 
 /** The handbook the reader is in: the current chapter's, or the one whose home page is open. */
 export function useHandbook(): HandbookId {
@@ -7,5 +7,9 @@ export function useHandbook(): HandbookId {
   const { pathname } = useLocation()
   const chapter = chapterId ? chapterById.get(chapterId) : undefined
   if (chapter) return chapter.part.handbook
-  return pathname === '/infra' || pathname.startsWith('/infra/') ? 'infra' : 'system-design'
+  const course = (Object.keys(HANDBOOKS) as HandbookId[]).find((h) => {
+    const home = HANDBOOKS[h].home
+    return home !== '/' && (pathname === home || pathname.startsWith(`${home}/`))
+  })
+  return course ?? 'system-design'
 }

@@ -77,16 +77,21 @@ export function HomePage() {
 
       <MovedNotice />
 
-      <Link
-        to={HANDBOOKS.infra.home}
-        className="group mt-10 flex items-center gap-4 rounded-2xl border border-rule bg-surface px-5 py-4 hover:border-accent"
-      >
-        <span className="min-w-0 flex-1">
-          <span className="block font-medium text-ink group-hover:text-accent">{HANDBOOKS.infra.title}</span>
-          <span className="mt-0.5 block text-sm text-muted">{HANDBOOKS.infra.description}</span>
-        </span>
-        <ArrowRight size={18} className="shrink-0 text-muted group-hover:text-accent" />
-      </Link>
+      <div className="mt-10 space-y-3">
+        {(['infra', 'cpp'] as const).map((h) => (
+          <Link
+            key={h}
+            to={HANDBOOKS[h].home}
+            className="group flex items-center gap-4 rounded-2xl border border-rule bg-surface px-5 py-4 hover:border-accent"
+          >
+            <span className="min-w-0 flex-1">
+              <span className="block font-medium text-ink group-hover:text-accent">{HANDBOOKS[h].title}</span>
+              <span className="mt-0.5 block text-sm text-muted">{HANDBOOKS[h].description}</span>
+            </span>
+            <ArrowRight size={18} className="shrink-0 text-muted group-hover:text-accent" />
+          </Link>
+        ))}
+      </div>
 
       <StudyPlan />
 
