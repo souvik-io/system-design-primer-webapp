@@ -40,6 +40,10 @@ const WIDGETS: Record<string, ComponentType> = {
   'grammar-mask': lazy(() => import('./GrammarMask')),
   'build-stage-quiz': lazy(() => import('./BuildStageQuiz')),
   'integer-traps': lazy(() => import('./IntegerTraps')),
+  'struct-layout': lazy(() => import('./StructLayout')),
+  'tensor-strides': lazy(() => import('./TensorStrides')),
+  'ub-detective': lazy(() => import('./UBDetective')),
+  'latency-percentiles': lazy(() => import('./LatencyPercentiles')),
 }
 
 export function Widgets({ root, chapter }: { root: RefObject<HTMLElement | null>; chapter: unknown }) {

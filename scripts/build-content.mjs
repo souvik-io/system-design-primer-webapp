@@ -207,7 +207,8 @@ const PARTS = [
     handbook: 'infra',
     dir: 'infra',
     title: 'Compression',
-    description: 'Number formats from FP32 to NVFP4, the arithmetic of quantization, the algorithms that produce quantized checkpoints, how to measure what they cost in quality, and when pruning or distillation is worth it instead.',
+    description:
+      'Number formats from FP32 to NVFP4, the arithmetic of quantization, the algorithms that produce quantized checkpoints, how to measure what they cost in quality, and when pruning or distillation is worth it instead.',
     chapters: ['number-formats', 'quantization-math', 'ptq-algorithms', 'quality-eval', 'other-compression'],
   },
   {
@@ -229,9 +230,8 @@ const PARTS = [
     handbook: 'cpp',
     dir: 'cpp',
     title: 'The ground rules',
-    description:
-      'How C++ turns source files into a program, and the syntax that differs from Python, then memory, pointers and undefined behavior.',
-    chapters: ['cpp-toolchain', 'cpp-syntax'],
+    description: 'How C++ turns source files into a program, and the syntax that differs from Python, then memory, pointers and undefined behavior.',
+    chapters: ['cpp-toolchain', 'cpp-syntax', 'cpp-memory', 'cpp-pointers', 'cpp-undefined-behavior', 'cpp-log-analyzer'],
   },
 ]
 
@@ -307,7 +307,16 @@ const DECKS = [
     id: 'infra-runtime',
     handbook: 'infra',
     title: 'The runtime layer',
-    description: 'Launch overhead, CUDA graphs, torch.compile and the caching allocator; bindings, zero copy and the GIL; and export, ONNX and TensorRT.',
+    description:
+      'Launch overhead, CUDA graphs, torch.compile and the caching allocator; bindings, zero copy and the GIL; and export, ONNX and TensorRT.',
+  },
+  // Decks for C++ for AI Infrastructure Engineers, one per part.
+  {
+    id: 'cpp-ground-rules',
+    handbook: 'cpp',
+    title: 'The ground rules',
+    description:
+      'The toolchain and linker errors, traps for Python programmers, stack and heap, layout and padding, pointers and strides, and undefined behavior.',
   },
 ]
 
@@ -351,6 +360,10 @@ const WIDGET_NAMES = new Set([
   'grammar-mask',
   'build-stage-quiz',
   'integer-traps',
+  'struct-layout',
+  'tensor-strides',
+  'ub-detective',
+  'latency-percentiles',
 ])
 
 function widgetNode(name, where) {
