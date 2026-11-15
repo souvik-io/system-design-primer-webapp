@@ -224,6 +224,15 @@ const PARTS = [
   // home page, sidebar and progress. content/cpp/SYLLABUS.md is the plan; the part ids below must match PLANNED in
   // src/pages/CppHomePage.tsx (cpp-ground-rules, cpp-ownership, cpp-performance, cpp-concurrency, cpp-systems-glue,
   // cpp-cuda, cpp-capstone), which lists the parts not published yet.
+  {
+    id: 'cpp-ground-rules',
+    handbook: 'cpp',
+    dir: 'cpp',
+    title: 'The ground rules',
+    description:
+      'How C++ turns source files into a program, and the syntax that differs from Python, then memory, pointers and undefined behavior.',
+    chapters: ['cpp-toolchain', 'cpp-syntax'],
+  },
 ]
 
 /** Folders under content/ that hold a handbook's chapters, besides content/ itself. */
@@ -340,6 +349,8 @@ const WIDGET_NAMES = new Set([
   'speculation-simulator',
   'sampling-filters',
   'grammar-mask',
+  'build-stage-quiz',
+  'integer-traps',
 ])
 
 function widgetNode(name, where) {
@@ -460,7 +471,10 @@ async function renderSection(section, ctx) {
 function readChapter(id, dir) {
   const file = dir ? `content/${dir}/${id}.md` : `content/${id}.md`
   if (!fs.existsSync(path.join(ROOT, file))) throw new Error(`${file} doesn't exist, but PARTS lists it.`)
-  const tree = parser.parse(fs.readFileSync(path.join(ROOT, file), 'utf8'))
+  // <!-- measure: ... --> notes mark results still to be measured (content/cpp/SYLLABUS.md). They are for the author, so
+  // they are dropped here and never reach the published page.
+  const source = fs.readFileSync(path.join(ROOT, file), 'utf8').replace(/\n?<!--\s*measure:[\s\S]*?-->\n?/g, '\n')
+  const tree = parser.parse(source)
   slugHeadings(tree)
   const titleIdx = tree.children.findIndex((n) => n.type === 'heading' && n.depth === 1)
   if (titleIdx === -1) throw new Error(`${file} needs a "# Title" heading.`)
