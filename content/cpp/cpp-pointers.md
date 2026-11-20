@@ -38,6 +38,27 @@ A few facts about pointers are worth knowing from the start:
 - Printing a pointer prints its address in hexadecimal. The value changes from one run to the next, because operating systems place the stack and the heap at random addresses each time a program starts, a defence called address space layout randomization.
 - To reach a member through a pointer to a struct, write `p->rows`, which is shorthand for `(*p).rows`.
 
+That gives C++ three ways to reach inside something, and which one you write depends only on what is on the left:
+
+| Operator | Left side | Example | Meaning |
+| --- | --- | --- | --- |
+| `::` | a namespace, enum or class name | `std::vector`, `DType::F16` | a name declared inside that scope |
+| `.` | an object | `t.rows` | a member of this object |
+| `->` | a pointer to an object | `p->rows` | a member of the object at this address |
+
+```cpp
+struct Shape { int rows, cols; };
+
+Shape t{2, 3};
+Shape* p = &t;
+
+int a = t.rows;      // t is an object: use .
+int b = p->rows;     // p is a pointer: use ->
+int c = (*p).rows;   // the same as p->rows; the parentheses matter, since *p.rows means *(p.rows)
+```
+
+Writing `p.rows` or `t->rows` is a compile error, not a silent bug, so the compiler tells you when you picked the wrong one. Smart pointers, coming in Chapter 8, follow the same rule: `->` reaches the object they own, and `.` calls a function of the smart pointer itself.
+
 ### nullptr
 
 A pointer that points at nothing holds the **null pointer**, written `nullptr`. It is how C++ says "no object here": a function that searches for something can return `nullptr` when it finds nothing, the way a Python function returns `None`.
