@@ -199,6 +199,8 @@ int raw = static_cast<int>(t);   // 2: converting to int must be explicit
 
 A namespace groups names to avoid collisions, much as a Python module does. Everything in the standard library is in `std`, which is why you write `std::vector`. You declare your own with `namespace tinymath { ... }`, and C++17 lets you nest them in one line, `namespace engine::kernels { ... }`. You can bring names into scope with `using std::vector;`, or everything with `using namespace std;`. The second form is common in tutorials and frowned on in real code, and it should never appear in a header, because it would leak into every file that includes it.
 
+The `::` in `std::vector` is the **scope resolution operator**. Its left side is the name of a scope, not a value: a namespace (`std::vector`), an `enum class` (`DType::F16`) or, from Chapter 6 on, a class. The dot does a different job. Its left side is an object that exists while the program runs, so with a `SamplingParams p`, `p.top_k` reads that object's field. Python uses the dot for both, as in `math.pi` and `p.top_k`, while C++ keeps them apart. A `::` with nothing before it, as in `::count`, means the global scope, and is occasionally needed when a local name hides a global one.
+
 ### Structured bindings
 
 C++17's structured bindings unpack a pair, a tuple or a simple struct into named variables, like Python's tuple unpacking:
